@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import * as THREE from "three";
 import RenderingDemo from "./RenderingDemo";
+import Rendering from "./Rendering";
 
 class ThreeCanvas extends Component {
   constructor(props) {
@@ -15,11 +16,14 @@ class ThreeCanvas extends Component {
 
   componentDidMount() {
     // Initialize Scene
-    this.rendering = new RenderingDemo(this.canvasRef);
+    this.rendering = new Rendering(this.canvasRef);
+    // pepe pepe poo poo
+    //this.rendering = RenderingDemo(this.canvasRef);
   }
 
   componentWillUnmount() {
 
+    this.rendering.unmount();
     // TODO: Den shit hier in Rendering einbinden
     return;
     // Stop Animation Loop

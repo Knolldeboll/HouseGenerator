@@ -18,7 +18,7 @@ class RenderingDemo{
         this.renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     
-        // Hier jetzt den anderen Müslimüll
+        // Hier jetzt den anderen Müslimüll rein
     
     
         // Start Animation Loop
