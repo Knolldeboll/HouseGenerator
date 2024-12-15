@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import Edge from "./Edge";
 import Rectangle from "./Rectangle"
-import { exp, Vector2, VertexColorNode } from "three/webgpu";
+import { Vector2, VertexColorNode } from "three/webgpu";
 import Apartment from "./Apartment";
 import House from "./House";
 

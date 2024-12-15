@@ -4,9 +4,6 @@ import ShapeObject from './ShapeObject';
 import PreApartment from './PreApartment';
 import Rectangle from './Rectangle';
 
-
-import { rand, Vector2 } from 'three/webgpu';
-import { TextureHelper } from 'three/examples/jsm/Addons.js';
 import Tools from './Tools';
 
 // TODO: Create ShapeObject interface and make House and Apartment implement this. 
@@ -343,7 +340,8 @@ class House {
 
             console.log("corridor:",corridor)
 
-            totalRects.push(houseRect,corridor);
+            // Da war immer houseRect auch drin, aber sieht kaka aus
+            totalRects.push(corridor);
             
             let upperRectVertices = [
                 houseRect.vertices.upperLeft,
@@ -378,7 +376,7 @@ class House {
             let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
             let corridor = new Rectangle().fromCoords(corridorHeight,this.houseHeight,this.position.x,this.position.y);
 
-            totalRects.push(houseRect,corridor);
+            totalRects.push(corridor);
 
             let leftRectVertices = [
                 houseRect.vertices.upperLeft,
