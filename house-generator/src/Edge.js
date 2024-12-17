@@ -94,6 +94,38 @@ class Edge{
 
     }
 
+    splitIntoParts(parts){
+
+        let subEdges = [];
+        let direction = new THREE.Vector2();
+
+        // Has totalLength
+        direction.subVectors(this._vertices.vertice2,this._vertices.vertice1);
+
+        let previousVertice = this._vertices.vertice1;
+
+        let len = this.length;
+        
+        // Oder: addScaledVector(direction, 1/n) - modifiziert glaub den prevVector!
+
+        for(let i = 0; i <parts.length ; i++){
+            // Per step, add 1/n of the distance vector to the initial vector
+
+            let v1 = previousVertice.clone();
+
+            // TODO: Do manually and round... 
+            let v2 = v1.clone().addScaledVector(direction, parts[i]/len)
+
+            subEdges.push(new Edge(v1,v2));
+
+            previousVertice = v2;
+            
+            // immer so: 0,0 - 0,1  / 0,1 - 0,2  / 
+        }
+
+        return subEdges;
+    }
+
     printEdge(){
         console.log("V1: " , this._vertices.vertice1, "V2: ", this._vertices.vertice2);
     }

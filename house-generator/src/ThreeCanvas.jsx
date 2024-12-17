@@ -28,8 +28,8 @@ class ThreeCanvas extends Component {
 
         //tests.testRendering();
         //tests.testVectors();
-        //tests.testEdges();
-        tests.testRectangles();
+        tests.testEdges();
+        //tests.testRectangles();
         //tests.testHouses();
     }
 

@@ -90,6 +90,14 @@ class Tests {
         }
 
 
+        let edgeToSplit3 = new Edge(new THREE.Vector2(0,0), new THREE.Vector2(0,10));
+        console.log("Edge subedges by parts of ", edgeToSplit3, "new Edges through parts splitting");
+        let subedges3 = edgeToSplit3.splitIntoParts([2,3,2,1,2]);
+        for (let e of subedges3) {
+            e.printEdge();
+            console.log("=",e.length)
+        }
+
     }
 
     testRectangles() {
@@ -151,18 +159,29 @@ class Tests {
         // Test random rect splitting 
 
         // Failing min:
-        let rect4 = new Rectangle().fromCoords(5, 10, 0, 0);
 
+        let r4w = 5;
+        let r4h = 10;
+        let rect4 = new Rectangle().fromCoords(r4w, r4h, 0, 0);
+
+        // Failing min:
         rect4.splitRandomlyMinMaxOriented(5, 12, 15);
 
         //Failing max:
         rect4.splitRandomlyMinMaxOriented(5, 5, 8);
 
-        //Correct:
+        //Correct splitting:
         let splits = rect4.splitRandomlyMinMaxOriented(5, 5, 15);
 
         console.log("Split sizes: ", splits);
+        
+        let splitSum = 0;
 
+        for(let s of splits){
+            splitSum += s
+        }
+
+        console.log("Splitsum " , splitSum, " should be" , (r4h*r4w));
     }
 
 

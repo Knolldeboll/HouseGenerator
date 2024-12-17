@@ -219,7 +219,7 @@ class Rectangle {
   
         console.log("split w / h",this.width,this.height)
         if(this._width > this._height){
-
+            // Horizontally
             
             // Divide along width
             let upperEdgeSplits = this._edges.upperEdge.splitEvenly(n);
@@ -243,6 +243,8 @@ class Rectangle {
 
 
         }else{
+
+            // Vertically
             // Divide along other axis:
             let rightEdgeSplits = this._edges.rightEdge.splitEvenly(n);
             let leftEdgeSplits = this._edges.leftEdge.splitEvenly(n);
@@ -267,9 +269,8 @@ class Rectangle {
 
         }
 
+
         return newRects;
-
-
         // Return (pieces) * new Rectangle
     }
 
@@ -277,19 +278,14 @@ class Rectangle {
     // Split into n randomly sized parts, each part with size between min and max
     splitRandomlyMinMaxOriented(n, min, max){
 
-        // TODO: Round the add?
-        // Or else there are pretty much very many repetitions until very small rests are divided..
-
 
         // 1. Check if Shit is hitting the fan with the given parameters:
         if(this._area < n*min){
             console.log("rect of ",this._area, " can't be split with min ", min , " max ", max ,":")
-            //console.log( "area ", this._area, " is too small to hold ", n ," min-sized parts")
             return;
         }
         if(this._area > n*max){
-            console.log("rect of " ,this._area, "can't be split with min ", min , " max ", max ,":")
-            //console.log( "area ", this._area, " is too big to be filled with ", n ," max-sized parts")
+            console.log("rect of " ,this._area, "can't be split with max ", min , " max ", max ,":")
             return;
         }
 
@@ -308,12 +304,8 @@ class Rectangle {
 
         // Calculate Value that can be added per part to reach max 
 
-        //let modifier = max-min;
-
         // 4.
         
-
-
         while (rest > 0){
             
             for (let j = 0; j < n; j++){
@@ -348,10 +340,7 @@ class Rectangle {
                 rest = Math.round(rest * 100 )/100;
 
             }
-
-
-            // zw. 0-1 * dem modifier (maximaler add-wert)oder, wenn kleiner, dem rest dazuaddieren.
-            
+         
 
 
 
@@ -365,11 +354,13 @@ class Rectangle {
 
     // TODO: Outsource the "generate vertices" part into separate 
 
-    generateHorizontalRectangles(){
+    generateHorizontalRectangles(parts){
 
+    // Kann man nicht vereinen, da bei SplitEven mit den Edges gearbeitet wird 
+    // und bei 
     }
 
-    generateVerticalRectangles(){
+    generateVerticalRectangles(parts){
 
     }
 
