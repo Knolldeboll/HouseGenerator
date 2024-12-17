@@ -327,17 +327,29 @@ class Rectangle {
                 // Wenn rest kleiner, ist rest der maximalwert für add
                 // eins der beiden mal random zw. 0-1
 
-                //TODO: Rounding to be done, sonst haufen wiederholungen
+                // Maximum value to be added to the part before it reaches max size
+                let maxAdd = max-parts[j]
 
-                let maxAdd = Math.min(max-parts[j],rest)
-               // let add = Math.random() * ;
-                
+                // Round Random
+                let random = Math.random()* maxAdd * 100
+                let randomRounded = Math.round(random)/100
+                console.log("Random rounded:", randomRounded);
+
+               let add = Math.min(randomRounded, rest);
 
                 parts[j] += add;
-                console.log("add is ", add, " parts at j is", parts[j])
+
+                // Round part
+                parts[j] = Math.round(parts[j]*100)/100
+                
                 rest -= add;
 
+                // Round rest 
+                rest = Math.round(rest * 100 )/100;
+
             }
+
+
             // zw. 0-1 * dem modifier (maximaler add-wert)oder, wenn kleiner, dem rest dazuaddieren.
             
 
