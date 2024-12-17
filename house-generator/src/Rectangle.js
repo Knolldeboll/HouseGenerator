@@ -24,6 +24,9 @@ class Rectangle {
 
         this._material = new THREE.MeshStandardMaterial({ color: this._color, side: THREE.DoubleSide });
 
+        this._width = undefined;
+        this._height = undefined;
+        this._area = undefined;
         this._pos = undefined;
         this._vertices = undefined;
         this._edges = undefined;
@@ -39,7 +42,12 @@ class Rectangle {
 
 
         let values = verts;
+
         // If Object given, transform to array
+
+        // TODO: Achtung: Arrays sind auch objects.. 
+        // Array.isArray(dingens) prüft, ob ein Objekt ein Array ist!
+        // ggf austauschen, sonst wird umsonst von Array zu Array konvertiert.. 
         if (typeof verts === "object") {
 
             values = Object.values(verts);
@@ -64,6 +72,11 @@ class Rectangle {
         this._width = this._vertices.upperLeft.distanceTo(this._vertices.upperRight);
         this._height = this._vertices.upperLeft.distanceTo(this._vertices.lowerLeft);
 
+        
+        this._area = this._width * this._height;
+
+        console.log("Set area to " ,this._width , " x ",this._height," = ",this._area)
+
         // Generate Position
         let x = this._vertices.upperLeft.x + this._width / 2;
         let y = this._vertices.lowerLeft.y + this._height / 2;
@@ -81,6 +94,8 @@ class Rectangle {
     fromCoords(width, height, x, y) {
         this._width = width;
         this._height = height;
+        this._area = this._width * this._height;
+        console.log("Set area to " ,this._width , " x ",this._height," = ",this._area)
         this._pos = {
             x: x,
             y: y,
@@ -130,7 +145,7 @@ class Rectangle {
             lowerEdge,
             leftEdge,
         }
-
+        
     }
 
 
@@ -258,6 +273,99 @@ class Rectangle {
         // Return (pieces) * new Rectangle
     }
 
+
+    // Split into n randomly sized parts, each part with size between min and max
+    splitRandomlyMinMaxOriented(n, min, max){
+
+        // TODO: Round the add?
+        // Or else there are pretty much very many repetitions until very small rests are divided..
+
+
+        // 1. Check if Shit is hitting the fan with the given parameters:
+        if(this._area < n*min){
+            console.log("rect of ",this._area, " can't be split with min ", min , " max ", max ,":")
+            //console.log( "area ", this._area, " is too small to hold ", n ," min-sized parts")
+            return;
+        }
+        if(this._area > n*max){
+            console.log("rect of " ,this._area, "can't be split with min ", min , " max ", max ,":")
+            //console.log( "area ", this._area, " is too big to be filled with ", n ," max-sized parts")
+            return;
+        }
+
+        // 2. initialize all parts with min
+
+        let parts = [];
+        for(let i = 0; i < n; i++){
+            parts.push(min)
+        }
+
+        console.log("area",this._area,"n*min",n*min)
+
+
+        // 3. calculate rest of the Area to this._area
+        let rest = this._area - (n*min)
+
+        // Calculate Value that can be added per part to reach max 
+
+        //let modifier = max-min;
+
+        // 4.
+        
+
+
+        while (rest > 0){
+            
+            for (let j = 0; j < n; j++){
+
+                if(rest <=0){
+                    console.log("rest empty ", rest)
+                    break;
+                }
+
+                // max-p: Maximalwert für add, damit p nicht max überschreitet
+                // Wenn rest kleiner, ist rest der maximalwert für add
+                // eins der beiden mal random zw. 0-1
+
+                //TODO: Rounding to be done, sonst haufen wiederholungen
+
+                let maxAdd = Math.min(max-parts[j],rest)
+               // let add = Math.random() * ;
+                
+
+                parts[j] += add;
+                console.log("add is ", add, " parts at j is", parts[j])
+                rest -= add;
+
+            }
+            // zw. 0-1 * dem modifier (maximaler add-wert)oder, wenn kleiner, dem rest dazuaddieren.
+            
+
+
+
+        }
+
+        return parts;
+
+
+    }
+
+
+    // TODO: Outsource the "generate vertices" part into separate 
+
+    generateHorizontalRectangles(){
+
+    }
+
+    generateVerticalRectangles(){
+
+    }
+
+    // Split into n randomly sized parts, with each part not exceeding a specified aspect ratio
+    splitRandomlyAspectRatioOriented(n, maxAspectRatio){
+    // Calculate min and max from the given aspect Ratio, then same as above 
+    }
+
     // areaList: List of areas that this rectangle should be divided into. 
     // Must add up to the rectangle's total area
     // orientation: if the division should be 
@@ -272,16 +380,6 @@ class Rectangle {
     // wenn beim function call für c "unefined" angegeben wird, wird der default-Wert verwendet!  
     //
     // func(a,b,c = null)
-
-    divideEvenlyAlongLongerSide() {
-        if (this._width > this._height) {
-            // Divide along width
-
-        } else {
-            // Divide along height
-
-        }
-    }
 
 
     getPointHelperMesh() {

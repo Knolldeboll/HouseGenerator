@@ -339,7 +339,6 @@ class House {
             let corridor = new Rectangle().fromCoords(this.houseWidth,corridorHeight,this.position.x,this.position.y);
 
             console.log("corridor:",corridor)
-
             // Da war immer houseRect auch drin, aber sieht kaka aus
             totalRects.push(corridor);
             

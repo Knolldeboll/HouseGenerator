@@ -134,27 +134,44 @@ class Tests {
             lowerLeft: new Vector2(-5, -10),
         }
         let rect3 = new Rectangle().fromVertices(vertsObject);
-        let rect3mesh = this.rendering.generateMeshFromVertices(rect3.vertices,rect3.material);
+        let rect3mesh = this.rendering.generateMeshFromVertices(rect3.vertices, rect3.material);
         //this.rendering.addToScene(rect3mesh);
 
         // Test rect splitting on rect3
         let splitRects = rect3.splitEvenlyOriented(6);
-        console.log("Splitted rects:" ,splitRects)
+        console.log("Splitted rects:", splitRects)
 
-        for (rect of splitRects){
-            this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices,rect.material));
+        for (rect of splitRects) {
+            this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices, rect.material));
         }
 
         // TODO: Test with higher-than-wide recta
+
+
+        // Test random rect splitting 
+
+        // Failing min:
+        let rect4 = new Rectangle().fromCoords(5, 10, 0, 0);
+
+        rect4.splitRandomlyMinMaxOriented(5, 12, 15);
+
+        //Failing max:
+        rect4.splitRandomlyMinMaxOriented(5, 5, 8);
+
+        //Correct:
+        let splits = rect4.splitRandomlyMinMaxOriented(5, 5, 15);
+
+        console.log("Split sizes: ", splits);
+
     }
 
 
-    testHouses(){
-       let houseRects = new House(80,null,null,null,null).simpleICorridor(2,8) || [];
-        console.log("houserects",houseRects);
+    testHouses() {
+        let houseRects = new House(80, null, null, null, null).simpleICorridor(2, 8) || [];
+        console.log("houserects", houseRects);
 
-        for (let rect of houseRects){
-            this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices,rect.material));
+        for (let rect of houseRects) {
+            this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices, rect.material));
         }
     }
 }
