@@ -39,6 +39,7 @@ class Rectangle {
     // 2nd constructors
     // Verts must be given in clockwise order, starting at upper left
     fromVertices(verts) {
+        console.log("> Rectangle from verts")
 
 
         let values = verts;
@@ -225,7 +226,7 @@ class Rectangle {
             let upperEdgeSplits = this._edges.upperEdge.splitEvenly(n);
             let lowerEdgeSplits = this._edges.lowerEdge.splitEvenly(n);
 
-            console.log("upper edge splits:" ,upperEdgeSplits)
+            //console.log("upper edge splits:" ,upperEdgeSplits)
             for (let i = 0; i < n; i++) {
                 // For every rect: 
 
@@ -260,7 +261,7 @@ class Rectangle {
                 leftEdgeSplits[i].vertices.vertice2
                 ]
 
-                console.log(verts)
+                //console.log(verts)
 
                 let rect = new Rectangle().fromVertices (verts)
                 newRects.push(rect);
@@ -325,7 +326,7 @@ class Rectangle {
                 // Round Random
                 let random = Math.random()* maxAdd * 100
                 let randomRounded = Math.round(random)/100
-                console.log("Random rounded:", randomRounded);
+                //console.log("Random rounded:", randomRounded);
 
                let add = Math.min(randomRounded, rest);
 
@@ -341,17 +342,116 @@ class Rectangle {
 
             }
          
-
-
-
         }
 
-        return parts;
+        // Ab hier parts Fertig
+        // Now Create Rectangles by Edge splitting into parts, then applying the known algorithm
 
+        // Parts is areas. 
+        // Dependant on "horizontally" vs. "vertically", calculate subedge lengths from area and given height/width
+
+  
+        return this.generateSubRectsFromParts(parts);
 
     }
 
 
+    generateSubRectsFromParts(parts){
+
+        console.log("> Generate SubRects from Parts")
+        let edgeParts = [];
+        let newRects = [];
+
+
+        if(this._width > this._height){       
+           
+            // Convert areas into edge length parts 
+            // nur bei Random Parts nötig
+
+            for (let p of parts){
+                // Horizontal: height ist immer gleich, teile Area durch height
+                edgeParts.push(p/this._height);
+            }
+    
+            console.log("edgeParts horizontal:",edgeParts)
+            
+            // upperedge splits by parts
+            // loweredge splits by parts
+            let upperEdgeSplits = this.edges.upperEdge.splitIntoParts(edgeParts);
+            let lowerEdgeSplits= this.edges.lowerEdge.splitIntoParts(edgeParts);
+
+            console.log("Part Splitting: Upper edges:");
+            for (let ue of upperEdgeSplits){
+                ue.printEdge();
+            }
+            console.log("Part splitting lower edgle: ");
+            // Pass edges into subedgesToRects Function
+            for (let le of lowerEdgeSplits){
+                le.printEdge();
+            }
+
+
+            for (let i = 0; i < parts.length; i++) {
+                // For every rect: 
+
+                // ul, ur, lr, ll
+                let verts = [
+                upperEdgeSplits[i].vertices.vertice1,
+                upperEdgeSplits[i].vertices.vertice2,
+                lowerEdgeSplits[i].vertices.vertice2,
+                lowerEdgeSplits[i].vertices.vertice1
+                ]
+
+                let rect = new Rectangle().fromVertices (verts)
+                newRects.push(rect);
+            }
+
+            // Pass edges into subedgesToRects Function
+        }else{
+
+            for (let p of parts){
+                // Horizontal: height ist immer gleich, teile Area durch height
+                edgeParts.push(p/this._width);
+            }
+            console.log("edgeParts vertical:",edgeParts)
+
+            let leftEdgeSplits = this.edges.leftEdge.splitIntoParts(edgeParts);
+            let rightEdgeSplits = this.edges.rightEdge.splitIntoParts(edgeParts);
+            console.log("Part Splitting: left edges:");
+            for (let le of leftEdgeSplits){
+                le.printEdge();
+            }
+            console.log("Part splitting right edgle: ");
+            // Pass edges into subedgesToRects Function
+            for (let re of rightEdgeSplits){
+                re.printEdge();
+            }
+
+
+            for (let i = 0; i < parts.length; i++) {
+                // For every rect: 
+
+                // ol, or, ur, ul
+                let verts = [
+                leftEdgeSplits[i].vertices.vertice1,
+                rightEdgeSplits[i].vertices.vertice1,
+                rightEdgeSplits[i].vertices.vertice2,
+                leftEdgeSplits[i].vertices.vertice2
+                ]
+
+                //console.log(verts)
+
+                let rect = new Rectangle().fromVertices (verts)
+                newRects.push(rect);
+            }
+
+
+
+        }
+        
+        return newRects;
+        //return parts;
+    }
     // TODO: Outsource the "generate vertices" part into separate 
 
     generateHorizontalRectangles(parts){

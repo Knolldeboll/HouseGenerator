@@ -114,7 +114,7 @@ class Rendering {
 
 
         values.slice(1).forEach(vert => {
-            console.log("line to " + vert.x + vert.y)
+           // console.log("line to " + vert.x + vert.y)
             shape.lineTo(vert.x, vert.y)
         }
         )

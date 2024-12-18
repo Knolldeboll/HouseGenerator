@@ -150,7 +150,7 @@ class Tests {
         console.log("Splitted rects:", splitRects)
 
         for (rect of splitRects) {
-            this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices, rect.material));
+           // this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices, rect.material));
         }
 
         // TODO: Test with higher-than-wide recta
@@ -171,6 +171,7 @@ class Tests {
         rect4.splitRandomlyMinMaxOriented(5, 5, 8);
 
         //Correct splitting:
+        console.log("----splitRandomlyMinMaxOriented");
         let splits = rect4.splitRandomlyMinMaxOriented(5, 5, 15);
 
         console.log("Split sizes: ", splits);
@@ -178,10 +179,15 @@ class Tests {
         let splitSum = 0;
 
         for(let s of splits){
-            splitSum += s
+            splitSum += s._area
         }
 
         console.log("Splitsum " , splitSum, " should be" , (r4h*r4w));
+        console.log("Visualise Random Splitting ")
+
+        for (let rect of splits) {
+            this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices, rect.material));
+        }
     }
 
 

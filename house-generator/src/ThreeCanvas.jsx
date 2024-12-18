@@ -28,8 +28,8 @@ class ThreeCanvas extends Component {
 
         //tests.testRendering();
         //tests.testVectors();
-        tests.testEdges();
-        //tests.testRectangles();
+        //tests.testEdges();
+        tests.testRectangles();
         //tests.testHouses();
     }
 
@@ -37,18 +37,7 @@ class ThreeCanvas extends Component {
 
         this.rendering.unmount();
         // TODO: Den shit hier in Rendering einbinden
-        return;
-        // Stop Animation Loop
-        cancelAnimationFrame(this.animationId);
 
-        // Remove Event Listener
-        window.removeEventListener("resize", this.handleWindowResize);
-
-        // Dispose of Three.js objects to prevent memory leaks
-        this.renderer.dispose();
-        this.scene = null;
-        this.camera = null;
-        this.renderer = null;
     }
 
     handleWindowResize = () => {
