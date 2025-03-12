@@ -5,6 +5,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 class Rendering {
 
+    // This class initiates everything that three.js needs to render and containts the animation update loop
+    // also exposes the addToScene() Method, which centralizes adding stuff to the scene
 
     constructor(canvasRef) {
 
