@@ -8,10 +8,13 @@ class Rendering {
     // This class initiates everything that three.js needs to render and containts the animation update loop
     // also exposes the addToScene() Method, which centralizes adding stuff to the scene
 
-    constructor(canvasRef) {
+    constructor(canvasRef, widthFactor, heightFactor) {
 
         this.canvasRef = canvasRef;
         this.scene = new THREE.Scene();
+
+        this.widthFactor = widthFactor;
+        this.heightFactor = heightFactor;
 
         // Camera
         // (fov, aspect ratio,  view frustrum, view frustru,)
@@ -30,7 +33,7 @@ class Rendering {
     }
 
     initCamera() {
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth*this.widthFactor / window.innerHeight * this.heightFactor, 0.1, 1000);
     }
 
     initRenderer() {
@@ -39,7 +42,10 @@ class Rendering {
 
         // Renderer initialize
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Direkt scalen geht, wenn kein div um beide Components rum ist!
+        // Geht auch mit div, auf jeden Fall wenn kein css dabei ist. 
+        this.renderer.setSize(window.innerWidth*this.widthFactor, window.innerHeight*this.heightFactor);
         this.camera.position.setZ(30);
 
     }
@@ -88,7 +94,7 @@ class Rendering {
         if (this.camera && this.renderer) {
           this.camera.aspect = window.innerWidth / window.innerHeight;
           this.camera.updateProjectionMatrix();
-          this.renderer.setSize(window.innerWidth, window.innerHeight);
+          this.renderer.setSize(window.innerWidth*this.widthFactor, window.innerHeight*this.heightFactor);
         }
       };
     

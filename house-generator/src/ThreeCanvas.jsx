@@ -7,10 +7,10 @@ import Tests from "./tests.js";
 class ThreeCanvas extends Component {
   constructor(props) {
     super(props);
+    console.log("ThreeCanvas props: ", props);
     // Referenz auf den Canvas, wird in Rendering.js für three.js benötigt
     this.canvasRef = React.createRef();
     // Referenz auf den umschließenden Container, wird für das Resizing benötigt
-    this.containerRef = React.createRef();
     this.scene = null;
     this.camera = null;
     this.renderer = null;
@@ -21,7 +21,11 @@ class ThreeCanvas extends Component {
   componentDidMount() {
     // Initialize Scene
     // Rendering: Three.js Basis
-    this.rendering = new Rendering(this.canvasRef, this.containerRef);
+    this.rendering = new Rendering(
+      this.canvasRef,
+      this.props.widthFactor,
+      this.props.heightFactor
+    );
     // pepe pepe poo poo
     //this.rendering = RenderingDemo(this.canvasRef);
     // Tests
@@ -41,20 +45,24 @@ class ThreeCanvas extends Component {
     // TODO: Den shit hier in Rendering einbinden
   }
 
+  /* Der shit wird ja nirgends verwendet... hier zumindest. Der Renderer hat das ja doppelt
   handleWindowResize = () => {
     if (this.camera && this.renderer) {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.camera.aspect =
+        ((window.innerWidth * this.props.widthFactor) / window.innerHeight) *
+        this.props.heightFactor;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.setSize(
+        window.innerWidth * this.props.widthFactor,
+        window.innerHeight * this.props.heightFactor
+      );
     }
   };
 
+  */
+
   render() {
-    return (
-      <div ref={this.containerRef} style={{ width: "100%", height: "100%" }}>
-        <canvas ref={this.canvasRef}></canvas>;
-      </div>
-    );
+    return <canvas ref={this.canvasRef}></canvas>;
   }
 }
 
