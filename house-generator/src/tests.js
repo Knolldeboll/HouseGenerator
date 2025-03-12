@@ -191,11 +191,11 @@ class Tests {
     }
 
 
-    testHouses() {
+    testHouses(n) {
 
-
+        console.log("House test with " , n, "apartments");
         //let houseRects = new House(80, null, null, null, null).simpleICorridor(2, 8) || [];
-        let houseRects = new House(80, null, null, null, null).randomizedICorridor(2, 8) || [];
+        let houseRects = new House(80, null, null, null, null).randomizedICorridor(2, n) || [];
 
         
 

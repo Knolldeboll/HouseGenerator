@@ -18,11 +18,13 @@ class ThreeCanvas extends Component {
     componentDidMount() {
 
         // Initialize Scene
+        // Rendering: Three.js Basis
         this.rendering = new Rendering(this.canvasRef);
         // pepe pepe poo poo
         //this.rendering = RenderingDemo(this.canvasRef);
         // Tests
 
+        //TODO: hier dann die Werte aus Props reingeben.
         let tests = new Tests(this.rendering);
 
 
@@ -30,7 +32,7 @@ class ThreeCanvas extends Component {
         //tests.testVectors();
         //tests.testEdges();
         //tests.testRectangles();
-        tests.testHouses();
+        tests.testHouses(this.props.n);
     }
 
     componentWillUnmount() {
