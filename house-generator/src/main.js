@@ -24,7 +24,8 @@ let tests = new Tests(rendering);
 //tests.testVectors();
 //tests.testEdges();
 //tests.testRectangles();
-tests.testHouses();
+console.log("---- Test Houses")
+//tests.testHouses();
 
 
 //TODO: Test Edges, Test new Rectangles

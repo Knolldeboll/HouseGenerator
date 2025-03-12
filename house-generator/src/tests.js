@@ -90,12 +90,12 @@ class Tests {
         }
 
 
-        let edgeToSplit3 = new Edge(new THREE.Vector2(0,0), new THREE.Vector2(0,10));
+        let edgeToSplit3 = new Edge(new THREE.Vector2(0, 0), new THREE.Vector2(0, 10));
         console.log("Edge subedges by parts of ", edgeToSplit3, "new Edges through parts splitting");
-        let subedges3 = edgeToSplit3.splitIntoParts([2,3,2,1,2]);
+        let subedges3 = edgeToSplit3.splitIntoParts([2, 3, 2, 1, 2]);
         for (let e of subedges3) {
             e.printEdge();
-            console.log("=",e.length)
+            console.log("=", e.length)
         }
 
     }
@@ -150,7 +150,7 @@ class Tests {
         console.log("Splitted rects:", splitRects)
 
         for (rect of splitRects) {
-           // this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices, rect.material));
+            // this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices, rect.material));
         }
 
         // TODO: Test with higher-than-wide recta
@@ -175,14 +175,14 @@ class Tests {
         let splits = rect4.splitRandomlyMinMaxOriented(5, 5, 15);
 
         console.log("Split sizes: ", splits);
-        
+
         let splitSum = 0;
 
-        for(let s of splits){
+        for (let s of splits) {
             splitSum += s._area
         }
 
-        console.log("Splitsum " , splitSum, " should be" , (r4h*r4w));
+        console.log("Splitsum ", splitSum, " should be", (r4h * r4w));
         console.log("Visualise Random Splitting ")
 
         for (let rect of splits) {
@@ -192,8 +192,19 @@ class Tests {
 
 
     testHouses() {
-        let houseRects = new House(80, null, null, null, null).simpleICorridor(2, 8) || [];
-        console.log("houserects", houseRects);
+
+
+        //let houseRects = new House(80, null, null, null, null).simpleICorridor(2, 8) || [];
+        let houseRects = new House(80, null, null, null, null).randomizedICorridor(2, 8) || [];
+
+        
+
+        // STM requires apartmentSizes, which requires house parameters: n, minSize, maxSize
+        // let house1 = new House(80,null,8,8,12);
+        // house1.generateRandomApartmentSizes();
+        // house1.squarifiedTreeMap();
+
+        // console.log("houserects", houseRects);
 
         for (let rect of houseRects) {
             this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices, rect.material));

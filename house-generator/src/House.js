@@ -168,8 +168,17 @@ class House {
         this.apartmentSizes = [15, 13, 12, 6, 2, 2]
 
     }
+
+
     // Divide houseArea into "number of apartments" random sized Pieces, with minimum and Maximum Room Sizes
-    calculateApartmentSizes() {
+    generateRandomApartmentSizes() {
+
+        console.log(" ----- CALCULATE APARTMENT SIZES")
+
+        if(this.apartmentCount == null || this.minApartmentSize == null || this.maxApartmentSize == null){
+            console.log("ERROR: Missing data for generateRandomApartmentSizes")
+        }
+
 
         // TODO: Fertigstellen, vielleicht mit "keep value around zero"
         // Alternativ so, dass die Raumgrößen immer um max/minimal denselben wert um den Mean fluktuieren.
@@ -282,6 +291,10 @@ class House {
         }
 
         console.log("sum of random apartment sizes:" + testApartmentSizeSum);
+
+        this.apartmentSizes = apartmentSizes;
+
+
         // Nun einmalig random was abziehen oder hinzufügen: bei abziehen immer random wert bis max. diffToMin, bei hinzufügen random wert bis max. difftomax
         // Summe der additionen/subtraktionen-Werte speichern. 
         // Wenn die aktuell - ist, beim nächsten mal was hinzufügen. Wenn die + ist, beim nächsten mal was abziehen.
@@ -318,7 +331,6 @@ class House {
     
 
 
-  
 
     // Generate a simple Building with an I-Shaped Corridor, connecting both sides of the Building
     // with n Apartments
@@ -409,6 +421,102 @@ class House {
     }
 
 
+    // TODO: Unify randomizedICorridor / simpleICorridor by parametrizing for the split method! 
+
+    // TODO: Use the min/max apartment sizes from either direct parameters ore from class fields
+    randomizedICorridor(corridorHeight, n){
+
+        // x/y = width/height /2
+
+        // TODO: Move houseRect generation to generateHouseShape()
+        // TODO: Look what to do with uneven n's - Maybe just throw an error
+
+        if(this.houseWidth>this.houseHeight){
+
+            let totalRects = [];
+
+            let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
+           
+           // Achtung: Da wird irgendwas mit NaN befüllt. hö
+            let corridor = new Rectangle().fromCoords(this.houseWidth,corridorHeight,this.position.x,this.position.y);
+
+            console.log("corridor:",corridor)
+            // Da war immer houseRect auch drin, aber sieht kaka aus
+            totalRects.push(corridor);
+            
+            let upperRectVertices = [
+                houseRect.vertices.upperLeft,
+                houseRect.vertices.upperRight,
+                corridor.edges.upperEdge.vertices.vertice2,
+                corridor.edges.upperEdge.vertices.vertice1
+            ]
+            
+            
+            console.log("Constructing Rect from Vertices")
+            let upperRect = new Rectangle().fromVertices(upperRectVertices);
+            
+
+            let lowerRectVertices = [
+                corridor.edges.lowerEdge.vertices.vertice1,
+                corridor.edges.lowerEdge.vertices.vertice2,
+                houseRect.vertices.lowerRight,
+                houseRect.vertices.lowerLeft,
+            ]
+
+            let lowerRect = new Rectangle().fromVertices(lowerRectVertices);
+
+            // Now Divide the Rects into n/2 Rooms each
+            // TODO: Use proper min/max values
+
+            // average room size =  lowerRect / (n/2)  
+            let avg = lowerRect._area / (n/2); 
+            let min = avg - 3;
+            let max = avg + 3;
+
+            let upperRooms = upperRect.splitRandomlyMinMaxOriented(n/2,min, max);
+            let lowerRooms = lowerRect.splitRandomlyMinMaxOriented(n/2,min, max);
+
+            
+            return totalRects.concat(upperRooms,lowerRooms);
+
+        }else{
+            let totalRects =[];
+            let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
+            let corridor = new Rectangle().fromCoords(corridorHeight,this.houseHeight,this.position.x,this.position.y);
+
+            totalRects.push(corridor);
+
+            let leftRectVertices = [
+                houseRect.vertices.upperLeft,
+                corridor.vertices.upperLeft,
+                corridor.vertices.lowerLeft,
+                houseRect.vertices.lowerLeft
+            ]
+
+            let leftRect = new Rectangle().fromVertices(leftRectVertices);
+
+            let rightRectVertices = [
+                corridor.vertices.upperRight,
+                houseRect.vertices.upperRight,
+                houseRect.vertices.lowerRight,
+                corridor.vertices.lowerRight
+            ]
+
+            let rightRect = new Rectangle().fromVertices(rightRectVertices);
+
+            let leftRooms = leftRect.splitEvenlyOriented(n/2);
+            let rightRooms = rightRect.splitEvenlyOriented(n/2);
+
+            return totalRects.concat(leftRooms,rightRooms);
+        }
+     
+        //1. Place Corridor with defined width.
+        //2. Generate Rectangles from Corridor Vertices and House Vertices
+        //3. Subdivide the Rectangles
+        //4. Happyness
+
+    }
+
       // Implementation of Squarified Treemap. Randomization by differing the Areas of the rooms (here: appartments)
     // Goal: Define Apartment Vertices. 
     // Inputs: List of predefined apartmentSizes, width/height of house
@@ -416,8 +524,13 @@ class House {
 
     // TODO: in manchen fällen wird nur ein sehr langes apartment in die row gepackt. warum ?
 
+    // TODO: Ensure return of Rectangles at the end! 
     squarifiedTreeMap(apartmentSizes) {
         console.log("Start STM")
+
+        if(this.apartmentSizeList == [] ){
+            console.log("ERROR: STM requires apartmentSizeList")
+        }
 
         // Define initial vertices of wall edges
         // let currentWidth = this.houseWidth;
@@ -427,6 +540,7 @@ class House {
         //currentRow.map(preAp => ({ ...preAp }));
         let apartmentSizeList = apartmentSizes.slice(0);
 
+        // TODO: Order apartmentSizeList 
 
         // TODO: hier an Koordinatensystem (0,0 unten links) anpassen.
         let leftWall = {
