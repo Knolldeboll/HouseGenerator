@@ -26,8 +26,15 @@ class App extends Component {
     };
   }
 
-  // TODO: Use State instead of this.n
-  // TODO: nInput ist ein event! da muss aber der value drin sein
+  // In diesem Callback wird der State der App verändert, sodass der ThreeCanvas geupdated wird.
+
+  // TODO: Schauen, wie man das am besten mit mehreren Settings macht. Aktuell wird ja nur der
+  // Value für einen Input übergeben.
+  // Gut wäre es, direkt das komplette Set an Settings mitzugeben und hier in den State zu packen
+  // und dann an ThreeCanvas weiterzugeben.
+  // Vielleicht kann man hier statt dem Event auch direkt den Wert übergeben, oder
+  // das Set an das Event irgendwie anheften
+
   onDataChange = (nInput) => {
     console.log("Data changed: ", nInput.target.value);
     if (nInput.target.value === "") {
@@ -39,6 +46,12 @@ class App extends Component {
   };
 
   render() {
+    //TODO: (aber nicht so wichtig) hier wieder Flexis reinpacken, damit mit beliebig vielen Settings gearbeitet werden kann
+    // Aber die sind ja eh limitiert und ändern sich nicht so oft, da kann man das auch manuell anpassen also
+    // Abstände etc.
+    //  Das könnte man auch generell eh in den Settings machen
+
+    //TODO: Remove unnecessary divs if a solution is found for the flexbox problem
     return (
       <div>
         <div>
