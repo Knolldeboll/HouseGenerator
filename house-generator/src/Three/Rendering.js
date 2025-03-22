@@ -12,7 +12,8 @@ class Rendering {
 
         this.canvasRef = canvasRef;
         this.scene = new THREE.Scene();
-
+        this.wrapper = document.getElementById("canvas-wrapper");
+        //console.log("Wrapper: ", this.wrapper);
         this.widthFactor = widthFactor;
         this.heightFactor = heightFactor;
 
@@ -43,9 +44,10 @@ class Rendering {
         // Renderer initialize
         this.renderer.setPixelRatio(window.devicePixelRatio);
 
+        // Hier ist das wichtige!
         // Direkt scalen geht, wenn kein div um beide Components rum ist!
         // Geht auch mit div, auf jeden Fall wenn kein css dabei ist. 
-        this.renderer.setSize(window.innerWidth*this.widthFactor, window.innerHeight*this.heightFactor);
+        this.renderer.setSize(this.wrapper.clientWidth, this.wrapper.clientHeight,false);
         this.camera.position.setZ(30);
 
     }
@@ -92,9 +94,11 @@ class Rendering {
 
     handleWindowResize = () => {
         if (this.camera && this.renderer) {
-          this.camera.aspect = window.innerWidth / window.innerHeight;
-          this.camera.updateProjectionMatrix();
-          this.renderer.setSize(window.innerWidth*this.widthFactor, window.innerHeight*this.heightFactor);
+            //this.camera.aspect = window.innerWidth / window.innerHeight;
+            console.log("Resize")
+            this.camera.aspect =  this.wrapper.clientWidth/ this.wrapper.clientHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(this.wrapper.clientWidth, this.wrapper.clientHeight,false);
         }
       };
     

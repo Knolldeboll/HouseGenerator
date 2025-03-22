@@ -11,13 +11,12 @@ const Settings = (props) => {
   const [minapatmentArea, setMinapatmentArea] = useState(6);
   const [maxApartmentArea, setMaxApartmentArea] = useState(12);
   const [maxAR, setMaxAR] = useState(1.5);
+
   return (
     // div surrounds one setting tab
-    <>
+    <div style={{ width: "100vw", height: "20vh" }}>
       <SettingsTab n={n} onDataChange={props.onDataChange} />
-
-      <SettingsTab n={n} onDataChange={props.onDataChange} />
-    </>
+    </div>
   );
 };
 export default Settings;

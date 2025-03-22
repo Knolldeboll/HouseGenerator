@@ -4,6 +4,11 @@ import Settings from "./Settings";
 const App = (props) => {
   const [n, setN] = useState(6);
 
+  // Faktoren für die Größe des Canvas, bezieht sich auf die Größe des Fensters... blöderweise.
+  // Wäre cooler, wenn der sich auf die Größe eines umliegenden Div beschränken würde.
+  const canvasWidthFactor = 1;
+  const canvasHeightFactor = 1;
+
   //TODO: Define more state variables
 
   //TODO: Aktuell werden Inputs im SettingsTab angenommen, durch gepasste Callback-Methoden
@@ -36,21 +41,25 @@ const App = (props) => {
   // Abstände etc.
   //  Das könnte man auch generell eh in den Settings machen
   //TODO: Remove unnecessary divs if a solution is found for the flexbox problem
+
+  // Hier wird automatisch immer der root-div drumrum gepackt.
+  // Dieser passt sich an die Inhalte an.
+  // Wenn man dann hier sagt 100% passt sich dieser div natürlich nur an den
+  // root-div an!
   return (
-    <div>
-      <div>
-        <Settings onDataChange={onDataChange}></Settings>
-      </div>
-      <div>
-        <ThreeCanvas
-          widthFactor={0.8}
-          heightFactor={0.8} // Key enforced ein Re-Rendering. ggf nicht nötig.
-          key={n} // Wenn nur ne Zahl geändert wird, die nichtmal angezeigt wird bzw. in ner custom prop ohne nutzen ist,
-          // wird das Component nicht neu gerendert.
-          n={n}
-        ></ThreeCanvas>
-      </div>
-    </div>
+    <>
+      <Settings onDataChange={onDataChange}></Settings>
+
+      <ThreeCanvas
+        //className=""
+        widthFactor={canvasWidthFactor}
+        heightFactor={canvasHeightFactor}
+        // Key enforced ein Re-Rendering. ggf nicht nötig.
+        key={n} // Wenn nur ne Zahl geändert wird, die nichtmal angezeigt wird bzw. in ner custom prop ohne nutzen ist,
+        // wird das Component nicht neu gerendert.
+        n={n}
+      ></ThreeCanvas>
+    </>
   );
 };
 

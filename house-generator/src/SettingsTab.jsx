@@ -2,7 +2,7 @@ import React, { Component } from "react";
 export const SettingsTab = (props) => {
   console.log("SettingsTab props: ", props);
   return (
-    <div className="mb-3">
+    <div style={{ margin: "10px" }}>
       <label htmlFor="exampleFormControlInput1" className="form-label">
         Apartments
       </label>
