@@ -15,7 +15,6 @@ class Rectangle {
     constructor() {
 
 
-
         // Random between 0x000000 and 0xffffff
         // TODO: Fix... even though rgb have values, its white. Maybe cap to integer
         //this._color =  new THREE.Color(0xffff00);
@@ -276,7 +275,12 @@ class Rectangle {
     }
 
 
-    // Split into n randomly sized parts, each part with size between min and max
+    /**
+     * Split into n randomly sized parts, each part with size between min and max
+     * Can be used to keep AR intact by calculating the maxArea and minArea beforehand!
+     * @param {*} max 
+     * 
+     *  */ 
     splitRandomlyMinMaxOriented(n, min, max){
 
 

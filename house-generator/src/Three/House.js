@@ -12,6 +12,13 @@ import Tools from './Tools';
 class House {
 
 
+    // TODO: Parametrize width/height
+    // TODO: Parametrize other stuff
+    /**
+     * Generates a House from the given parameters and automatically 
+     * generates the outer walls (calls generateHouseShape)
+     * Everything else must be done by decorator methods
+     */
     constructor(houseArea, gardenArea, apartmentCount, minApartmentSize, maxApartmentSize) {
         this.houseArea = houseArea;
         this.gardenArea = gardenArea;
@@ -50,15 +57,16 @@ class House {
         this.houseShapeObject = null;
 
         this.calculateHouseShape();
-       // this.calculateRooms();
+        // this.calculateRooms();
     }
 
-    // Einfach alles machen!
-
+    /**
+     * Wrapper Method for the construction process
+     */
     calculateRooms() {
-        this.calculateHouseShape(); // Mirahmadi Step 1
-        this.setFixedApartmentSizes(); // Placeholder for calculateApartmentSizes
 
+        this.calculateHouseShape(); // Mirahmadi Step 1/
+        this.setFixedApartmentSizes(); // Placeholder for calculateApartmentSizes
 
         //this.calculateApartmentSizes(); 
         //this.calculateFloorPlan(); // Squarified Tree Map
@@ -85,15 +93,14 @@ class House {
         */
     }
 
-    // Calculates Random House Rectangle Shape with aspect ratio from 0.8 to 1.2, without any appartments placed in the floor
+    /**  Calculates Random House Rectangle Shape with aspect ratio from 0.8 to 1.2, without any appartments placed in the floor
+    */
     calculateHouseShape() {
-        // TODO: Parametrize min/max Aspect Ratio
 
-        // Garden: Calculate rect coordinates from gardenArea
+        // TODO: Parametrize min/max Aspect Ratio of House
+        // TODO: Parametrize width/height of House
+        
         // Rectangle Area A = a*b 
-
-
-
 
         // Randomly generate side a, in Aspect Ratio between 1/1 and 0.8/1
         // amin = 0.8*b
@@ -103,7 +110,6 @@ class House {
         // TODO: Redo Aspect Ratio calculation according to Mirahmadi: max (w/h, h/w)
 
         var aspectRatio = 0.6 + (0.8 * Math.random()); // AR zw. 0.6 und 1.4
-
 
         console.log("random aspect ratio " + aspectRatio);
         // aspectratio = a/b 
@@ -422,17 +428,36 @@ class House {
 
 
     // TODO: Unify randomizedICorridor / simpleICorridor by parametrizing for the split method! 
-
     // TODO: Use the min/max apartment sizes from either direct parameters ore from class fields
+    // TODO: Extract the corridor generation method from the splitting method, so that
+    // it could be called multiple times to generate new rectangle splits
+
     randomizedICorridor(corridorHeight, n){
 
         // x/y = width/height /2
 
+        // TODO: Error for Both corridor Types! when using uneven numbers <=5
+        // "cannot read xy from vertices"
+        // Some of the Rectangles are probably not generated correctly
+
         // TODO: Move houseRect generation to generateHouseShape()
-        // TODO: Look what to do with uneven n's - Maybe just throw an error
+        // TODO: Look what to do with uneven n's
+
+
+        // -> divide n by the amount of available living area rectangles scaled by their size
+        // for example: four LA-rects: each one has a part of 1.0 of the total area
+        // one has 0.4, one has 0.4, one has 0.1, one has 0.1 
+        // n = 15, so the division is ~ 6, 6, 2, 1 or maybe 6,5,2,2
+        // -> Look at all the raw n-splits the la-rects would get when multiplied by their area ratio 
+        // then select those where rounding up/down would cause the least divergence (but in percent!) from their raw
+        // n-split value. Choose those to go below their value for dividing uneven n's
 
         if(this.houseWidth>this.houseHeight){
+            console.log("Horizontal Corridor!")
 
+            /**
+             * All rects that will be passed to rendering
+             */
             let totalRects = [];
 
             let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
@@ -466,20 +491,35 @@ class House {
             let lowerRect = new Rectangle().fromVertices(lowerRectVertices);
 
             // Now Divide the Rects into n/2 Rooms each
-            // TODO: Use proper min/max values
+            // If n uneven, do fuck
 
+            // TODO: Use proper min/max values
             // average room size =  lowerRect / (n/2)  
             let avg = lowerRect._area / (n/2); 
             let min = avg - 3;
             let max = avg + 3;
 
-            let upperRooms = upperRect.splitRandomlyMinMaxOriented(n/2,min, max);
-            let lowerRooms = lowerRect.splitRandomlyMinMaxOriented(n/2,min, max);
+
+            // TODO: Extract and to this for every Living Area Rectangle
+            let n1;
+            let n2;
+
+            if(n%2 != 0 ){
+                n1 = Math.floor(n/2)
+                n2 = Math.ceil(n/2);
+            }else{
+                n1 = n/2;
+                n2 = n/2;
+            }
+            let upperRooms = upperRect.splitRandomlyMinMaxOriented(n1,min, max);
+            let lowerRooms = lowerRect.splitRandomlyMinMaxOriented(n2,min, max);
 
             
             return totalRects.concat(upperRooms,lowerRooms);
 
         }else{
+            console.log("Vertical Corridor!")
+
             let totalRects =[];
             let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
             let corridor = new Rectangle().fromCoords(corridorHeight,this.houseHeight,this.position.x,this.position.y);
@@ -504,8 +544,24 @@ class House {
 
             let rightRect = new Rectangle().fromVertices(rightRectVertices);
 
-            let leftRooms = leftRect.splitEvenlyOriented(n/2);
-            let rightRooms = rightRect.splitEvenlyOriented(n/2);
+
+            // TODO: Extract and to this for every Living Area Rectangle
+            let n1;
+            let n2;
+
+            if(n%2 != 0 ){
+                n1 = Math.floor(n/2)
+                n2 = Math.ceil(n/2);
+            }else{
+                n1 = n/2;
+                n2 = n/2;
+            }
+           
+
+            // TODO: Check why splitEvenlyOriented is used here
+            // Is "splitEvenlyMinMaxOriented" not ready for vertical corridor?
+            let leftRooms = leftRect.splitEvenlyOriented(n1);
+            let rightRooms = rightRect.splitEvenlyOriented(n2);
 
             return totalRects.concat(leftRooms,rightRooms);
         }
