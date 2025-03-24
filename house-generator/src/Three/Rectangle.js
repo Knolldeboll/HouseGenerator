@@ -27,7 +27,17 @@ class Rectangle {
         this._height = undefined;
         this._area = undefined;
         this._pos = undefined;
+
+        /**
+         * Vertices in following order.
+         * upper left, upper right, lower right, lower left
+         */
         this._vertices = undefined;
+
+        /**
+         * Edges in following order: 
+         * upper, right, lower, left
+         */
         this._edges = undefined;
         //  this.generateVertices();
         //  this.generateEdges();
@@ -75,7 +85,7 @@ class Rectangle {
         
         this._area = this._width * this._height;
 
-        console.log("Set area to " ,this._width , " x ",this._height," = ",this._area)
+        //console.log("Set area to " ,this._width , " x ",this._height," = ",this._area)
 
         // Generate Position
         let x = this._vertices.upperLeft.x + this._width / 2;
@@ -92,10 +102,11 @@ class Rectangle {
     }
 
     fromCoords(width, height, x, y) {
+        console.log("> Rectangle from verts")
         this._width = width;
         this._height = height;
         this._area = this._width * this._height;
-        console.log("Set area to " ,this._width , " x ",this._height," = ",this._area)
+        //console.log("Set area to " ,this._width , " x ",this._height," = ",this._area)
         this._pos = {
             x: x,
             y: y,
@@ -108,8 +119,12 @@ class Rectangle {
     }
 
 
-    // Generate the vertices from the position and height/width
-    // Vertice naming redefined to speaking names.    
+    /**
+     * Generate the vertices from the position and height/width
+     Vertice naming redefined to speaking names.  
+     * 
+     */ 
+
     generateVertices() {
 
         let upperLeft = new THREE.Vector2((this._pos.x - this._width / 2), (this._pos.y + this._height / 2));
@@ -128,9 +143,18 @@ class Rectangle {
     }
 
 
+    /**
+     * Generates and Saves Edges from this Rects vertices, whichhh
+     * 
+     */
     generateEdges() {
         // ul > ur > lr > ll7
         // TODO: Überlegen, welches immer v1/v2 ist
+
+        console.log("> Generate Edges from Vertices")
+        if(this._vertices == undefined ){
+            console.error("Cannot Generate Edges, vertices are not defined for this rect!");
+        }
 
         // v1 immer links/obe
         // v2 immer rechts/unten 
@@ -217,7 +241,8 @@ class Rectangle {
     splitEvenlyOriented(n) {
         let newRects = [];
   
-        console.log("split w / h",this.width,this.height)
+        console.log("> Split Rectangle evenly oriented along the longer side")
+        //console.log("split w / h",this.width,this.height)
         if(this._width > this._height){
             // Horizontally
             
@@ -283,14 +308,14 @@ class Rectangle {
      *  */ 
     splitRandomlyMinMaxOriented(n, min, max){
 
-
+        console.log("> Split Rectangle in n randomly sized splits oriented along it's longer side")
         // 1. Check if Shit is hitting the fan with the given parameters:
         if(this._area < n*min){
-            console.log("rect of ",this._area, " can't be split with min ", min , " max ", max ,":")
+            console.error("rect of ",this._area, " can't be split with min ", min , " max ", max ,":")
             return;
         }
         if(this._area > n*max){
-            console.log("rect of " ,this._area, "can't be split with max ", min , " max ", max ,":")
+            console.error("rect of " ,this._area, "can't be split with max ", min , " max ", max ,":")
             return;
         }
 
@@ -301,7 +326,7 @@ class Rectangle {
             parts.push(min)
         }
 
-        console.log("area",this._area,"n*min",n*min)
+        //console.log("area",this._area,"n*min",n*min)
 
 
         // 3. calculate rest of the Area to this._area
@@ -316,7 +341,7 @@ class Rectangle {
             for (let j = 0; j < n; j++){
 
                 if(rest <=0){
-                    console.log("rest empty ", rest)
+                    //console.log("rest empty ", rest)
                     break;
                 }
 
@@ -360,6 +385,11 @@ class Rectangle {
     }
 
 
+    /**
+     * Generate Subrectangles from a given set of parts of one of it's edges
+     * @param {} parts 
+     * @returns 
+     */
     generateSubRectsFromParts(parts){
 
         console.log("> Generate SubRects from Parts")
@@ -377,21 +407,21 @@ class Rectangle {
                 edgeParts.push(p/this._height);
             }
     
-            console.log("edgeParts horizontal:",edgeParts)
+           //console.log("edgeParts horizontal:",edgeParts)
             
             // upperedge splits by parts
             // loweredge splits by parts
             let upperEdgeSplits = this.edges.upperEdge.splitIntoParts(edgeParts);
             let lowerEdgeSplits= this.edges.lowerEdge.splitIntoParts(edgeParts);
 
-            console.log("Part Splitting: Upper edges:");
+            //console.log("Part Splitting: Upper edges:");
             for (let ue of upperEdgeSplits){
-                ue.printEdge();
+                //ue.printEdge();
             }
-            console.log("Part splitting lower edgle: ");
+            //console.log("Part splitting lower edgle: ");
             // Pass edges into subedgesToRects Function
             for (let le of lowerEdgeSplits){
-                le.printEdge();
+                //le.printEdge();
             }
 
 
@@ -417,18 +447,18 @@ class Rectangle {
                 // Horizontal: height ist immer gleich, teile Area durch height
                 edgeParts.push(p/this._width);
             }
-            console.log("edgeParts vertical:",edgeParts)
+            //console.log("edgeParts vertical:",edgeParts)
 
             let leftEdgeSplits = this.edges.leftEdge.splitIntoParts(edgeParts);
             let rightEdgeSplits = this.edges.rightEdge.splitIntoParts(edgeParts);
-            console.log("Part Splitting: left edges:");
+            //console.log("Part Splitting: left edges:");
             for (let le of leftEdgeSplits){
-                le.printEdge();
+                //le.printEdge();
             }
-            console.log("Part splitting right edgle: ");
+            //console.log("Part splitting right edgle: ");
             // Pass edges into subedgesToRects Function
             for (let re of rightEdgeSplits){
-                re.printEdge();
+                //re.printEdge();
             }
 
 

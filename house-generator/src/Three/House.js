@@ -25,6 +25,7 @@ class House {
         this.apartmentCount = apartmentCount;
         this.houseWidth = null;
         this.houseHeight = null;
+        this.totalRects = [];
 
         // a: upper left
         // b: upper right
@@ -349,7 +350,7 @@ class House {
 
         if(this.houseWidth>this.houseHeight){
 
-            let totalRects = [];
+            //let totalRects = [];
 
             let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
            
@@ -358,7 +359,7 @@ class House {
 
             console.log("corridor:",corridor)
             // Da war immer houseRect auch drin, aber sieht kaka aus
-            totalRects.push(corridor);
+            this.totalRects.push(corridor);
             
             let upperRectVertices = [
                 houseRect.vertices.upperLeft,
@@ -385,15 +386,15 @@ class House {
             let upperRooms = upperRect.splitEvenlyOriented(n/2);
             let lowerRooms = lowerRect.splitEvenlyOriented(n/2);
 
-            
-            return totalRects.concat(upperRooms,lowerRooms);
+            this.totalRects = this.totalRects.concat(upperRooms,lowerRooms);
+            return this.totalRects;
 
         }else{
-            let totalRects =[];
+            //let totalRects =[];
             let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
             let corridor = new Rectangle().fromCoords(corridorHeight,this.houseHeight,this.position.x,this.position.y);
 
-            totalRects.push(corridor);
+            this.totalRects.push(corridor);
 
             let leftRectVertices = [
                 houseRect.vertices.upperLeft,
@@ -416,7 +417,8 @@ class House {
             let leftRooms = leftRect.splitEvenlyOriented(n/2);
             let rightRooms = rightRect.splitEvenlyOriented(n/2);
 
-            return totalRects.concat(leftRooms,rightRooms);
+            this.totalRects = this.totalRects.concat(leftRooms,rightRooms);
+            return this.totalRects;
         }
      
         //1. Place Corridor with defined width.
@@ -458,7 +460,7 @@ class House {
             /**
              * All rects that will be passed to rendering
              */
-            let totalRects = [];
+            //let totalRects = [];
 
             let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
            
@@ -467,7 +469,7 @@ class House {
 
             console.log("corridor:",corridor)
             // Da war immer houseRect auch drin, aber sieht kaka aus
-            totalRects.push(corridor);
+            this.totalRects.push(corridor);
             
             let upperRectVertices = [
                 houseRect.vertices.upperLeft,
@@ -493,38 +495,71 @@ class House {
             // Now Divide the Rects into n/2 Rooms each
             // If n uneven, do fuck
 
-            // TODO: Use proper min/max values
+            // TODO: Use proper min/max values calculated from maxAR or smth. 
             // average room size =  lowerRect / (n/2)  
+
+            
+            // TODO: Use parameter for divergence of average area
+            // TODO: Adjust to actual n of the LA
             let avg = lowerRect._area / (n/2); 
-            let min = avg - 3;
-            let max = avg + 3;
+
 
 
             // TODO: Extract and to this for every Living Area Rectangle
-            let n1;
-            let n2;
+            let nUpper;
+            let nLower;
+            let avgUpper;
+            let avgLower;
+
+            // If n uneven, divide n per Living Area
+            // Currently only 2 areas.
 
             if(n%2 != 0 ){
-                n1 = Math.floor(n/2)
-                n2 = Math.ceil(n/2);
+
+                // Calculate upper and lower n
+                nUpper = Math.floor(n/2)
+                nLower = Math.ceil(n/2);
             }else{
-                n1 = n/2;
-                n2 = n/2;
+
+                // Calculate upper and lower n
+                nUpper = n/2;
+                nLower = n/2;
             }
-            let upperRooms = upperRect.splitRandomlyMinMaxOriented(n1,min, max);
-            let lowerRooms = lowerRect.splitRandomlyMinMaxOriented(n2,min, max);
 
             
-            return totalRects.concat(upperRooms,lowerRooms);
+            // Calculate avg room size for the upper and lower rect
+            avgUpper = upperRect._area / nUpper;
+            avgLower = lowerRect._area /nLower;
+
+
+            // TODO: Extract min/max Area calculation for 
+            // Living Areas in General
+
+
+            // Calculate min/max area values for upper rect
+            let minUpper = avgUpper - 3;
+            let maxUpper = avgUpper + 3;
+
+            // Calculate min/max area values for lower rect
+            let minLower = avgLower -3;
+            let maxLower = avgLower + 3;
+
+            // Calculate Subrectanles/Apartments for the upper/lower Living Area
+            let upperRoomsRects = upperRect.splitRandomlyMinMaxOriented(nUpper,minUpper, maxUpper);
+            let lowerRoomsRects = lowerRect.splitRandomlyMinMaxOriented(nLower,minLower, maxLower);
+
+            this.totalRects = this.totalRects.concat(upperRoomsRects,lowerRoomsRects);
+
+            return this.totalRects;
 
         }else{
             console.log("Vertical Corridor!")
 
-            let totalRects =[];
+            //let totalRects =[];
             let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
             let corridor = new Rectangle().fromCoords(corridorHeight,this.houseHeight,this.position.x,this.position.y);
 
-            totalRects.push(corridor);
+            this.totalRects.push(corridor);
 
             let leftRectVertices = [
                 houseRect.vertices.upperLeft,
@@ -560,10 +595,13 @@ class House {
 
             // TODO: Check why splitEvenlyOriented is used here
             // Is "splitEvenlyMinMaxOriented" not ready for vertical corridor?
-            let leftRooms = leftRect.splitEvenlyOriented(n1);
-            let rightRooms = rightRect.splitEvenlyOriented(n2);
 
-            return totalRects.concat(leftRooms,rightRooms);
+            let leftRoomsRects = leftRect.splitEvenlyOriented(n1);
+            let rightRoomsRects = rightRect.splitEvenlyOriented(n2);
+
+            this.totalRects = this.totalRects.concat(leftRoomsRects,rightRoomsRects);
+            // Return corridor + left rooms + right rooms
+            return this.totalRects;
         }
      
         //1. Place Corridor with defined width.

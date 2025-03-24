@@ -33,9 +33,14 @@ class Edge{
         return this._vertices;
     }
 
-
+/**
+ * Splits the Edge evenly into n parts
+ * @param {} n 
+ * @returns The newly generated Edges
+ */
     splitEvenly(n){
 
+        console.log("> split Edge evenly in n edges")
         let subEdges = [];
         let direction = new THREE.Vector2();
 
@@ -66,12 +71,19 @@ class Edge{
         return subEdges;
     }
 
+    /**
+     * Splits the Edge in two parts, with one having a length of the
+     * provided Parameter
+     * @param {} len 
+     * @returns The two generated Edgess
+     */
     splitByLength(len){
 
+        console.log("> Split Edge by length ")
         let newEdges = [];
         
         if(len >= this.length){
-            console.log("Invalid splitting length: too long")
+            console.error("Invalid splitting length: too long")
             return undefined;
         }
 
@@ -94,6 +106,11 @@ class Edge{
 
     }
 
+    /**
+     * Split Edge into specifed parts
+     * @param {Parts have to be given as percentages} parts 
+     * @returns The newly generated Edges
+     */
     splitIntoParts(parts){
 
         let subEdges = [];
@@ -126,6 +143,9 @@ class Edge{
         return subEdges;
     }
 
+    /**
+     * Prints the Vertices of the Edge
+     */
     printEdge(){
         console.log("V1: " , this._vertices.vertice1, "V2: ", this._vertices.vertice2);
     }
