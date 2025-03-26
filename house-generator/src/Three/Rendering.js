@@ -13,7 +13,7 @@ class Rendering {
         this.canvasRef = canvasRef;
         this.scene = new THREE.Scene();
         this.wrapper = document.getElementById("canvas-wrapper");
-        //console.log("Wrapper: ", this.wrapper);
+        console.log("Wrapper: ", this.wrapper);
         this.widthFactor = widthFactor;
         this.heightFactor = heightFactor;
 
