@@ -12,7 +12,10 @@ html, body {
   height: 100vw;
   overflow: hidden;
   background-color: rgb(117, 143, 145);
-/*  display: flex;
+  /*
+  display:flex;
+  flex-direction: column;
   justify-content: center;
- align-items: center; */
+  align-items: center; 
+  */
 }

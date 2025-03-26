@@ -14,13 +14,24 @@ const Settings = (props) => {
 
   return (
     // div surrounds one setting tab
-    <div style={{ width: "100vw", height: "20vh" }}>
+    <div
+      style={{
+        width: "100vw",
+        height: "20vh",
+        display: "flex",
+        justifyContent: "center",
+        backgroundColor: "darkgrey",
+      }}
+    >
       <SettingsTab
         n={n}
         labelText="Apartments"
         onDataChange={props.onDataChange}
       />{" "}
-      <SettingsTab n={n} labelText="Test" onDataChange={props.onDataChange} />
+      <SettingsTab n={n} labelText="Test1" onDataChange={props.onDataChange} />
+      <SettingsTab n={n} labelText="Test2" onDataChange={props.onDataChange} />
+      <SettingsTab n={n} labelText="Test3" onDataChange={props.onDataChange} />
+      <SettingsTab n={n} labelText="Test4" onDataChange={props.onDataChange} />
     </div>
   );
 };

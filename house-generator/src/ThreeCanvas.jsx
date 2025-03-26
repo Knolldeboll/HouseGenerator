@@ -39,24 +39,36 @@ const ThreeCanvas = (props) => {
   }, []);
 
   //Bei canvas den canvasRef reinpacken, damit in canvasRef dieses Element referenziert werden kann
+
+  // canvasWrapper dictates the width/heigt of the canvas
   return (
     <div
-      id="canvas-wrapper"
-      className="w-80"
+      id="canvas-div"
       style={{
-        width: "60vw",
-        height: "70vh",
-        overflow: "hidden",
-        margin: "auto",
+        height: "80vh",
+        display: "flex",
+        justifyContent: "center",
+        alignContent: "center",
       }}
     >
-      <canvas
-        ref={canvasRef}
+      <div
+        id="canvas-wrapper"
         style={{
-          width: "100%",
-          height: "100%",
+          width: "60vw",
+          height: "70vh",
+          overflow: "hidden",
+          margin: "auto",
         }}
-      ></canvas>
+      >
+        <canvas
+          ref={canvasRef}
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: "8px",
+          }}
+        ></canvas>
+      </div>
     </div>
   );
 };
