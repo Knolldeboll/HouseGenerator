@@ -2,9 +2,9 @@ import React, { Component } from "react";
 export const SettingsTab = (props) => {
   console.log("SettingsTab props: ", props);
   return (
-    <div style={{ margin: "10px" }}>
+    <div style={{ margin: "10px", display: "inline" }}>
       <label htmlFor="exampleFormControlInput1" className="form-label">
-        Apartments
+        {props.labelText}
       </label>
       <input
         type="email"
