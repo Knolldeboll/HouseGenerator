@@ -214,6 +214,20 @@ class Tests {
 
     }
 
+    testRectangleSTMSplitting(){
+        const vertsObject = {
+            upperLeft: new Vector2(-5, 5),
+            upperRight: new Vector2(10, 5),
+            lowerRight: new Vector2(10, -5),
+            lowerLeft: new Vector2(-5, -5),
+        }
+        const rect = new Rectangle().fromVertices(vertsObject);
+        const rectmesh = rect.generateShapeMesh();
+
+        //TODO: Call STM Split method
+        
+    }
+
     testHouses(n, corridorWidth) {
 
         console.log("House test with " , n, "apartments");
