@@ -191,11 +191,13 @@ class Tests {
     }
 
 
-    testHouses(n) {
+    testHouses(n, corridorWidth) {
 
         console.log("House test with " , n, "apartments");
         //let houseRects = new House(80, null, null, null, null).simpleICorridor(2, 8) || [];
-        let houseRects = new House(80, null, null, null, null).randomizedICorridor(2, n) || [];
+
+    
+        let houseRects = new House(80, null, null, null, null).randomizedICorridor(n, corridorWidth) || [];
 
         
 
@@ -206,6 +208,8 @@ class Tests {
 
         // console.log("houserects", houseRects);
 
+        // Rendering works by converting each house rectangle to a mesh
+        // the main house rectangle is not rendered
         for (let rect of houseRects) {
             this.rendering.addToScene(this.rendering.generateMeshFromVertices(rect.vertices, rect.material));
         }

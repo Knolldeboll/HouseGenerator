@@ -9,8 +9,13 @@ import * as THREE from 'three';
 
 // Only Job: Take Vertices and Generate a Shape out of it.
 
+
+
 class ShapeObject {
 
+
+    //TODO: Make the vertices parameter to be in the form of house.vertices, which is an object and not an array
+    // -> aber eher unwichtig
     constructor(vertices, materialColor) {
 
         // Set vertices later via method, as they are not known before generating the floor plan

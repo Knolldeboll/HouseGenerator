@@ -28,6 +28,7 @@ class Rectangle {
         this._area = undefined;
         this._pos = undefined;
 
+        
         /**
          * Vertices in following order.
          * upper left, upper right, lower right, lower left
@@ -144,7 +145,7 @@ class Rectangle {
 
 
     /**
-     * Generates and Saves Edges from this Rects vertices, whichhh
+     * Generates and saves Edges from this Rects vertices
      * 
      */
     generateEdges() {
@@ -173,6 +174,10 @@ class Rectangle {
     }
 
 
+    /**
+     * Generates a ShapeMesh from the vertices of this rectangle
+     * @returns 
+     */
     generateShapeMesh() {
         shape = new THREE.Shape();
 
@@ -302,6 +307,7 @@ class Rectangle {
 
     /**
      * Split into n randomly sized parts, each part with size between min and max
+     * Oriented along the longer Edge
      * Can be used to keep AR intact by calculating the maxArea and minArea beforehand!
      * @param {*} max 
      * 

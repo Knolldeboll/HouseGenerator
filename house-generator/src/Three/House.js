@@ -25,7 +25,13 @@ class House {
         this.apartmentCount = apartmentCount;
         this.houseWidth = null;
         this.houseHeight = null;
+        /**
+         * The rects from the Apartments, corridor and rooms
+         */
         this.totalRects = [];
+        this.apartmentRects = [];
+        this.corridorRects = [];
+        this.roomRects = [];
 
         // a: upper left
         // b: upper right
@@ -36,6 +42,14 @@ class House {
         // so that we can say apartment1.upperEdge = apartment2.lowerEdge = a and b for placing apartment1 below apartment2
         // Otherwise the vertices have to be called separately, so 
 
+        // TODO: Doublecheck vertex order
+        /**
+         * a: upper left
+         * b: upper right
+         * c: lower left
+         * d: lower right
+         * 
+         */
         this.vertices = {
             a: null,
             b: null,
@@ -57,7 +71,7 @@ class House {
         // ShapeObject of house base shape
         this.houseShapeObject = null;
 
-        this.calculateHouseShape();
+        this.calculateRandomHouseShape();
         // this.calculateRooms();
     }
 
@@ -66,7 +80,7 @@ class House {
      */
     calculateRooms() {
 
-        this.calculateHouseShape(); // Mirahmadi Step 1/
+        this.calculateRandomHouseShape(); // Mirahmadi Step 1/
         this.setFixedApartmentSizes(); // Placeholder for calculateApartmentSizes
 
         //this.calculateApartmentSizes(); 
@@ -94,9 +108,19 @@ class House {
         */
     }
 
+
+    /**
+     * Calculate House Rectangle shape,
+     */
+    calculateDefinedHouseShape(){
+
+    }
+
+
     /**  Calculates Random House Rectangle Shape with aspect ratio from 0.8 to 1.2, without any appartments placed in the floor
     */
-    calculateHouseShape() {
+
+    calculateRandomHouseShape() {
 
         // TODO: Parametrize min/max Aspect Ratio of House
         // TODO: Parametrize width/height of House
@@ -134,12 +158,9 @@ class House {
         }
         console.log("width " + width + "height " + height + " aspect ratio later " + (width / height));
 
-        // TODO: Save Vertices as this.a (upper left), this.b (upper right), this.c(lower left), this.d(lower right) 
-
-        this.vertices.a = new THREE.Vector2(0, 0);
-        this.vertices.b = new THREE.Vector2(width, 0);
-        this.vertices.c = new THREE.Vector2(width, height);
-        this.vertices.d = new THREE.Vector2(0, height);
+ 
+        // Calculate the vertices from w/h and
+        this.calculateHouseVertices();
 
         const shapeVertices = [
             this.vertices.a,
@@ -155,6 +176,25 @@ class House {
 
         // Create Shape from vertices and color
         this.houseShapeObject = new ShapeObject(shapeVertices, 0xffff11);
+    }
+
+    /**
+     * calculates the House's corner vertices from width and height and stores them in this.vertices
+     * 
+     */
+    calculateHouseVertices(){
+
+        if(this.houseWidth == undefined || this.houseHeight == undefined){
+            console.error("Error calculating house vertices! HouseWidth or height not defined!")
+        }
+
+        //Save Vertices as this.a (upper left), this.b (upper right), this.c(lower left), this.d(lower right)
+        // What the fuck
+        this.vertices.a = new THREE.Vector2(0, 0);
+        this.vertices.b = new THREE.Vector2(this.houseWidth, 0);
+        this.vertices.c = new THREE.Vector2(this.houseWidth, this.houseHeight);
+        this.vertices.d = new THREE.Vector2(0, this.houseHeight);
+
     }
 
     // Attention: ggf. müssen die Apartments nach Area (groß nach klein) sortiert sein!
@@ -434,7 +474,14 @@ class House {
     // TODO: Extract the corridor generation method from the splitting method, so that
     // it could be called multiple times to generate new rectangle splits
 
-    randomizedICorridor(corridorHeight, n){
+    /**
+     * Generates a House with a simple I-Corridor and n Apartments of random Size
+     * 
+     * @param {} corridorWidth 
+     * @param {*} n 
+     * @returns 
+     */
+    randomizedICorridor(n, corridorWidth){
 
         // x/y = width/height /2
 
@@ -465,7 +512,7 @@ class House {
             let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
            
            // Achtung: Da wird irgendwas mit NaN befüllt. hö
-            let corridor = new Rectangle().fromCoords(this.houseWidth,corridorHeight,this.position.x,this.position.y);
+            let corridor = new Rectangle().fromCoords(this.houseWidth,corridorWidth,this.position.x,this.position.y);
 
             console.log("corridor:",corridor)
             // Da war immer houseRect auch drin, aber sieht kaka aus
@@ -557,7 +604,7 @@ class House {
 
             //let totalRects =[];
             let houseRect = new Rectangle().fromCoords(this.houseWidth,this.houseHeight,this.position.x,this.position.y);
-            let corridor = new Rectangle().fromCoords(corridorHeight,this.houseHeight,this.position.x,this.position.y);
+            let corridor = new Rectangle().fromCoords(corridorWidth,this.houseHeight,this.position.x,this.position.y);
 
             this.totalRects.push(corridor);
 
@@ -617,13 +664,14 @@ class House {
 
 
     // TODO: in manchen fällen wird nur ein sehr langes apartment in die row gepackt. warum ?
+    // TODO: Auf Rectangles anwendbar machen!
 
     // TODO: Ensure return of Rectangles at the end! 
     squarifiedTreeMap(apartmentSizes) {
         console.log("Start STM")
 
         if(this.apartmentSizeList == [] ){
-            console.log("ERROR: STM requires apartmentSizeList")
+            console.error("ERROR: STM requires apartmentSizeList")
         }
 
         // Define initial vertices of wall edges
@@ -875,8 +923,6 @@ class House {
                 // in die Row zu packen
                 while (apartmentSizeList.length > 0) {
                     console.log("vvvvvvvvvvvvvvvvvvv New Iteration of trying to add preApartments to lower wall row")
-
-
 
                     // First one's free
                     if (currentRow.length == 0) {

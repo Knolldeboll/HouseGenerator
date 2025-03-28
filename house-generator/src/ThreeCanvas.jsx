@@ -30,12 +30,13 @@ const ThreeCanvas = (props) => {
     const tests = new Tests(rendering);
     //this.rendering = RenderingDemo(this.canvasRef);
     // Tests
-    //TODO: hier dann die Werte aus Props reingeben.
+
     //tests.testRendering();
     //tests.testVectors();
     //tests.testEdges();
-    //tests.testRectangles();
-    tests.testHouses(props.n);
+    //tests.testRectangles();7
+    // TODO: Use prop for corridor width
+    tests.testHouses(props.n, 2);
   }, []);
 
   //Bei canvas den canvasRef reinpacken, damit in canvasRef dieses Element referenziert werden kann
