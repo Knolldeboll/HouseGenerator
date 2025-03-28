@@ -7,6 +7,8 @@ import House from "./House";
 
 class Tests {
     constructor(rendering) {
+
+        // Type unknown, so no info on rendering
         this.rendering = rendering;
     }
 
@@ -190,6 +192,27 @@ class Tests {
         }
     }
 
+
+    testRectangleHelpers(){
+        const vertsObject = {
+            upperLeft: new Vector2(-5, 5),
+            upperRight: new Vector2(10, 5),
+            lowerRight: new Vector2(10, -5),
+            lowerLeft: new Vector2(-5, -5),
+        }
+        const rect = new Rectangle().fromVertices(vertsObject);
+        const rectmesh = rect.generateShapeMesh();
+
+        this.rendering.addToScene(rectmesh);
+
+        const pointHelper = rect.getPointHelperMesh();
+        this.rendering.addToScene(pointHelper);
+
+        const verticeHelpers = rect.getVerticesPointHelperMeshes();
+
+        this.rendering.addAllToScene(verticeHelpers);
+
+    }
 
     testHouses(n, corridorWidth) {
 

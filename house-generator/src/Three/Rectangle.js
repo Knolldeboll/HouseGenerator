@@ -48,14 +48,18 @@ class Rectangle {
 
     // 2nd constructors
     // Verts must be given in clockwise order, starting at upper left
+    /**
+     * 
+     * @param {Object} verts Value object defined as upperLeft, upperRight, lowerRight, lowerLeft with Vector2 values
+     * @returns {Rectangle}
+     */
     fromVertices(verts) {
         console.log("> Rectangle from verts")
 
-
+        // If Object given, transform to array
         let values = verts;
 
-        // If Object given, transform to array
-
+    
         // TODO: Achtung: Arrays sind auch objects.. 
         // Array.isArray(dingens) prüft, ob ein Objekt ein Array ist!
         // ggf austauschen, sonst wird umsonst von Array zu Array konvertiert.. 
@@ -179,7 +183,8 @@ class Rectangle {
      * @returns 
      */
     generateShapeMesh() {
-        shape = new THREE.Shape();
+
+        const shape = new THREE.Shape();
 
         const values = Object.values(this._vertices);
         // Set currentPoint to point 0 ?? 
@@ -197,7 +202,7 @@ class Rectangle {
         // Save shape
         this._shape = shape;
 
-        geometry = new THREE.ShapeGeometry(shape);
+        const geometry = new THREE.ShapeGeometry(shape);
 
         /*
                 // Test for the shape: (so klappts!)
@@ -210,7 +215,7 @@ class Rectangle {
         // Create ShapeGeometry from shape (will be 2D)
         this._geometry = geometry;
 
-        mesh = new THREE.Mesh(this._geometry, this._material);
+        const mesh = new THREE.Mesh(this._geometry, this._material);
         //console.log("geometry debug:" + this.geometry.attributes.position.count);
 
         // Create Mesh from geometry and material
@@ -393,14 +398,26 @@ class Rectangle {
 
     /**
      * Generate Subrectangles from a given set of parts of one of it's edges
-     * @param {} parts 
+     * @param {List of values from 0.0 to 1.0. Must add up to 1.0} parts 
      * @returns 
      */
     generateSubRectsFromParts(parts){
 
+
+
         console.log("> Generate SubRects from Parts")
         let edgeParts = [];
         let newRects = [];
+
+        // Check if parts add up to 1.0
+        let sum = 0;
+        for(let p of parts){
+            sum += p;
+        }
+        if(sum != 1.0){
+            console.error("Parts do not add up to 1.0! But to: " , sum)
+            return;
+        }
 
 
         if(this._width > this._height){       
@@ -492,8 +509,9 @@ class Rectangle {
         return newRects;
         //return parts;
     }
-    // TODO: Outsource the "generate vertices" part into separate 
 
+
+    // TODO: Outsource the "generate vertices" part into separate 
     generateHorizontalRectangles(parts){
 
     // Kann man nicht vereinen, da bei SplitEven mit den Edges gearbeitet wird 
@@ -514,8 +532,14 @@ class Rectangle {
     // orientation: if the division should be 
     divideDefined(areaList, orientation = null, divideAlongLongerSide = null) {
 
-
-
+        let areaSum = 0;
+        for(let a of areaList){
+            areaSum += a;
+        }
+        if(areaSum != this){
+            console.error("ERROR: AreaList does not add up to the area of this rectangle!")
+            return;
+        }
     }
 
     // JS Optional Parameters:
@@ -525,14 +549,48 @@ class Rectangle {
     // func(a,b,c = null)
 
 
+    /**
+     * 
+     * @returns Generates a small sphere mesh at the middle position of this rectangle
+     */
     getPointHelperMesh() {
         // Create a small sphere geometry
         const spheregeometry = new THREE.SphereGeometry(0.1, 32, 16);
-        const spherematerial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        const spherematerial = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const sphere = new THREE.Mesh(spheregeometry, spherematerial);
         sphere.position.set(this._pos.x, this._pos.y, 0);
 
         return sphere;
+    }
+
+    /**
+    * Generates a small sphere mesh at the position of each vertice of this rectangle
+    * @returns {Array} Array of meshes
+    */
+    getVerticesPointHelperMeshes(){
+        const helperMeshes = [];
+        // Do not iterate, enables to set specific color for each vertice's pointHelper
+        
+        // ul: red ur: green lr: blue: ll: cyan
+        const colors = [0xff0000, 0x00ff00, 0x0000ff, 0x00ffff]
+        let colorCount = 0;
+
+        //  For .. in : iterates over object properties' KEYS
+
+        // For ...  of iterates over Arrays.
+        // Object.values gives an array of the values of the object
+        for(let vertice of Object.values(this._vertices)){
+
+            console.log("vert:",vertice)
+            const spheregeometry = new THREE.SphereGeometry(0.3, 32, 16);
+            const spherematerial = new THREE.MeshBasicMaterial({ color: colors[colorCount] });
+            const sphere = new THREE.Mesh(spheregeometry, spherematerial);
+            sphere.position.set(vertice.x, vertice.y, 0);
+            helperMeshes.push(sphere);
+            colorCount++;
+        }
+
+        return helperMeshes;
     }
     //TODO: Vertice getters
     //TODO: Edge getters

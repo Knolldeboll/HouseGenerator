@@ -164,8 +164,24 @@ class Rendering {
     // To be called from the businessLogic 
     // So is the Business logic responsible for generating meshes?
     // All THREE.js Stuff should be done here I think...
+
+    /**
+     * Adds one Mesh to the scene
+     * @param {The Mesh to be added} mesh 
+     */
     addToScene(mesh) {
         this.scene.add(mesh);
+    }
+
+    /**
+     * Adds all Meshes from a List to the scene
+     * @param {List of Meshes} meshes 
+     */
+    addAllToScene(meshes){
+        for(let m of meshes){
+            console.log("Add all mesh to scene:",m)
+            this.scene.add(m);
+        }
     }
 
 
