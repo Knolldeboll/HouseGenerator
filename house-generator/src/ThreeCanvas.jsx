@@ -37,8 +37,10 @@ const ThreeCanvas = (props) => {
     //tests.testRectangles();7
     // TODO: Use prop for corridor width
     //tests.testHouses(props.n, 2);
+
+    tests.testHouseWithSTMRooms(props.n, 2);
     //tests.testRectangleHelpers();
-    tests.testRectangleSTMSplitting();
+    //tests.testRectangleSTMSplitting();
   }, []);
 
   //Bei canvas den canvasRef reinpacken, damit in canvasRef dieses Element referenziert werden kann

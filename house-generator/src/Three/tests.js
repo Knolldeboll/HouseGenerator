@@ -291,25 +291,56 @@ class Tests {
     console.log("House test with ", n, "apartments");
     //let houseRects = new House(80, null, null, null, null).simpleICorridor(2, 8) || [];
 
-    let houseRects =
-      new House(80, null, null, null, null).randomizedICorridor(
-        n,
-        corridorWidth
-      ) || [];
+    let house = new House(80, null, null, null, null).randomizedICorridor(
+      n,
+      corridorWidth
+    );
 
     // STM requires apartmentSizes, which requires house parameters: n, minSize, maxSize
     // let house1 = new House(80,null,8,8,12);
     // house1.generateRandomApartmentSizes();
     // house1.squarifiedTreeMap();
 
-    // console.log("houserects", houseRects);
+    console.log("house", house, "houserects", house.totalRects);
 
+    //return;
     // Rendering works by converting each house rectangle to a mesh
     // the main house rectangle is not rendered
-    for (let rect of houseRects) {
-      this.rendering.addToScene(
-        this.rendering.generateMeshFromVertices(rect.vertices, rect.material)
-      );
+
+    // now only render rooms and corridor, not apartments
+    for (let rect of house.corridorRects) {
+      this.rendering.addToScene(rect.generateShapeMesh());
+    }
+
+    for (let rect of house.apartmentRects) {
+      this.rendering.addToScene(rect.generateShapeMesh());
+    }
+  }
+
+  testHouseWithSTMRooms(n, corridorWidth) {
+    console.log("House test with ", n, "apartments");
+    //let houseRects = new House(80, null, null, null, null).simpleICorridor(2, 8) || [];
+
+    let house = new House(80, null, null, null, null)
+      .randomizedICorridor(n, corridorWidth)
+      .fillApartmentsWithSTMRooms(5, 0.2, 0.4);
+
+    // STM requires apartmentSizes, which requires house parameters: n, minSize, maxSize
+    // let house1 = new House(80,null,8,8,12);
+    // house1.generateRandomApartmentSizes();
+    // house1.squarifiedTreeMap();
+
+    // console.log("house", house, "houserects", house.totalRects);
+
+    //return;
+    // Rendering works by converting each house rectangle to a mesh
+    // the main house rectangle is not rendered
+
+    for (let rect of house.roomRects) {
+      this.rendering.addToScene(rect.generateShapeMesh());
+    }
+    for (let rect of house.corridorRects) {
+      this.rendering.addToScene(rect.generateShapeMesh());
     }
   }
 }

@@ -34,6 +34,7 @@ class House {
      */
     this.totalRects = [];
     this.apartmentRects = [];
+    this.roomRects = [];
     this.corridorRects = [];
     this.roomRects = [];
 
@@ -487,12 +488,15 @@ class House {
 
   /**
    * Generates a House with a simple I-Corridor and n Apartments of random Size
+   * The Apartments are then accessible through apartmentRects
+   * The Corridor is then accessible through corridorRects
    *
    * @param {} corridorWidth
    * @param {*} n
    * @returns
    */
   randomizedICorridor(n, corridorWidth) {
+    console.log("> RandomizedICorridor");
     // x/y = width/height /2
 
     // TODO: Error for Both corridor Types! when using uneven numbers <=5
@@ -535,6 +539,8 @@ class House {
 
       console.log("corridor:", corridor);
       // Da war immer houseRect auch drin, aber sieht kaka aus
+
+      this.corridorRects.push(corridor);
       this.totalRects.push(corridor);
 
       let upperRectVertices = [
@@ -612,12 +618,16 @@ class House {
         maxLower
       );
 
-      this.totalRects = this.totalRects.concat(
+      // Add apartments
+      this.apartmentRects = this.apartmentRects.concat(
         upperRoomsRects,
         lowerRoomsRects
       );
 
-      return this.totalRects;
+      this.totalRects = this.totalRects.concat(
+        upperRoomsRects,
+        lowerRoomsRects
+      );
     } else {
       console.log("Vertical Corridor!");
 
@@ -635,6 +645,8 @@ class House {
         this.position.y
       );
 
+      // Add corridorRects
+      this.corridorRects.push(corridor);
       this.totalRects.push(corridor);
 
       let leftRectVertices = [
@@ -674,17 +686,41 @@ class House {
       let leftRoomsRects = leftRect.splitEvenlyOriented(n1);
       let rightRoomsRects = rightRect.splitEvenlyOriented(n2);
 
+      this.apartmentRects = this.apartmentRects.concat(
+        leftRoomsRects,
+        rightRoomsRects
+      );
       this.totalRects = this.totalRects.concat(leftRoomsRects, rightRoomsRects);
-      // Return corridor + left rooms + right rooms
-      return this.totalRects;
     }
 
-    //1. Place Corridor with defined width.
-    //2. Generate Rectangles from Corridor Vertices and House Vertices
-    //3. Subdivide the Rectangles
-    //4. Happyness
+    return this;
   }
 
+  /**
+   * Fills the Apartment rects with sub-Rectangles generated through STM
+   * Rooms are accessible through roomRects
+   */
+
+  //TODO: Apply Room-n, minpercentage, maxpercentage from props
+  fillApartmentsWithSTMRooms(roomN, roomMinPercentage, roomMaxPercentage) {
+    let counter = 0;
+
+    //TODO: Irgendwie macht der nur eins richtig
+
+    for (let apartmentRect of this.apartmentRects) {
+      console.log("STMing Apartment no. ", counter);
+      let rooms = apartmentRect.splitSTMMinMax(
+        roomN,
+        roomMinPercentage,
+        roomMaxPercentage
+      );
+      this.roomRects = this.roomRects.concat(rooms);
+      this.totalRects = this.totalRects.concat(rooms);
+      counter++;
+    }
+
+    return this;
+  }
   // Implementation of Squarified Treemap. Randomization by differing the Areas of the rooms (here: appartments)
   // Goal: Define Apartment Vertices.
   // Inputs: List of predefined apartmentSizes, width/height of house

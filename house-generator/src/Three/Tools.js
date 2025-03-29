@@ -33,6 +33,12 @@ class Tools {
     console.log(`[Tools]: ${message}`);
   }
 
+  roundTwoDigits(value) {
+    let ret = (100 * Math.round(value)) / 100;
+    console.log("Tools: rounded", value, " to ", ret);
+    return ret;
+  }
+
   /**
    * Divide a value into n parts with random size between min and max
    * @param {number} value The value to be divided

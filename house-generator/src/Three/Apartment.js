@@ -140,7 +140,8 @@ class Apartment {
   }
 
   logApartment() {
-    //console.log("-logging apartment-")
+    //console.log("-logging apartment-").
+
     console.log(
       "set area:",
       this._apartmentArea,
