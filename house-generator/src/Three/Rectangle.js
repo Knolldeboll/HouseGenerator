@@ -3,6 +3,8 @@
 import * as THREE from "three";
 import Edge from "./Edge";
 import ShapeObject from "./ShapeObject";
+import PreApartment from "./PreApartment";
+import Apartment from "./Apartment";
 import Tools from "./Tools";
 
 //TODO: Getters/Setters
@@ -43,7 +45,8 @@ class Rectangle {
   // 2nd constructors
   // Verts must be given in clockwise order, starting at upper left
   /**
-   *
+   * creates a rectangle from the given vertices
+   * also generates it's edges and other values
    * @param {Object} verts Value object defined as upperLeft, upperRight, lowerRight, lowerLeft with Vector2 values
    * @returns {Rectangle}
    */
@@ -340,21 +343,504 @@ class Rectangle {
 
     // Parts is concrete area values! Not percentages!
     // Dependant on "horizontally" vs. "vertically", calculate subedge lengths from area and given height/width
-    return this.generateSubRectsFromParts(parts);
+    return this.generateSubRectsFromAreaParts(parts);
   }
 
   /**
-   * Split with STM into n parts
-   * @param {} n
+   * Split with STM into n parts of random size, each part with size between min and max
+   * @param {number} n
+   * @param {number} minPercentage The minimum size a subrect must have, given as percentage of this rectangles area
+   * @param {number} maxPercentage The maximum size a subrect must have, given as percentage of this rectangles area
    */
-  splitSTM(n) {}
+
+  // TODO: Make shit work here, then convert Apartments to rectangles. Feddig.
+
+  splitSTMMinMax(n, minPercentage, maxPercentage) {
+    console.log("Start STM");
+
+    // Define initial vertices of wall edges
+    // let currentWidth = this.houseWidth;
+    //let currentHeight = this.houseHeight;
+
+    // Copy apartmentSizes list to leave the original list intact
+    //currentRow.map(preAp => ({ ...preAp }));
+
+    let apartmentSizes = Tools.getInstance().divideValueIntoPartsMinMax(
+      this._area,
+      n,
+      minPercentage * this._area,
+      maxPercentage * this._area
+    );
+
+    apartmentSizes.sort((a, b) => b - a);
+    console.log(apartmentSizes);
+
+    let apartmentSizesCopy = apartmentSizes.slice(0);
+
+    /**
+     * Apartment collection
+     */
+    let apartments = [];
+
+    /*    console.log(
+      "STM Room sizes: ",
+      apartmentSizes,
+      " vs whole area",
+      this._area
+    );
+*/
+
+    // TODO: Order apartmentSizeList
+    // TODO: hier an Koordinatensystem (0,0 unten links) anpassen.
+
+    let leftWall = {
+      a: new THREE.Vector2(0, this._height),
+      b: new THREE.Vector2(0, 0),
+    };
+
+    let lowerWall = {
+      a: new THREE.Vector2(0, 0),
+      b: new THREE.Vector2(this._width, 0),
+    };
+
+    // Will contain PreApartments (contain area, width, height, aspectRatio)
+    // let currentRow = [];
+
+    // while hier: wiederholt zwischen den wechseln der wände. (worst ist schlechter geworden)
+    //   while (apartmentSizeList.length > 0) {
+
+    while (apartmentSizesCopy.length > 0) {
+      // Reinitialize lists etc.
+
+      let currentHeight = Tools.getInstance().distanceBetweenTwoVertices(
+        leftWall.a,
+        leftWall.b
+      );
+      let currentWidth = Tools.getInstance().distanceBetweenTwoVertices(
+        lowerWall.a,
+        lowerWall.b
+      );
+      let currentRow = [];
+
+      console.log("current width", currentWidth, "currentheigt", currentHeight);
+
+      //"" currentWidth > currentHeight
+      if (currentWidth > currentHeight) {
+        console.log("wider than high");
+        // Wider than high: place on left wall
+
+        // Add rooms to row until the worst of their aspect ratios worsens
+        // Only add rooms to row if they are confirmed to improve the worst aspect ratio
+
+        // While hier: durch apartmentSizes iterieren und immer versuchen, ein preApartment der nächsten Größe
+        // in die Row zu packen
+        while (apartmentSizesCopy.length > 0) {
+          console.log(
+            ">>>>>>>>>>>>>>>New Iteration of trying to add preApartments to left wall row"
+          );
+
+          // First one's free
+          if (currentRow.length == 0) {
+            let firstApartmentArea = apartmentSizesCopy.shift();
+            console.log("left apartment sizes: ", apartmentSizesCopy);
+            // new PreApartment that adapts to the wall length (currentHeight)
+
+            // TODO: Schauen, ob sich die currentHeight im Verlauf irgendwie verändert und das dann ne DeepCopy ist, die auch das preAp verändert ... ?
+            console.log("First in Row:");
+            currentRow.push(
+              new PreApartment(firstApartmentArea, null, currentHeight)
+            );
+          }
+
+          // Add up all areas of the apartments currently in the row
+          // Braucht man das wirklich? wir wollen doch nur die schlechteste aspectRatio bekommen, und die ist schon in der
+          // vorrunde berechnet worden
+
+          // let currentRowAreaSum = currentRow.reduce((areaSum, apartment) => areaSum + apartment.area, 0);
+
+          // Iteratively try to add new apartments to row.
+          // Calculate current worst aspect ratio
+
+          // Find max aspect ratio among the preApartments in the row
+
+          //console.log("current row: ", currentRow);
+          //console.log("current row stretched: ", ...currentRow)
+
+          let currentRowWorstAspectRatio = Math.max(
+            ...currentRow.map((preApartment) => preApartment.aspectRatio)
+          );
+
+          //console.log("current worst aspect ratio: ", currentRowWorstAspectRatio)
+
+          //console.log("current row after stretc use ", currentRow);
+
+          // Copy row, add next apartment, recalculate row width, set row width for each row preapartment, fetch worst aspectratio
+
+          // When adding to the row, the size is removed from the sizeList
+
+          let currentRowAreaSum = currentRow.reduce(
+            (areaSum, apartment) => areaSum + apartment.area,
+            0
+          );
+          let nextRowAreaSum = currentRowAreaSum + apartmentSizesCopy[0];
+
+          // console.log("currentRowAreaSum: (should be 10) ", currentRowAreaSum)
+          //console.log("nextRowAreaSum: (should be 10) ", nextRowAreaSum)
+          // Calculate next row width
+          let nextRowWidth = nextRowAreaSum / currentHeight;
+
+          // Copy current row and update the contained PreApartments with the nextRowWidth, which also updates their aspectratio
+
+          // .map to crete deep copy.
+          // new PreApartment to keep the types of "PreApartment"
+          // using ... (stretch) would convert the objects to plain objects
+          console.log("Copying currentRow preAp list");
+          let nextRow = currentRow.map(
+            (preAp) =>
+              new PreApartment(preAp._area, preAp._width, preAp._height)
+          );
+
+          //console.log("copied current row = next row", nextRow)
+
+          // Update the contained PreApartments with the nextRowWidth
+          // Also updates their height and their aspect ratio
+          for (let preAp of nextRow) {
+            preAp.width = nextRowWidth;
+          }
+
+          console.log("Create possible next preAp:");
+          // Create possible next apartment
+          let nextPreApartment = new PreApartment(
+            apartmentSizesCopy[0],
+            nextRowWidth,
+            null
+          );
+
+          // Add next preAp to the nextRow
+          nextRow.push(nextPreApartment);
+
+          //console.log("Test: nextRow with new preApartment", nextRow);
+          // Hier weiter: Auch testen.
+
+          // calculate the new worst AP
+
+          let nextRowWorstAspectRatio = Math.max(
+            ...nextRow.map((preApartment) => preApartment.aspectRatio)
+          );
+          console.log(
+            "Test: nextRow worst aspect Ratio",
+            nextRowWorstAspectRatio,
+            "vs currentRow worst aspect Ratio",
+            currentRowWorstAspectRatio
+          );
+
+          // If lower than the current worst AP, set currentRow = nextCurrentRow and repeat
+          // If higher, Wände neu berechnen, Apartments generieren, etc.
+          if (currentRowWorstAspectRatio > nextRowWorstAspectRatio) {
+            // Nächste Runde
+            currentRow = nextRow;
+            console.log("aspect Ratio improved");
+            apartmentSizesCopy.shift();
+            console.log("left apartment sizes: ", apartmentSizesCopy);
+          } else {
+            console.log("aspect Ratio worsened");
+            // calculate x/y positions of apartments.
+
+            // All preAps in row have same width
+            // let rowWidth  = currentRow[0].width
+
+            // Take coords from lower vertice of left wall (starts at 0,0)
+            //lW.b = (0,0)
+
+            let rowX = leftWall.b.x;
+            let ySum = leftWall.b.y;
+
+            // Von oben nach unten
+
+            // Achtung: in die row werden die preAps von unten (y=0) nach oben hinzugefügt!
+            // Die Abfragereihenfolge der Vertices für die neue leftWall muss berücksichtigt werden
+            let preApCount = 1;
+            for (let preAp of currentRow) {
+              let newApX = rowX + preAp.width / 2;
+              let newApY = ySum + preAp.height / 2;
+              let apColor = new THREE.Color(
+                Math.random(),
+                Math.random(),
+                Math.random()
+              );
+              let newApartment = new Apartment(
+                preAp.area,
+                apColor,
+                preAp.width,
+                preAp.height,
+                newApX,
+                newApY
+              );
+              apartments.push(newApartment);
+              ySum += preAp.height;
+
+              // lower = first = 1
+
+              if (preApCount == 1) {
+                // Set new wall lower vertex to lower new Apartment.vertices.c
+
+                console.log("set left wall b");
+                leftWall.b = newApartment.vertices.b;
+                lowerWall.a = newApartment.vertices.b;
+              }
+              // upper = last = length
+              if (preApCount == currentRow.length) {
+                // Set new wall upper vertex to upper new Apartment.vertices.b
+                console.log("set left wall a");
+                leftWall.a = newApartment.vertices.c;
+
+                // Set upper wall left vertex
+                //lowerWall.a = newApartment.vertices.b
+              }
+
+              preApCount++;
+            }
+
+            console.log("new left wall:", leftWall);
+            console.log("new lower wall ", lowerWall);
+
+            // "Da geht irgendwas mit den Vertices schief." ???
+            // Das 18er Apartment ist unten, hat aber a bei 0,0 bzw die Vertices vom oberen. wtf?
+
+            // Lösung: 0,0 ist unten links. X ist nach oben, Y ist nach rechts.... wtf
+
+            // Wände neu berechnen
+            // row zurücksetzen
+
+            // TODO: does break apply to the loop directly containing it or all loops?
+
+            // TODO: Remove return
+            //
+            console.log("fixed apartments after left wall placement:");
+            for (let ap of apartments) {
+              ap.logApartment();
+            }
+
+            console.log(">>>>>>>>>>>>>>> END of left wall placement ");
+            //return;
+            break;
+          }
+        }
+      } else {
+        // Higher than wide: place on lower wall
+        // TODO: Implement
+
+        console.log("higher than wide");
+        // Wider than high: place on left wall
+
+        // Add rooms to row until the worst of their aspect ratios worsens
+        // Only add rooms to row if they are confirmed to improve the worst aspect ratio
+
+        // While hier: durch apartmentSizes iterieren und immer versuchen, ein preApartment der nächsten Größe
+        // in die Row zu packen
+        while (apartmentSizesCopy.length > 0) {
+          console.log(
+            "vvvvvvvvvvvvvvvvvvv New Iteration of trying to add preApartments to lower wall row"
+          );
+
+          // First one's free
+          if (currentRow.length == 0) {
+            let firstApartmentArea = apartmentSizesCopy.shift();
+            console.log("left apartment sizes: ", apartmentSizesCopy);
+            // new PreApartment that adapts to the wall length (currentHeight)
+
+            // TODO: Schauen, ob sich die currentHeight im Verlauf irgendwie verändert und das dann ne DeepCopy ist, die auch das preAp verändert ... ?
+            let firstPreAp = new PreApartment(
+              firstApartmentArea,
+              currentWidth,
+              null
+            );
+            currentRow.push(firstPreAp);
+          }
+
+          // Add up all areas of the apartments currently in the row
+          // Braucht man das wirklich? wir wollen doch nur die schlechteste aspectRatio bekommen, und die ist schon in der
+          // vorrunde berechnet worden
+
+          // let currentRowAreaSum = currentRow.reduce((areaSum, apartment) => areaSum + apartment.area, 0);
+
+          // Iteratively try to add new apartments to row.
+          // Calculate current worst aspect ratio
+
+          // Find max aspect ratio among the preApartments in the row
+
+          //console.log("current row: ", currentRow);
+          //console.log("current row stretched: ", ...currentRow)
+
+          let currentRowWorstAspectRatio = Math.max(
+            ...currentRow.map((preApartment) => preApartment.aspectRatio)
+          );
+
+          let currentRowAreaSum = currentRow.reduce(
+            (areaSum, apartment) => areaSum + apartment.area,
+            0
+          );
+          let nextRowAreaSum = currentRowAreaSum + apartmentSizesCopy[0];
+
+          // console.log("currentRowAreaSum: (should be 10) ", currentRowAreaSum)
+          //console.log("nextRowAreaSum: (should be 10) ", nextRowAreaSum)
+          // Calculate next row width
+
+          // rowheight = area/ currentwidth(wall width)
+
+          let nextRowHeight = nextRowAreaSum / currentWidth;
+
+          // Copy current row and update the contained PreApartments with the nextRowWidth, which also updates their aspectratio
+
+          // .map to crete deep copy.
+          // new PreApartment to keep the types of "PreApartment"
+          // using ... (stretch) would convert the objects to plain objects
+          let nextRow = currentRow.map(
+            (preAp) =>
+              new PreApartment(preAp._area, preAp._width, preAp._height)
+          );
+
+          //console.log("copied current row = next row", nextRow)
+
+          // Update the contained PreApartments with the nextRowWidth
+          // Also updates their height and their aspect ratio
+          for (let preAp of nextRow) {
+            preAp.height = nextRowHeight;
+          }
+
+          // Create possible next apartment
+          let nextPreApartment = new PreApartment(
+            apartmentSizesCopy[0],
+            null,
+            nextRowHeight
+          );
+
+          // Add next preAp to the nextRow
+          nextRow.push(nextPreApartment);
+
+          //console.log("Test: nextRow with new preApartment", nextRow);
+          // Hier weiter: Auch testen.
+
+          // calculate the new worst AP
+
+          let nextRowWorstAspectRatio = Math.max(
+            ...nextRow.map((preApartment) => preApartment.aspectRatio)
+          );
+          console.log(
+            "Test: nextRow worst aspect Ratio",
+            nextRowWorstAspectRatio,
+            "vs currentRow worst aspect Ratio",
+            currentRowWorstAspectRatio
+          );
+
+          // If lower than the current worst AP, set currentRow = nextCurrentRow and repeat
+          // If higher, Wände neu berechnen, Apartments generieren, etc.
+          if (currentRowWorstAspectRatio > nextRowWorstAspectRatio) {
+            // Nächste Runde
+            currentRow = nextRow;
+            console.log(" lower aspect Ratio improved");
+            apartmentSizesCopy.shift();
+            console.log("left apartment sizes: ", apartmentSizesCopy);
+          } else {
+            console.log("aspect Ratio worsened");
+
+            // Take coords from upper vertice of left wall
+            let rowY = lowerWall.a.y;
+            let xSum = lowerWall.a.x;
+
+            // Von oben nach unten
+
+            // Achtung: in die row werden die preAps von unten nach oben hinzugefügt!
+            // Die Abfragereihenfolge der Vertices für die neue leftWall muss berücksichtigt werden
+            let preApCount = 1;
+            for (let preAp of currentRow) {
+              // Width verändert sich pro preAp.
+              // height ist in der Row gleich
+
+              // newApY ist immer rowY (start bei 0,0, also y = 0) + halbe rowheight bzw. preAp height in der row
+
+              let newApY = rowY + preAp.height / 2;
+              let newApX = xSum + preAp.width / 2;
+              let apColor = new THREE.Color(
+                Math.random(),
+                Math.random(),
+                Math.random()
+              );
+              let newApartment = new Apartment(
+                preAp.area,
+                apColor,
+                preAp.width,
+                preAp.height,
+                newApX,
+                newApY
+              );
+              apartments.push(newApartment);
+              xSum += preAp.width;
+
+              // lower = first = 1
+              // upper = last = length
+              console.log("setting lower wall");
+              if (preApCount == 1) {
+                // Set new wall lower vertex to lower new Apartment.vertices.c
+                //console.log("set left wall b")
+                lowerWall.a = newApartment.vertices.d;
+                leftWall.b = newApartment.vertices.d;
+              }
+              if (preApCount == currentRow.length) {
+                // Set new wall upper vertex to upper new Apartment.vertices.b
+                //console.log("set lower wall b")
+                lowerWall.b = newApartment.vertices.c;
+              }
+
+              preApCount++;
+            }
+
+            console.log("new left wall:", leftWall);
+            console.log("new lower wall ", lowerWall);
+
+            // "Da geht irgendwas mit den Vertices schief." ???
+            // Das 18er Apartment ist unten, hat aber a bei 0,0 bzw die Vertices vom oberen. wtf?
+
+            // Lösung: 0,0 ist unten links. X ist nach oben, Y ist nach rechts.... wtf
+
+            // Wände neu berechnen
+            // row zurücksetzen
+
+            // TODO: does break apply to the loop directly containing it or all loops?
+
+            console.log("fixed apartments after lower wall placement:");
+            for (let ap of apartments) {
+              ap.logApartment();
+            }
+
+            console.log(
+              "vvvvvvvvvvvvvvvvvvv END of iteration of trying to add preApartments to lower wall row"
+            );
+            // return;
+            break;
+          }
+        }
+        // Add rooms to row until the worst of their aspect ratios worsens
+      }
+    }
+
+    //console.log("All STM-ed apartments: ");
+    // Convert all apartments to Rectangles, for unified edge etc handling
+    const returnRects = [];
+    for (let ap of apartments) {
+      //ap.logApartment();
+      returnRects.push(ap.convertToRectangle());
+    }
+
+    return returnRects;
+  }
 
   /**
-   * Generate Subrectangles from a given set of parts of one of it's edges
-   * @param {List} parts List of areas of the individual parts
+   * Generate Subrectangles from a given set of parts of the longer one of it's edges
+   * @param {List} parts List of areas of the individual parts, given as concrete Areas, not percentages
    * @returns Rectangles generated from the given area parts
    */
-  generateSubRectsFromParts(parts) {
+  generateSubRectsFromAreaParts(parts) {
     console.log("> Generate SubRects from Parts");
     let edgeParts = [];
     let newRects = [];

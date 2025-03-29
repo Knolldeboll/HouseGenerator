@@ -37,8 +37,8 @@ class Tools {
    * Divide a value into n parts with random size between min and max
    * @param {number} value The value to be divided
    * @param {number} n The amount of parts to divide the value into
-   * @param {number} min The minimum value of each part
-   * @param {number} max The maximum value of each part
+   * @param {number} min The minimum value of each part, as true value, not percentage
+   * @param {number} max The maximum value of each part, as true value, not percentage
    * @returns An Array of the n parts of the value, each bfetween min and max
    */
   divideValueIntoPartsMinMax(value, n, min, max) {
@@ -115,6 +115,12 @@ class Tools {
     }
 
     // Return the list of n parts
+    let sum = 0;
+    for (let p of parts) {
+      sum += p;
+    }
+
+    console.log("Tools: Sum of parts: ", sum, "vs initial value: ", value);
     return parts;
   }
 }
