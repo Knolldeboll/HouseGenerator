@@ -495,6 +495,8 @@ class House {
    * @param {*} n
    * @returns
    */
+
+  // TODO: Bei Vertical sind alle Räume gleich groß...
   randomizedICorridor(n, corridorWidth) {
     console.log("> RandomizedICorridor");
     // x/y = width/height /2
@@ -701,11 +703,26 @@ class House {
    * Rooms are accessible through roomRects
    */
 
-  //TODO: Apply Room-n, minpercentage, maxpercentage from props
+  //TODO: Der Bums wird irgendwie immer an dieselbe Stelle generiert1
+  // Deshalb sieht's immer so aus als ob
   fillApartmentsWithSTMRooms(roomN, roomMinPercentage, roomMaxPercentage) {
+    console.log("> Rect-STM for apartmentRects:  ", this.apartmentRects);
     let counter = 0;
-
+    let number = 2;
     //TODO: Irgendwie macht der nur eins richtig
+
+    // TODO: alle einzeln ausprobieren, dann checken
+    //console.log("> STMRooms for Apartment ", number);
+
+    let rooms = this.apartmentRects[number].splitSTMMinMax(
+      roomN,
+      roomMinPercentage,
+      roomMaxPercentage
+    );
+
+    this.roomRects = rooms;
+
+    return this;
 
     for (let apartmentRect of this.apartmentRects) {
       console.log("STMing Apartment no. ", counter);

@@ -1,72 +1,78 @@
 class PreApartment {
+  // TODO: Vielleicht keine width/height direkt setzen, da man ggf nur eins der beiden direkt zur Verfügung hat
+  // Man kann auch nicht wissen, welches das ist, deshalb schwierig mit optionalen parametern
+  // TODO: Optionale parameter.
+  constructor(area, width, height) {
+    this._area = area;
 
-    // TODO: Vielleicht keine width/height direkt setzen, da man ggf nur eins der beiden direkt zur Verfügung hat
-    // Man kann auch nicht wissen, welches das ist, deshalb schwierig mit optionalen parametern
-    // TODO: Optionale parameter. 
-    constructor(area, width, height) {
-        this._area = area;
-
-        if (width == null && height == null) {
-            console.log("Error! No widh and height!")
-            return null;
-        }
-        //console.log("inputs w", width, "h", height)
-        // Calculate width/height if one of them is missing
-        if (width == null) {
-            //console.log("No width, calc of height!")
-            this._width = area / height
-            this._height = height;
-        } else if (height == null) {
-            //console.log("No height, calc of width")
-            this._width = width;
-            this._height = area / width;
-        } else {
-            this._width = width;
-            this._height = height;
-        }
-
-        //console.log("new PreApartment: width ", this._width, " height ", this._height)
-        this._aspectRatio = Math.max((this._width / this._height), (this._height / this._width));
-        console.log("new PreApartment: area", this._area, "width ", this._width, " height ", this._height, "AR ", this._aspectRatio)
-
+    if (width == null && height == null) {
+      console.log("Error! No widh and height!");
+      return null;
+    }
+    //console.log("inputs w", width, "h", height)
+    // Calculate width/height if one of them is missing
+    if (width == null) {
+      //console.log("No width, calc of height!")
+      this._width = area / height;
+      this._height = height;
+    } else if (height == null) {
+      //console.log("No height, calc of width")
+      this._width = width;
+      this._height = area / width;
+    } else {
+      this._width = width;
+      this._height = height;
     }
 
-    get area() {
-        return this._area;
-    }
+    //console.log("new PreApartment: width ", this._width, " height ", this._height)
+    this._aspectRatio = Math.max(
+      this._width / this._height,
+      this._height / this._width
+    );
+    //console.log("new PreApartment: area", this._area, "width ", this._width, " height ", this._height, "AR ", this._aspectRatio)
+  }
 
-    get width() {
-        return this._width;
-    }
+  get area() {
+    return this._area;
+  }
 
-    set width(width) {
-        this._width = width;
-        // Area = width*height
-        this._height = this._area / this._width
-        this._aspectRatio = Math.max((this._width / this._height), (this._height / this._width));
-    }
+  get width() {
+    return this._width;
+  }
 
-    get height() {
-        return this._height;
-    }
+  set width(width) {
+    this._width = width;
+    // Area = width*height
+    this._height = this._area / this._width;
+    this._aspectRatio = Math.max(
+      this._width / this._height,
+      this._height / this._width
+    );
+  }
 
-    set height(height) {
-        this._height = height;
-        this._width = this._area / this._height;
-        this._aspectRatio = Math.max((this._width / this._height), (this._height / this._width));
-    }
+  get height() {
+    return this._height;
+  }
 
-    get aspectRatio() {
-        return this._aspectRatio;
-    }
+  set height(height) {
+    this._height = height;
+    this._width = this._area / this._height;
+    this._aspectRatio = Math.max(
+      this._width / this._height,
+      this._height / this._width
+    );
+  }
 
-    // Generates an Object of type Apartment out of this
-    // needs x and y coordinates to work
-    toApartment(x, y) {
-        // TODO: Implement
-        console.log("toApartment not implemented");
-    }
+  get aspectRatio() {
+    return this._aspectRatio;
+  }
+
+  // Generates an Object of type Apartment out of this
+  // needs x and y coordinates to work
+  toApartment(x, y) {
+    // TODO: Implement
+    console.log("toApartment not implemented");
+  }
 }
 
-
-export default PreApartment
+export default PreApartment;

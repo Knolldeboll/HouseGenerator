@@ -34,8 +34,9 @@ class Tools {
   }
 
   roundTwoDigits(value) {
+    //console.log("> Tools: round");
     let ret = (100 * Math.round(value)) / 100;
-    console.log("Tools: rounded", value, " to ", ret);
+    //console.log("Tools: rounded", value, " to ", ret);
     return ret;
   }
 

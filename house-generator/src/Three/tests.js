@@ -4,6 +4,7 @@ import Rectangle from "./Rectangle";
 import { Vector2, VertexColorNode } from "three/webgpu";
 import Apartment from "./Apartment";
 import House from "./House";
+import HouseCalculator from "./HouseCalculator";
 
 class Tests {
   constructor(rendering) {
@@ -321,9 +322,11 @@ class Tests {
     console.log("House test with ", n, "apartments");
     //let houseRects = new House(80, null, null, null, null).simpleICorridor(2, 8) || [];
 
-    let house = new House(80, null, null, null, null)
-      .randomizedICorridor(n, corridorWidth)
-      .fillApartmentsWithSTMRooms(5, 0.2, 0.4);
+    let house = new House(80, null, null, null, null).randomizedICorridor(
+      n,
+      corridorWidth
+    );
+    //   .fillApartmentsWithSTMRooms(5, 0.2, 0.4);
 
     // STM requires apartmentSizes, which requires house parameters: n, minSize, maxSize
     // let house1 = new House(80,null,8,8,12);
@@ -335,6 +338,9 @@ class Tests {
     //return;
     // Rendering works by converting each house rectangle to a mesh
     // the main house rectangle is not rendered
+    for (let rect of house.apartmentRects) {
+      this.rendering.addToScene(rect.generateShapeMesh());
+    }
 
     for (let rect of house.roomRects) {
       this.rendering.addToScene(rect.generateShapeMesh());
@@ -342,6 +348,33 @@ class Tests {
     for (let rect of house.corridorRects) {
       this.rendering.addToScene(rect.generateShapeMesh());
     }
+  }
+
+  testHouseCalculator(
+    houseWidth,
+    houseHeight,
+    corridorWidth,
+    minApartmentWidth
+  ) {
+    const houseCalc = new HouseCalculator();
+    let maxAps = houseCalc.calculateMaxAparments(
+      houseWidth,
+      houseHeight,
+      corridorWidth,
+      minApartmentWidth
+    );
+
+    console.log(
+      "Max Aps for house of width ",
+      houseWidth,
+      " height ",
+      houseHeight,
+      " width corridor width of ",
+      corridorWidth,
+      " and min apartment width of ",
+      minApartmentWidth
+    );
+    console.log(">>>", maxAps, "<<<");
   }
 }
 

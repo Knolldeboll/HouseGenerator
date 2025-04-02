@@ -83,14 +83,14 @@ class Apartment {
     this._shape = new THREE.Shape();
 
     // Set currentPoint to point 0 ??
-    console.log("vertices: ", this._vertices);
-    console.log("verticeList: ", this._verticeList);
+    //console.log("vertices: ", this._vertices);
+    //console.log("verticeList: ", this._verticeList);
     this._shape.moveTo(this._verticeList[0].x, this._verticeList[0].y);
     // Set lines in the Shape object
 
     // Problem liegt hier!
     this._verticeList.slice(1).forEach((vert) => {
-      console.log("line to " + vert.x + vert.y);
+      //console.log("line to " + vert.x + vert.y);
       this._shape.lineTo(vert.x, vert.y);
     });
 
@@ -143,13 +143,11 @@ class Apartment {
     //console.log("-logging apartment-").
 
     console.log(
-      "set area:",
-      this._apartmentArea,
-      "set width",
+      "Apartment width",
       this._width,
-      "set height ",
+      " | height ",
       this._height,
-      " pos ",
+      " | pos ",
       this._position
     );
 

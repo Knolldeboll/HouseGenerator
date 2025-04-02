@@ -354,8 +354,18 @@ class Rectangle {
    */
 
   //
+
+  // TODO: Hier wird anscheinend jedes fertige STM Rectangle an dieselbe Position gepackt
+  // also als ob das Parent-Rect bei 0,0 wäre oder so
+
+  // Wird zum initialisieren denn die width/height von dem ding hier benutzt oder auch irgendwie die position?
   splitSTMMinMax(n, minPercentage, maxPercentage) {
-    console.log("Start STM");
+    console.log(
+      ">>> Start Rect STM for Rect: ",
+      this._pos,
+      this._width,
+      this._height
+    );
 
     // Define initial vertices of wall edges
     // let currentWidth = this.houseWidth;
@@ -393,6 +403,12 @@ class Rectangle {
     // TODO: Order apartmentSizeList
     // TODO: hier an Koordinatensystem (0,0 unten links) anpassen.
 
+    // TODO: Übernahme von den Punkten aus this.edges statt nur width/height!
+    // denn damit startet alles unten links bei 0,0
+
+    // TODO: schauen, ob noch irgendwo anders das setzen von Punkten von
+    // 0,0 abhängig ist oder ob zb bei wandverschiebungen einfach die currentwidth/height draufaddiert wird
+
     let leftWall = {
       a: new THREE.Vector2(0, this._height),
       b: new THREE.Vector2(0, 0),
@@ -412,6 +428,7 @@ class Rectangle {
     while (apartmentSizesCopy.length > 0) {
       // Reinitialize lists etc.
 
+      // Egal wo die Punkte sind!
       let currentHeight = Tools.getInstance().distanceBetweenTwoVertices(
         leftWall.a,
         leftWall.b
@@ -554,6 +571,7 @@ class Rectangle {
             // Take coords from lower vertice of left wall (starts at 0,0)
             //lW.b = (0,0)
 
+            // Egal wo die Punkte sind! Solange die Wall stimmt
             let rowX = leftWall.b.x;
             let ySum = leftWall.b.y;
 
@@ -830,14 +848,15 @@ class Rectangle {
       }
     }
 
-    //console.log("All STM-ed apartments: ");
     // Convert all apartments to Rectangles, for unified edge etc handling
     const returnRects = [];
+
+    console.log("All Rect-STM-ed apartments: ");
     for (let ap of apartments) {
-      //ap.logApartment();
+      ap.logApartment();
       returnRects.push(ap.convertToRectangle());
     }
-
+    console.log(">>>>>> End Rect-STM ");
     return returnRects;
   }
 
