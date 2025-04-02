@@ -41,7 +41,7 @@ const ThreeCanvas = (props) => {
     //tests.testRectangleHelpers();
     //
     //tests.testRectangleSTMSplitting();
-    tests.testHouseCalculator(50, 100, 2, 3);
+    tests.testHouseCalculator(50, 100, 2, 4);
   }, []);
 
   //Bei canvas den canvasRef reinpacken, damit in canvasRef dieses Element referenziert werden kann
