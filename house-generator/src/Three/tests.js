@@ -5,6 +5,7 @@ import { Vector2, VertexColorNode } from "three/webgpu";
 import Apartment from "./Apartment";
 import House from "./House";
 import HouseCalculator from "./HouseCalculator";
+import { render } from "react-dom";
 
 class Tests {
   constructor(rendering) {
@@ -356,12 +357,21 @@ class Tests {
     corridorWidth,
     minApartmentWidth
   ) {
-    const houseCalc = new HouseCalculator();
+    const houseCalc = HouseCalculator.getInstance();
+    let maxCorridors = houseCalc.calculateMaxCorridors(houseWidth, houseHeight);
+    //length, i, corridorWidth
+
+    // Test with house Width, maxI and
+    let k = houseCalc.calculateK(houseWidth, maxCorridors, corridorWidth);
+
+    console.log("k for ", maxCorridors, " corridors: ", k);
+
     let maxAps = houseCalc.calculateMaxAparments(
       houseWidth,
       houseHeight,
       corridorWidth,
-      minApartmentWidth
+      minApartmentWidth,
+      maxCorridors
     );
 
     console.log(
@@ -375,6 +385,57 @@ class Tests {
       minApartmentWidth
     );
     console.log(">>>", maxAps, "<<<");
+  }
+
+  // Passt soweit erstmal Kollegen
+  testHouseDefinedShape(houseWidth, houseHeight) {
+    let house = new House(
+      houseWidth * houseHeight,
+      null,
+      null,
+      houseWidth,
+      houseHeight,
+      null,
+      null
+    );
+
+    this.rendering.addToScene(house.getHouseMesh());
+  }
+
+  testMultiCorridorHouse(
+    houseWidth,
+    houseHeight,
+    corridorWidth,
+    corridorCount
+  ) {
+    // Get house with defined house shape by passing  house width and height
+    // then generate multi corridors
+
+    console.log("> testMultiCorridorHouse");
+    let house = new House(
+      houseWidth * houseHeight,
+      null,
+      null,
+      houseWidth,
+      houseHeight,
+      null,
+      null
+    );
+
+    // TODO: Da funzt irgendwas mit der Platzierung nicht gescheid.
+    // Richtige Anzahl an Korridoren passt aber!
+
+    let houseCorridorRects = house.multiCorridorLayout(
+      corridorWidth,
+      corridorCount
+    ).corridorRects;
+
+    console.log("multi corridor rects:", houseCorridorRects);
+    this.rendering.addToScene(house.getHouseMesh());
+
+    for (let rect of houseCorridorRects) {
+      this.rendering.addToScene(rect.generateShapeMesh());
+    }
   }
 }
 

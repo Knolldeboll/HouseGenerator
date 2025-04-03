@@ -5,6 +5,7 @@ import PreApartment from "./PreApartment";
 import Rectangle from "./Rectangle";
 
 import Tools from "./Tools";
+import HouseCalculator from "./HouseCalculator";
 
 // TODO: Create ShapeObject interface and make House and Apartment implement this.
 // They inherit the ability to create a THREE.Shape from vertices.
@@ -21,14 +22,17 @@ class House {
     houseArea,
     gardenArea,
     apartmentCount,
+    houseWidth,
+    houseHeight,
     minApartmentSize,
     maxApartmentSize
   ) {
+    // House Area wird eig nur in randomShape verwendet glaub
     this.houseArea = houseArea;
     this.gardenArea = gardenArea;
     this.apartmentCount = apartmentCount;
-    this.houseWidth = null;
-    this.houseHeight = null;
+    this.houseWidth = houseWidth;
+    this.houseHeight = houseHeight;
     /**
      * The rects from the Apartments, corridor and rooms
      */
@@ -36,7 +40,6 @@ class House {
     this.apartmentRects = [];
     this.roomRects = [];
     this.corridorRects = [];
-    this.roomRects = [];
 
     // a: upper left
     // b: upper right
@@ -76,12 +79,22 @@ class House {
     // ShapeObject of house base shape
     this.houseShapeObject = null;
 
-    this.calculateRandomHouseShape();
+    // Utilities
+    this.houseCalc = HouseCalculator.getInstance();
+
+    // check if random or defined houseshape should be used
+    if (this.houseWidth == null || this.houseHeight == null) {
+      this.calculateRandomHouseShape();
+    } else {
+      this.calculateDefinedHouseShape();
+    }
+
     // this.calculateRooms();
   }
 
   /**
    * Wrapper Method for the construction process
+   * - Obsolete?
    */
   calculateRooms() {
     this.calculateRandomHouseShape(); // Mirahmadi Step 1/
@@ -112,26 +125,55 @@ class House {
   }
 
   /**
-   * Calculate House Rectangle shape,
+   * Calculate House Rectangle shape, according to given width and height
+   * Sets house position and vertices and shapeobject
    */
-  calculateDefinedHouseShape() {}
+  calculateDefinedHouseShape() {
+    if (this.houseWidth == null || this.houseHeight == null) {
+      console.error(
+        ">calculateDefinedHouseShape: House width or height not specified!"
+      );
+      return;
+    }
+
+    this.position = {
+      x: this.houseWidth / 2,
+      y: this.houseHeight / 2,
+    };
+
+    console.log(
+      "width " +
+        this.houseWidth +
+        "height " +
+        this.houseHeight +
+        " aspect ratio later " +
+        this.houseWidth / this.houseHeight
+    );
+
+    this.calculateHouseVertices();
+
+    // Calculate Shape object
+    // TODO: obsolete?
+    const shapeVertices = [
+      this.vertices.a,
+      this.vertices.b,
+      this.vertices.c,
+      this.vertices.d,
+    ];
+    // TODO: Specify housecolor
+    // TODO: Somehow bums that shit.
+    // ShapeObject war gedacht für tatsächliche Shapes.
+    // Apartment ist gedacht zum unterscheiden von House und Apartments, da --- eh...
+
+    // Create Shape from vertices and color
+    this.houseShapeObject = new ShapeObject(shapeVertices, 0xffff11);
+  }
 
   /**  Calculates Random House Rectangle Shape with aspect ratio from 0.8 to 1.2, without any appartments placed in the floor
+   * sets house position and vertices and shapeobject
    */
 
   calculateRandomHouseShape() {
-    // TODO: Parametrize min/max Aspect Ratio of House
-    // TODO: Parametrize width/height of House
-
-    // Rectangle Area A = a*b
-
-    // Randomly generate side a, in Aspect Ratio between 1/1 and 0.8/1
-    // amin = 0.8*b
-    // b = area/a  ->   amin = 0.8 *(area/a)
-    // umformen zu amin = sqrt(0.8*area)
-
-    // TODO: Redo Aspect Ratio calculation according to Mirahmadi: max (w/h, h/w)
-
     var aspectRatio = 0.6 + 0.8 * Math.random(); // AR zw. 0.6 und 1.4
 
     console.log("random aspect ratio " + aspectRatio);
@@ -699,6 +741,63 @@ class House {
   }
 
   /**
+   * Places multiple corridors along the longer side of the house
+   * corridorCount must be calculated before and can be anything, but should not exceed maxI,
+   * which should be calculated beforehand
+   */
+
+  // TODO: exctract method for filling living area
+  multiCorridorLayout(corridorWidth, corridorCount) {
+    let longerSide =
+      this.houseWidth > this.houseHeight ? this.houseWidth : this.houseHeight;
+    let shorterSide =
+      this.houseWidth > this.houseHeight ? this.houseHeight : this.houseWidth;
+
+    // calculate k
+    // longer side,i, corrwidth
+    // K passt!
+    let k = this.houseCalc.calculateK(longerSide, corridorCount, corridorWidth);
+    console.log("k:", k);
+    // Place corridorCount* corridor rects along longer side with k + corridorWidth/2 distance to each other
+    // x =
+    // y = shorterside/2
+
+    let corridorRects = [];
+
+    // TODO: platzierung ist nicht immer nach K!
+    // nur beim ersten ist die k. danach immer 2k
+
+    let currentX = k + corridorWidth / 2;
+    let firstRect = new Rectangle().fromCoords(
+      corridorWidth,
+      shorterSide,
+      k + corridorWidth / 2,
+      shorterSide / 2
+    );
+
+    corridorRects.push(firstRect);
+
+    for (let currentI = 2; currentI <= corridorCount; currentI++) {
+      currentX = currentX + 2 * k + corridorWidth;
+      let currentRect = new Rectangle().fromCoords(
+        corridorWidth,
+        shorterSide,
+        currentX,
+        shorterSide / 2
+      );
+      corridorRects.push(currentRect);
+    }
+
+    this.corridorRects = corridorRects;
+    return this;
+
+    // TODO: set this.corridorRects, this.livingAreaRects, this.totalRects
+  }
+
+  // TODO: Extract method for filling living area rects with
+  //
+
+  /**
    * Fills the Apartment rects with sub-Rectangles generated through STM
    * Rooms are accessible through roomRects
    */
@@ -722,7 +821,8 @@ class House {
 
     this.roomRects = rooms;
 
-    return this;
+    //TODO: Remove
+    //return this;
 
     for (let apartmentRect of this.apartmentRects) {
       console.log("STMing Apartment no. ", counter);
