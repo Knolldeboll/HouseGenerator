@@ -42,6 +42,20 @@ class Rectangle {
     //  this.generateEdges();
   }
 
+  /**
+   *
+   * @param {THREE.Color} color
+   * @returns
+   */
+  setColor(color) {
+    this._color = color;
+    this._material = new THREE.MeshStandardMaterial({
+      color: color,
+      side: THREE.DoubleSide,
+    });
+    return this;
+  }
+
   // 2nd constructors
   // Verts must be given in clockwise order, starting at upper left
   /**

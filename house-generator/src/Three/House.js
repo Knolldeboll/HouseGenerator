@@ -746,7 +746,8 @@ class House {
    * which should be calculated beforehand
    */
 
-  // TODO: exctract method for filling living area
+  // TODO: Generate Connectors
+  // TODO: exctract method for filling living area rectangles/ rectangles in general along their longer side
   multiCorridorLayout(corridorWidth, corridorCount) {
     let longerSide =
       this.houseWidth > this.houseHeight ? this.houseWidth : this.houseHeight;
@@ -768,24 +769,39 @@ class House {
     // nur beim ersten ist die k. danach immer 2k
 
     let currentX = k + corridorWidth / 2;
-    let firstRect = new Rectangle().fromCoords(
-      corridorWidth,
-      shorterSide,
-      k + corridorWidth / 2,
-      shorterSide / 2
-    );
+    let firstRect = new Rectangle()
+      .fromCoords(
+        corridorWidth,
+        shorterSide,
+        k + corridorWidth / 2,
+        shorterSide / 2
+      )
+      .setColor(new THREE.Color(255, 255, 0));
 
     corridorRects.push(firstRect);
 
     for (let currentI = 2; currentI <= corridorCount; currentI++) {
       currentX = currentX + 2 * k + corridorWidth;
-      let currentRect = new Rectangle().fromCoords(
-        corridorWidth,
-        shorterSide,
-        currentX,
-        shorterSide / 2
-      );
+      let currentRect = new Rectangle()
+        .fromCoords(corridorWidth, shorterSide, currentX, shorterSide / 2)
+        .setColor(new THREE.Color(255, 255, 0));
       corridorRects.push(currentRect);
+    }
+
+    // Connectors:
+    // width 2k
+    // height corridorWidth
+    // y shorterSide/2
+    // x: Start at 2k+ corridorWidth, then always +  (2k+corridorWidth)
+
+    // Add connectors
+    //let currentConX =
+    for (let f = 1; f <= corridorCount - 1; f++) {
+      let currentConX = f * (2 * k + corridorWidth);
+      let currentConRect = new Rectangle()
+        .fromCoords(2 * k, corridorWidth, currentConX, shorterSide / 2)
+        .setColor(new THREE.Color(255, 255, 0));
+      corridorRects.push(currentConRect);
     }
 
     this.corridorRects = corridorRects;
