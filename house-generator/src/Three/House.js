@@ -6,6 +6,7 @@ import Rectangle from "./Rectangle";
 
 import Tools from "./Tools";
 import HouseCalculator from "./HouseCalculator";
+import { IndirectStorageBufferAttribute } from "three/webgpu";
 
 // TODO: Create ShapeObject interface and make House and Apartment implement this.
 // They inherit the ability to create a THREE.Shape from vertices.
@@ -40,6 +41,7 @@ class House {
     this.apartmentRects = [];
     this.roomRects = [];
     this.corridorRects = [];
+    this.livingAreaRects = [];
 
     // a: upper left
     // b: upper right
@@ -748,6 +750,7 @@ class House {
 
   // TODO: Generate Connectors
   // TODO: exctract method for filling living area rectangles/ rectangles in general along their longer side
+  // TODO: Handle "1" as corridorCount input
   multiCorridorLayout(corridorWidth, corridorCount) {
     let longerSide =
       this.houseWidth > this.houseHeight ? this.houseWidth : this.houseHeight;
@@ -807,9 +810,67 @@ class House {
     this.corridorRects = corridorRects;
     return this;
 
-    // TODO: set this.corridorRects, this.livingAreaRects, this.totalRects
+    // TODO: set this.livingAreaRects, this.totalRects
   }
 
+  /**
+   *
+   * @param {float} k
+   * @param {integer} i
+   * @returns
+   */
+  generateLivingAreaRects(k) {
+    console.log("> House generate Living Area Rects");
+
+    // TODO: L.A. Color from params
+    let livingAreaColor = new THREE.Color(255, 0, 220);
+    // 1. Take the first two corridor rects, which are the first two in the corridor list
+    // Exception: if corridor is only one
+
+    if (this.corridorRects.length == 1) {
+      // TODO: Do bums
+      console.log("... is not implemented for 1 corridor");
+
+      let corr = this.corridorRects[0];
+      if (corr.isHorizontal) {
+        // upper/lower
+        let upperFullLivingArea = new Rectangle()
+          .fromCoords(corr.width, k, corr.position.x, corr.position.y + k / 2)
+          .setColor(livingAreaColor);
+
+        let lowerFullLivingArea = new Rectangle()
+          .fromCoords(corr.width, k, corr.position.x, corr.position.y - k / 2)
+          .setColor(livingAreaColor);
+
+        this.livingAreaRects.push(upperFullLivingArea, lowerFullLivingArea);
+      } else {
+        // left right
+
+        let leftFullLivingArea = new Rectangle().fromCoords(
+          corr.width,
+          k,
+          corr.position.x - k / 2,
+          corr.position.y
+        );
+
+        let rightFullLivingArea = new Rectangle().fromCoords(
+          corr.width,
+          k,
+          corr.position.x + k / 2,
+          corr.position.y
+        );
+
+        this.livingAreaRects.push(leftFullLivingArea, rightFullLivingArea);
+      }
+
+      return this;
+    }
+
+    // Generate full height/width living areas
+
+    // Generate half height/width living areas next to connectors
+  }
+  // TODO: Extract method for generating living area rects
   // TODO: Extract method for filling living area rects with
   //
 
@@ -1342,6 +1403,7 @@ class House {
     return sphere;
   }
 
+  // Alter STM versuch..
   calculateFloorPlan() {
     // TODO: Rekursiv machen, nach Anleitung vom Paper.
     // Andere Leute habens auch schon geschafft.

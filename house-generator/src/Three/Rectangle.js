@@ -26,7 +26,7 @@ class Rectangle {
     this._height = undefined;
     this._area = undefined;
     this._pos = undefined;
-
+    this._isHorizontal = undefined;
     /**
      * Vertices in following order.
      * upper left, upper right, lower right, lower left
@@ -112,6 +112,7 @@ class Rectangle {
 
     // Generate Edges
     this.generateEdges();
+    this.calculateOrientation();
 
     return this;
   }
@@ -130,6 +131,7 @@ class Rectangle {
     // Generate Vertices and Edges
     this.generateVertices();
     this.generateEdges();
+    this.calculateOrientation();
     return this;
   }
 
@@ -248,6 +250,7 @@ class Rectangle {
   }
 
   // Split into Random Sections with area between min, max
+  // In
   splitRandomlyMinMax(n, min, max) {
     // Vorgabe: Die Basisform ist fix vorgegeben und nicht anpassbar.
     // 1. Calculate minimum/maximum Percentage of total area which will cover min/max-sized Rooms
@@ -320,12 +323,15 @@ class Rectangle {
   //TODO: Apply random splitting to both orientations
   /**
    * Split into n randomly sized parts, each part with size between min and max
-   * Oriented along the longer Edge
+   * Oriented along the longer side
    * Can be used to keep AR intact by calculating the maxArea and minArea beforehand!
    * @param {*} max
    *
    *  */
   splitRandomlyMinMaxOriented(n, min, max) {
+    // TODO: Check orientation!
+    // Where
+
     console.log(
       "> Split Rectangle in n randomly sized splits oriented along it's longer side"
     );
@@ -357,7 +363,7 @@ class Rectangle {
 
     // Parts is concrete area values! Not percentages!
     // Dependant on "horizontally" vs. "vertically", calculate subedge lengths from area and given height/width
-    return this.generateSubRectsFromAreaParts(parts);
+    return this.generateSubRectsFromAreaPartsOriented(parts);
   }
 
   /**
@@ -879,7 +885,7 @@ class Rectangle {
    * @param {List} parts List of areas of the individual parts, given as concrete Areas, not percentages
    * @returns Rectangles generated from the given area parts
    */
-  generateSubRectsFromAreaParts(parts) {
+  generateSubRectsFromAreaPartsOriented(parts) {
     console.log("> Generate SubRects from Parts");
     let edgeParts = [];
     let newRects = [];
@@ -982,22 +988,6 @@ class Rectangle {
     // Calculate min and max from the given aspect Ratio, then same as above
   }
 
-  // areaList: List of areas that this rectangle should be divided into.
-  // Must add up to the rectangle's total area
-  // orientation: if the division should be
-  divideDefined(areaList, orientation = null, divideAlongLongerSide = null) {
-    let areaSum = 0;
-    for (let a of areaList) {
-      areaSum += a;
-    }
-    if (areaSum != this) {
-      console.error(
-        "ERROR: AreaList does not add up to the area of this rectangle!"
-      );
-      return;
-    }
-  }
-
   // JS Optional Parameters:
   // c ist optional und per default mit null belegt
   // wenn beim function call für c "unefined" angegeben wird, wird der default-Wert verwendet!
@@ -1052,6 +1042,14 @@ class Rectangle {
   //TODO: Edge getters
   //TODO: Vertice adjacent edgle getters
 
+  calculateOrientation() {
+    if (this._height == undefined || this._width == undefined) {
+      console.error(">calculateOrientation Error: height || width not set!");
+    }
+
+    this._isHorizontal = this._width > this._height ? true : false;
+  }
+
   get material() {
     return this._material;
   }
@@ -1069,6 +1067,10 @@ class Rectangle {
 
   get edges() {
     return this._edges;
+  }
+
+  get isHorizontal() {
+    return this._isHorizontal;
   }
 }
 
