@@ -116,6 +116,36 @@ class Tests {
     }
   }
 
+  testEdgeRectSpawn() {
+    let mainColor = new THREE.Color(255, 0, 0);
+    let newColor = new THREE.Color(0, 255, 0);
+    let rect = new Rectangle().fromCoords(10, 5, 10, 10).setColor(mainColor);
+
+    let newRectLeft = rect.edges.leftEdge
+      .spawnRectangle(5, new Vector2(-1, 0))
+      .setColor(newColor);
+
+    let newRectRight = rect.edges.rightEdge
+      .spawnRectangle(5, new Vector2(1, 0))
+      .setColor(newColor);
+
+    let newRectTop = rect.edges.upperEdge
+      .spawnRectangle(5, new Vector2(0, 1))
+      .setColor(newColor);
+
+    let newRectBottom = rect.edges.lowerEdge
+      .spawnRectangle(5, new Vector2(0, -1))
+      .setColor(newColor);
+
+    let rects = [rect, newRectLeft, newRectRight, newRectTop, newRectBottom];
+
+    for (let r of rects) {
+      console.log(r);
+    }
+
+    this.rendering.addAllToScene(rects.map((r) => r.generateShapeMesh()));
+  }
+
   testRectangles() {
     let rect = new Rectangle().fromCoords(10, 10, 0, 0);
     console.log("new rect vertices values");
@@ -310,7 +340,7 @@ class Tests {
     // the main house rectangle is not rendered
 
     // now only render rooms and corridor, not apartments
-    for (let rect of house.corridorRects) {
+    for (let rect of house.mainCorridorRects) {
       this.rendering.addToScene(rect.generateShapeMesh());
     }
 
@@ -346,7 +376,7 @@ class Tests {
     for (let rect of house.roomRects) {
       this.rendering.addToScene(rect.generateShapeMesh());
     }
-    for (let rect of house.corridorRects) {
+    for (let rect of house.mainCorridorRects) {
       this.rendering.addToScene(rect.generateShapeMesh());
     }
   }
@@ -428,7 +458,7 @@ class Tests {
     let houseCorridorRects = house.multiCorridorLayout(
       corridorWidth,
       corridorCount
-    ).corridorRects;
+    ).mainCorridorRects;
 
     console.log("multi corridor rects:", houseCorridorRects);
     this.rendering.addToScene(house.getHouseMesh());
@@ -436,6 +466,52 @@ class Tests {
     for (let rect of houseCorridorRects) {
       this.rendering.addToScene(rect.generateShapeMesh());
     }
+  }
+
+  testLivingAreaGeneration(
+    houseWidth,
+    houseHeight,
+    corridorWidth,
+    corridorCount
+  ) {
+    let house = new House(
+      houseWidth * houseHeight,
+      null,
+      null,
+      houseWidth,
+      houseHeight,
+      null,
+      null
+    )
+      .multiCorridorLayout(corridorWidth, corridorCount)
+      //.randomizedICorridor(6, corridorWidth)
+      .generateLivingAreaRects();
+
+    //console.log("House with living area rects", house);
+
+    //return;
+    let houseCorridorRects = house.mainCorridorRects;
+    let houseConnectorRects = house.connectorRects;
+    let houseApartmentRects = house.apartmentRects;
+    let houseLARects = house.livingAreaRects;
+
+    console.log(
+      "CRECTS",
+      houseCorridorRects,
+      "houseConnectorRects",
+      houseConnectorRects,
+      "HLARECTS",
+      houseLARects,
+      "APRECTS",
+      houseApartmentRects
+    );
+
+    this.rendering.addAllToScene(
+      houseCorridorRects
+        .concat(houseLARects)
+        .concat(houseConnectorRects)
+        .map((r) => r.generateShapeMesh())
+    );
   }
 }
 

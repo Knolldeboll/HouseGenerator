@@ -3,10 +3,11 @@ import Apartment from "./Apartment";
 import ShapeObject from "./ShapeObject";
 import PreApartment from "./PreApartment";
 import Rectangle from "./Rectangle";
+import Edge from "./Edge";
 
 import Tools from "./Tools";
 import HouseCalculator from "./HouseCalculator";
-import { IndirectStorageBufferAttribute } from "three/webgpu";
+import { IndirectStorageBufferAttribute, Vector2 } from "three/webgpu";
 
 // TODO: Create ShapeObject interface and make House and Apartment implement this.
 // They inherit the ability to create a THREE.Shape from vertices.
@@ -34,13 +35,17 @@ class House {
     this.apartmentCount = apartmentCount;
     this.houseWidth = houseWidth;
     this.houseHeight = houseHeight;
+    this.k = undefined;
+    this.i = undefined;
+    this.corridorWidth = undefined;
     /**
      * The rects from the Apartments, corridor and rooms
      */
     this.totalRects = [];
     this.apartmentRects = [];
     this.roomRects = [];
-    this.corridorRects = [];
+    this.mainCorridorRects = [];
+    this.connectorRects = [];
     this.livingAreaRects = [];
 
     // a: upper left
@@ -425,6 +430,7 @@ class House {
   // Generate a simple Building with an I-Shaped Corridor, connecting both sides of the Building
   // with n Apartments
   simpleICorridor(corridorHeight, n) {
+    this.corridorWidth = corridorHeight;
     // x/y = width/height /2
 
     // TODO: Move houseRect generation to generateHouseShape()
@@ -542,6 +548,7 @@ class House {
 
   // TODO: Bei Vertical sind alle Räume gleich groß...
   randomizedICorridor(n, corridorWidth) {
+    this.corridorWidth = corridorWidth;
     console.log("> RandomizedICorridor");
     // x/y = width/height /2
 
@@ -561,13 +568,13 @@ class House {
     // n-split value. Choose those to go below their value for dividing uneven n's
 
     if (this.houseWidth > this.houseHeight) {
-      console.log("Horizontal Corridor!");
-
       /**
        * All rects that will be passed to rendering
        */
       //let totalRects = [];
 
+      this.k = (this.houseHeight - corridorWidth) / 2;
+      console.log("Horizontal Corridor! with k", this.k);
       let houseRect = new Rectangle().fromCoords(
         this.houseWidth,
         this.houseHeight,
@@ -586,7 +593,7 @@ class House {
       console.log("corridor:", corridor);
       // Da war immer houseRect auch drin, aber sieht kaka aus
 
-      this.corridorRects.push(corridor);
+      this.mainCorridorRects.push(corridor);
       this.totalRects.push(corridor);
 
       let upperRectVertices = [
@@ -675,8 +682,8 @@ class House {
         lowerRoomsRects
       );
     } else {
-      console.log("Vertical Corridor!");
-
+      this.k = (this.houseWidth - corridorWidth) / 2;
+      console.log("Vertical Corridor! with k:", this.k);
       //let totalRects =[];
       let houseRect = new Rectangle().fromCoords(
         this.houseWidth,
@@ -692,7 +699,7 @@ class House {
       );
 
       // Add corridorRects
-      this.corridorRects.push(corridor);
+      this.mainCorridorRects.push(corridor);
       this.totalRects.push(corridor);
 
       let leftRectVertices = [
@@ -748,10 +755,15 @@ class House {
    * which should be calculated beforehand
    */
 
-  // TODO: Generate Connectors
   // TODO: exctract method for filling living area rectangles/ rectangles in general along their longer side
   // TODO: Handle "1" as corridorCount input
+
+  // TODO: Extract methods for (multicorridor-horizontal and /-vertical), then let this method
+  // decide which split direction shall be used
+  // TODO: Think about which is the best corridor placement direction... heheheheheheh
+
   multiCorridorLayout(corridorWidth, corridorCount) {
+    this.corridorWidth = corridorWidth;
     let longerSide =
       this.houseWidth > this.houseHeight ? this.houseWidth : this.houseHeight;
     let shorterSide =
@@ -762,15 +774,18 @@ class House {
     // K passt!
     let k = this.houseCalc.calculateK(longerSide, corridorCount, corridorWidth);
     console.log("k:", k);
+
     // Place corridorCount* corridor rects along longer side with k + corridorWidth/2 distance to each other
     // x =
     // y = shorterside/2
 
     let corridorRects = [];
+    let connectorRects = [];
 
     // TODO: platzierung ist nicht immer nach K!
     // nur beim ersten ist die k. danach immer 2k
 
+    // Generating the main corridors
     let currentX = k + corridorWidth / 2;
     let firstRect = new Rectangle()
       .fromCoords(
@@ -783,6 +798,7 @@ class House {
 
     corridorRects.push(firstRect);
 
+    // The corridors are added from left to right/ from top to bottom
     for (let currentI = 2; currentI <= corridorCount; currentI++) {
       currentX = currentX + 2 * k + corridorWidth;
       let currentRect = new Rectangle()
@@ -804,10 +820,16 @@ class House {
       let currentConRect = new Rectangle()
         .fromCoords(2 * k, corridorWidth, currentConX, shorterSide / 2)
         .setColor(new THREE.Color(255, 255, 0));
-      corridorRects.push(currentConRect);
+      connectorRects.push(currentConRect);
     }
 
-    this.corridorRects = corridorRects;
+    this.k = k;
+    this.i = corridorCount;
+    this.mainCorridorRects = corridorRects;
+    this.connectorRects = connectorRects;
+    //this.generateLivingAreaRects(k);
+
+    // Return this with corridorRects generated
     return this;
 
     // TODO: set this.livingAreaRects, this.totalRects
@@ -816,10 +838,18 @@ class House {
   /**
    *
    * @param {float} k
-   * @param {integer} i
    * @returns
    */
-  generateLivingAreaRects(k) {
+  generateLivingAreaRects() {
+    // i is given from this.corridorRects.length
+    // NO! denn da sind alle Rects drinnen!
+
+    const i = this.mainCorridorRects.length;
+
+    console.log(">generate Living area Rects");
+    if (this.k == undefined) {
+      console.error(">LA Generation error: no corridors available!");
+    }
     console.log("> House generate Living Area Rects");
 
     // TODO: L.A. Color from params
@@ -827,38 +857,30 @@ class House {
     // 1. Take the first two corridor rects, which are the first two in the corridor list
     // Exception: if corridor is only one
 
-    if (this.corridorRects.length == 1) {
+    if (i == 1) {
       // TODO: Do bums
-      console.log("... is not implemented for 1 corridor");
+      // console.log("... is not implemented for 1 corridor");
 
-      let corr = this.corridorRects[0];
+      let corr = this.mainCorridorRects[0];
       if (corr.isHorizontal) {
         // upper/lower
-        let upperFullLivingArea = new Rectangle()
-          .fromCoords(corr.width, k, corr.position.x, corr.position.y + k / 2)
+        let upperFullLivingArea = corr.edges.upperEdge
+          .spawnRectangle(this.k, new Vector2(0, 1))
           .setColor(livingAreaColor);
 
-        let lowerFullLivingArea = new Rectangle()
-          .fromCoords(corr.width, k, corr.position.x, corr.position.y - k / 2)
+        let lowerFullLivingArea = corr.edges.lowerEdge
+          .spawnRectangle(this.k, new Vector2(0, -1))
           .setColor(livingAreaColor);
 
         this.livingAreaRects.push(upperFullLivingArea, lowerFullLivingArea);
       } else {
         // left right
-
-        let leftFullLivingArea = new Rectangle().fromCoords(
-          corr.width,
-          k,
-          corr.position.x - k / 2,
-          corr.position.y
-        );
-
-        let rightFullLivingArea = new Rectangle().fromCoords(
-          corr.width,
-          k,
-          corr.position.x + k / 2,
-          corr.position.y
-        );
+        let leftFullLivingArea = corr.edges.leftEdge
+          .spawnRectangle(this.k, new Vector2(-1, 0))
+          .setColor(livingAreaColor);
+        let rightFullLivingArea = corr.edges.rightEdge
+          .spawnRectangle(this.k, new Vector2(1, 0))
+          .setColor(livingAreaColor);
 
         this.livingAreaRects.push(leftFullLivingArea, rightFullLivingArea);
       }
@@ -866,8 +888,109 @@ class House {
       return this;
     }
 
-    // Generate full height/width living areas
+    // For this.corridors.length >1
 
+    // Split this.corridorRects into two lists: [0,1] and rest
+    // Passt! Nicht!
+    // Die main corridors werden nacheinander in this.corridorRects gepackt!
+    // d.H. die outers sind bei [0] und [i-1]
+
+    const outerCorridors = [
+      this.mainCorridorRects[0],
+      this.mainCorridorRects[this.i - 1],
+    ];
+    console.log("Outer corridors: ", outerCorridors);
+
+    const innerCorridors = this.connectorRects;
+    console.log("Inner corridors/connectors ", innerCorridors);
+
+    // Generate full height/width living areas
+    // First outer
+    let horizontal = outerCorridors[0].isHorizontal;
+
+    if (horizontal) {
+      // Outer up
+      const upperFullLivingArea = this.mainCorridorRects[0].edges.upperEdge
+        .spawnRectangle(this.k, new Vector2(0, 1))
+        .setColor(livingAreaColor);
+      // Outer down
+      const lowerFullLivingArea = this.mainCorridorRects[
+        this.i - 1
+      ].edges.lowerEdge
+        .spawnRectangle(this.k, new Vector2(0, -1))
+        .setColor(livingAreaColor);
+
+      this.livingAreaRects.push(upperFullLivingArea, lowerFullLivingArea);
+    } else {
+      // Outer left
+      const leftFullLivingArea = this.mainCorridorRects[0].edges.leftEdge
+        .spawnRectangle(this.k, new Vector2(-1, 0))
+        .setColor(livingAreaColor);
+      // Outer right
+      const rightFullLivingArea = this.mainCorridorRects[
+        this.i - 1
+      ].edges.rightEdge
+        .spawnRectangle(this.k, new Vector2(1, 0))
+        .setColor(livingAreaColor);
+      this.livingAreaRects.push(leftFullLivingArea, rightFullLivingArea);
+    }
+
+    // Generate half living areas next to connectors
+    const connectorHorizontal = this.connectorRects[0].isHorizontal;
+    const laLength =
+      (this.mainCorridorRects[0].longerSideLength - this.corridorWidth) / 2;
+
+    if (connectorHorizontal) {
+      // Calc LA height, opposite of k
+      // Is a main corridors longer side - corridorWidth/2
+
+      // Collect all upper/lower Edges
+      const upperEdges = this.connectorRects.flatMap((con) =>
+        con.edges.upperEdge.splitEvenly(2)
+      );
+      const lowerEdges = this.connectorRects.flatMap((con) =>
+        con.edges.lowerEdge.splitEvenly(2)
+      );
+
+      for (const ue of upperEdges) {
+        this.livingAreaRects.push(
+          ue
+            .spawnRectangle(laLength, new Vector2(0, 1))
+            .setColor(livingAreaColor)
+        );
+      }
+      for (const le of lowerEdges) {
+        this.livingAreaRects.push(
+          le
+            .spawnRectangle(laLength, new Vector2(0, -1))
+            .setColor(livingAreaColor)
+        );
+      }
+    } else {
+      // Collect all left/right edges
+      const leftEdges = this.connectorRects.flatMap((con) =>
+        con.edges.leftEdge.splitEvenly(2)
+      );
+      const rightEdges = this.connectorRects.flatMap((con) =>
+        con.edges.rightEdge.splitEvenly(2)
+      );
+      for (const le of leftEdges) {
+        this.livingAreaRects.push(
+          le
+            .spawnRectangle(laLength, new Vector2(-1, 0))
+            .setColor(livingAreaColor)
+        );
+      }
+      for (const re of rightEdges) {
+        this.livingAreaRects.push(
+          re
+            .spawnRectangle(laLength, new Vector2(1, 0))
+            .setColor(livingAreaColor)
+        );
+      }
+    }
+
+    return this;
     // Generate half height/width living areas next to connectors
   }
   // TODO: Extract method for generating living area rects

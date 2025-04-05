@@ -45,7 +45,10 @@ const ThreeCanvas = (props) => {
 
     //tests.testHouseDefinedShape(30, 20);
     // Perfection!
-    tests.testMultiCorridorHouse(30, 20, 2, 3);
+    //tests.testMultiCorridorHouse(30, 20, 2, 3);
+
+    //tests.testEdgeRectSpawn();
+    tests.testLivingAreaGeneration(30, 20, 2, 4);
   }, []);
 
   //Bei canvas den canvasRef reinpacken, damit in canvasRef dieses Element referenziert werden kann

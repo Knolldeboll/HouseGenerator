@@ -1,6 +1,7 @@
 // Displays Edges
 import * as THREE from "three";
-import { Vector2 } from "three/webgpu";
+import { RectAreaLight, Vector2 } from "three/webgpu";
+import Rectangle from "./Rectangle";
 class Edge {
   // TODO: Die Reihenfolge der Vertices festlegen, also z.B. immer im Uhrzeigersinn oder so
   // d.H.
@@ -25,6 +26,15 @@ class Edge {
       color: this._color,
       side: THREE.DoubleSide,
     });
+
+    // Same y: horizontal, same x: vertical
+    this._isHorizontal =
+      this.vertices.vertice1.y == this.vertices.vertice2.y ? true : false;
+
+    this._middleVertice = new THREE.Vector2(
+      (this._vertices.vertice1.x + this._vertices.vertice2.x) / 2,
+      (this._vertices.vertice1.y + this._vertices.vertice2.y) / 2
+    );
   }
 
   // Return length float
@@ -38,6 +48,14 @@ class Edge {
 
   get vertices() {
     return this._vertices;
+  }
+
+  get isHorizontal() {
+    return this._isHorizontal;
+  }
+
+  get middleVertice() {
+    return this._middleVertice;
   }
 
   /**
@@ -144,6 +162,60 @@ class Edge {
     }
 
     return subEdges;
+  }
+
+  /**
+   * Spawns a new Rectangle sharing the two Vertices of the Edge as one of its edges
+   *@param {float} height The height of the rectangle
+   * @param {THREE.Vector2} direction The direction of the rectangle, x = 1: right, x = -1: left, y = 1: up, y = -1: down
+   */
+  spawnRectangle(height, direction) {
+    console.log(
+      "> Spawn Rectangle along Edge with height: ",
+      height,
+      " and direction: ",
+      direction
+    );
+    if (this._isHorizontal && direction.x != 0 && direction.y == 0) {
+      console.error("Invalid direction for horizontal edge!");
+      return undefined;
+    }
+
+    if (!this._isHorizontal && direction.x == 0 && direction.y != 0) {
+      console.error("Invalid direction for vertical edge!");
+      return undefined;
+    }
+
+    // new Rect:
+    // if horizontal & direction.y == 1: // nach oben
+    // if horizontal & direction.y == -1: // nach unten
+    // if vertical & direction.x == 1: // nach rechts
+    // if vertical & direction.x == -1: // nach links
+
+    let x, y, w, h;
+
+    if (this._isHorizontal) {
+      console.log("is horizontal edge");
+      x = this._middleVertice.x;
+      // if direction.y == 1: // nach oben
+      // if direction.y == -1: // nach unten
+      y = this._middleVertice.y + (direction.y * height) / 2;
+      w = this.length;
+      h = height;
+    } else {
+      console.log("is vertical edge");
+      // if direction.x == 1: // nach rechts
+      // if direction.x == -1: // nach links
+      x = this._middleVertice.x + (direction.x * height) / 2;
+      y = this._middleVertice.y;
+      w = height;
+      h = this.length;
+    }
+
+    console.log("new rect in order with: ", w, h, x, y);
+    let newRect = new Rectangle().fromCoords(w, h, x, y);
+    console.log("Spawned Rectangle: ", newRect);
+    return newRect;
   }
 
   /**

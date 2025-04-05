@@ -27,6 +27,8 @@ class Rectangle {
     this._area = undefined;
     this._pos = undefined;
     this._isHorizontal = undefined;
+    this._longerSideLength = undefined;
+    this._shorterSideLength = undefined;
     /**
      * Vertices in following order.
      * upper left, upper right, lower right, lower left
@@ -65,7 +67,7 @@ class Rectangle {
    * @returns {Rectangle}
    */
   fromVertices(verts) {
-    console.log("> Rectangle from verts");
+    //console.log("> Rectangle from verts");
 
     // If Object given, transform to array
     let values = verts;
@@ -112,13 +114,14 @@ class Rectangle {
 
     // Generate Edges
     this.generateEdges();
+    // Irgendwas saugt hier Arsch
     this.calculateOrientation();
 
     return this;
   }
 
   fromCoords(width, height, x, y) {
-    console.log("> Rectangle from verts");
+    //console.log("> Rectangle from verts");
     this._width = width;
     this._height = height;
     this._area = this._width * this._height;
@@ -175,7 +178,7 @@ class Rectangle {
     // ul > ur > lr > ll7
     // TODO: Überlegen, welches immer v1/v2 ist
 
-    console.log("> Generate Edges from Vertices");
+    //console.log("> Generate Edges from Vertices");
     if (this._vertices == undefined) {
       console.error(
         "Cannot Generate Edges, vertices are not defined for this rect!"
@@ -204,6 +207,9 @@ class Rectangle {
       lowerEdge,
       leftEdge,
     };
+
+    this._longerSideLength = Math.max(this._width, this._height);
+    this._shorterSideLength = Math.min(this._width, this._height);
   }
 
   /**
@@ -1065,12 +1071,16 @@ class Rectangle {
     return this._vertices;
   }
 
-  get edges() {
-    return this._edges;
-  }
-
   get isHorizontal() {
     return this._isHorizontal;
+  }
+
+  get longerSideLength() {
+    return this._longerSideLength;
+  }
+
+  get shorterSideLength() {
+    return this._shorterSideLength;
   }
 }
 
