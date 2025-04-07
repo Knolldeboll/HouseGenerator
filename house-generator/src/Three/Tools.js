@@ -48,6 +48,10 @@ class Tools {
    * @param {number} max The maximum value of each part, as true value, not percentage
    * @returns An Array of the n parts of the value, each bfetween min and max
    */
+
+  // TODO: distribution is uneven.
+  // very often the first one is max, the rest is min
+  // Prolly
   divideValueIntoPartsMinMax(value, n, min, max) {
     console.log("> Tools: divideValueIntoPartsMinMax", value, n, min, max);
 
@@ -128,6 +132,7 @@ class Tools {
     }
 
     console.log("Tools: Sum of parts: ", sum, "vs initial value: ", value);
+    console.log("Generated parts: ", parts);
     return parts;
   }
 }

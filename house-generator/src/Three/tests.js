@@ -236,14 +236,14 @@ class Tests {
     let rect4 = new Rectangle().fromCoords(r4w, r4h, 0, 0);
 
     // Failing min:
-    rect4.splitRandomlyMinMaxOriented(5, 12, 15);
+    rect4.splitRandomlyMinMaxSizeOriented(5, 12, 15);
 
     //Failing max:
-    rect4.splitRandomlyMinMaxOriented(5, 5, 8);
+    rect4.splitRandomlyMinMaxSizeOriented(5, 5, 8);
 
     //Correct splitting:
     console.log("----splitRandomlyMinMaxOriented");
-    let splits = rect4.splitRandomlyMinMaxOriented(5, 5, 15);
+    let splits = rect4.splitRandomlyMinMaxSizeOriented(5, 5, 15);
 
     console.log("Split sizes: ", splits);
 
@@ -319,6 +319,16 @@ class Tests {
     //TODO: Call STM Split method
   }
 
+  testRectangleRandomWidthSplitting() {
+    let rect = new Rectangle().fromCoords(20, 10, 0, 0);
+    let subRects = rect.splitRandomlyMinMaxWidthOriented(5, 3);
+
+    this.rendering.addAllToScene([
+      rect.generateShapeMesh(),
+      ...subRects.flatMap((rect) => rect.generateShapeMesh()),
+    ]);
+  }
+
   testHouses(n, corridorWidth) {
     console.log("House test with ", n, "apartments");
     //let houseRects = new House(80, null, null, null, null).simpleICorridor(2, 8) || [];
@@ -388,7 +398,11 @@ class Tests {
     minApartmentWidth
   ) {
     const houseCalc = HouseCalculator.getInstance();
-    let maxCorridors = houseCalc.calculateMaxCorridors(houseWidth, houseHeight);
+    let maxCorridors = houseCalc.calculateMaxCorridors(
+      houseWidth,
+      corridorWidth,
+      minApartmentWidth
+    );
     //length, i, corridorWidth
 
     // Test with house Width, maxI and
@@ -415,6 +429,37 @@ class Tests {
       minApartmentWidth
     );
     console.log(">>>", maxAps, "<<<");
+
+    console.log("testing Thresholds: ");
+
+    for (let i = maxCorridors; i > 0; i--) {
+      console.log(
+        "Max Aps for ",
+        i,
+        " corridors: ",
+        houseCalc.calculateMaxAparments(
+          houseWidth,
+          houseHeight,
+          corridorWidth,
+          minApartmentWidth,
+          i
+        )
+      );
+    }
+
+    console.log("Testing random n division");
+
+    let minWidth = 3;
+    let testLArects = [
+      new Rectangle().fromCoords(15, minWidth, 0, 0),
+      new Rectangle().fromCoords(15, minWidth, 0, 0),
+      new Rectangle().fromCoords(8, minWidth, 0, 0),
+      new Rectangle().fromCoords(8, minWidth, 0, 0),
+      new Rectangle().fromCoords(8, minWidth, 0, 0),
+      new Rectangle().fromCoords(8, minWidth, 0, 0),
+    ];
+
+    houseCalc.calculateNDivisions(testLArects, 15, minWidth);
   }
 
   // Passt soweit erstmal Kollegen
@@ -512,6 +557,36 @@ class Tests {
         .concat(houseConnectorRects)
         .map((r) => r.generateShapeMesh())
     );
+  }
+
+  testLivingAreaApartmentFilling(
+    houseWidth,
+    houseHeight,
+    corridorWidth,
+    corridorCount,
+    n
+  ) {
+    let house = new House(
+      houseWidth * houseHeight,
+      null,
+      n,
+      houseWidth,
+      houseHeight,
+      null,
+      null
+    )
+      .multiCorridorLayout(corridorWidth, corridorCount)
+      .generateLivingAreaRects()
+      .fillLivingAreasWithRooms(n, 3);
+
+    console.log("Testhouse", house);
+
+    this.rendering.addAllToScene([
+      ...house.mainCorridorRects.flatMap((mcr) => mcr.generateShapeMesh()),
+      ...house.connectorRects.flatMap((cr) => cr.generateShapeMesh()),
+      ...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
+      ...house.apartmentRects.flatMap((ap) => ap.generateShapeMesh()),
+    ]);
   }
 }
 

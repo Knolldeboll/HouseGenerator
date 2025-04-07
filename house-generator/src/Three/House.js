@@ -35,9 +35,32 @@ class House {
     this.apartmentCount = apartmentCount;
     this.houseWidth = houseWidth;
     this.houseHeight = houseHeight;
+    /**
+     * current height of living areas
+     */
     this.k = undefined;
+    /**
+     * current amount of corridors
+     */
     this.i = undefined;
+
     this.corridorWidth = undefined;
+
+    //TODO: Add map-type attribute for the swap thresholds for
+    // the amount of corridors
+    // mapping with (i : maxApartments)
+    // so for example:
+
+    /**
+     * 1 corridor: 6 maxApartments
+     * 2 corridor: 14 max Apartments
+     * 3 corridor: 20 max apartments
+     *
+     *
+     */
+
+    // this list can be dynamic to save the max amount of corridors as well
+
     /**
      * The rects from the Apartments, corridor and rooms
      */
@@ -660,12 +683,12 @@ class House {
       let maxLower = avgLower + 3;
 
       // Calculate Subrectanles/Apartments for the upper/lower Living Area
-      let upperRoomsRects = upperRect.splitRandomlyMinMaxOriented(
+      let upperRoomsRects = upperRect.splitRandomlyMinMaxSizeOriented(
         nUpper,
         minUpper,
         maxUpper
       );
-      let lowerRoomsRects = lowerRect.splitRandomlyMinMaxOriented(
+      let lowerRoomsRects = lowerRect.splitRandomlyMinMaxSizeOriented(
         nLower,
         minLower,
         maxLower
@@ -836,8 +859,7 @@ class House {
   }
 
   /**
-   *
-   * @param {float} k
+   * Generates rect's for the current corridor Layout's living areas
    * @returns
    */
   generateLivingAreaRects() {
@@ -859,8 +881,6 @@ class House {
 
     if (i == 1) {
       // TODO: Do bums
-      // console.log("... is not implemented for 1 corridor");
-
       let corr = this.mainCorridorRects[0];
       if (corr.isHorizontal) {
         // upper/lower
@@ -884,29 +904,16 @@ class House {
 
         this.livingAreaRects.push(leftFullLivingArea, rightFullLivingArea);
       }
-
       return this;
     }
 
     // For this.corridors.length >1
-
-    // Split this.corridorRects into two lists: [0,1] and rest
-    // Passt! Nicht!
     // Die main corridors werden nacheinander in this.corridorRects gepackt!
     // d.H. die outers sind bei [0] und [i-1]
 
-    const outerCorridors = [
-      this.mainCorridorRects[0],
-      this.mainCorridorRects[this.i - 1],
-    ];
-    console.log("Outer corridors: ", outerCorridors);
-
-    const innerCorridors = this.connectorRects;
-    console.log("Inner corridors/connectors ", innerCorridors);
-
     // Generate full height/width living areas
-    // First outer
-    let horizontal = outerCorridors[0].isHorizontal;
+    // First the two outer ones
+    let horizontal = this.mainCorridorRects[0].isHorizontal;
 
     if (horizontal) {
       // Outer up
@@ -935,15 +942,13 @@ class House {
       this.livingAreaRects.push(leftFullLivingArea, rightFullLivingArea);
     }
 
+    // then the half sized inner living areas
     // Generate half living areas next to connectors
     const connectorHorizontal = this.connectorRects[0].isHorizontal;
     const laLength =
       (this.mainCorridorRects[0].longerSideLength - this.corridorWidth) / 2;
 
     if (connectorHorizontal) {
-      // Calc LA height, opposite of k
-      // Is a main corridors longer side - corridorWidth/2
-
       // Collect all upper/lower Edges
       const upperEdges = this.connectorRects.flatMap((con) =>
         con.edges.upperEdge.splitEvenly(2)
@@ -994,8 +999,47 @@ class House {
     // Generate half height/width living areas next to connectors
   }
   // TODO: Extract method for generating living area rects
-  // TODO: Extract method for filling living area rects with
+  // TODO: Extract method for filling living area rects with n apartments
   //
+
+  /**
+   * Divides the
+   *
+   * @param {} n
+   */
+
+  // TODO: check this with the max amount of apartments /thresholds per specified i
+  // the n specified here can't be higher than the current i's upper threshold
+  fillLivingAreasWithRooms(n, minApWidth) {
+    // Generate splits  for livingAreaRects
+
+    if (this.livingAreaRects == undefined) {
+      console.error("fillLivingAreasWithRooms error: no living areas present!");
+      return;
+    }
+
+    // Divide n over all livingAreas
+    const livingAreaSplits = this.houseCalc.calculateNDivisions(
+      this.livingAreaRects,
+      n,
+      minApWidth
+    );
+
+    this.livingAreaRects.forEach((laRect, index) => {
+      // split each LA randomly min max WIDTH oriented into corresponding n apartments
+      // push to apartments
+      // console.log("split ", laRect, " into ", livingAreaSplits[index]);
+
+      this.apartmentRects.push(
+        ...laRect.splitRandomlyMinMaxWidthOriented(
+          livingAreaSplits[index],
+          minApWidth
+        )
+      );
+    });
+
+    return this;
+  }
 
   /**
    * Fills the Apartment rects with sub-Rectangles generated through STM

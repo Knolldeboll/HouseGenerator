@@ -41,14 +41,16 @@ const ThreeCanvas = (props) => {
     //tests.testRectangleHelpers();
     //
     //tests.testRectangleSTMSplitting();
-    //tests.testHouseCalculator(50, 60, 3, 5);
+    //tests.testHouseCalculator(60, 40, 6, 5);
 
     //tests.testHouseDefinedShape(30, 20);
     // Perfection!
     //tests.testMultiCorridorHouse(30, 20, 2, 3);
 
     //tests.testEdgeRectSpawn();
-    tests.testLivingAreaGeneration(30, 20, 2, 4);
+    //tests.testLivingAreaGeneration(30, 20, 2, 3);
+    tests.testLivingAreaApartmentFilling(30, 20, 2, 4, 25);
+    //tests.testRectangleRandomWidthSplitting();
   }, []);
 
   //Bei canvas den canvasRef reinpacken, damit in canvasRef dieses Element referenziert werden kann

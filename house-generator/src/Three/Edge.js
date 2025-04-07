@@ -128,7 +128,7 @@ class Edge {
 
   /**
    * Split Edge into specifed parts
-   * @param {number} parts As specific lengths of the new Edges
+   * @param {number} parts As specific lengths of the new Edges, not percentages
    * @returns The newly generated Edges
    */
   splitIntoParts(parts) {
@@ -170,12 +170,13 @@ class Edge {
    * @param {THREE.Vector2} direction The direction of the rectangle, x = 1: right, x = -1: left, y = 1: up, y = -1: down
    */
   spawnRectangle(height, direction) {
-    console.log(
+    /* console.log(
       "> Spawn Rectangle along Edge with height: ",
       height,
       " and direction: ",
       direction
     );
+    */
     if (this._isHorizontal && direction.x != 0 && direction.y == 0) {
       console.error("Invalid direction for horizontal edge!");
       return undefined;
@@ -195,7 +196,7 @@ class Edge {
     let x, y, w, h;
 
     if (this._isHorizontal) {
-      console.log("is horizontal edge");
+      //console.log("is horizontal edge");
       x = this._middleVertice.x;
       // if direction.y == 1: // nach oben
       // if direction.y == -1: // nach unten
@@ -203,7 +204,7 @@ class Edge {
       w = this.length;
       h = height;
     } else {
-      console.log("is vertical edge");
+      //console.log("is vertical edge");
       // if direction.x == 1: // nach rechts
       // if direction.x == -1: // nach links
       x = this._middleVertice.x + (direction.x * height) / 2;
@@ -212,9 +213,9 @@ class Edge {
       h = this.length;
     }
 
-    console.log("new rect in order with: ", w, h, x, y);
+    //console.log("new rect in order with: ", w, h, x, y);
     let newRect = new Rectangle().fromCoords(w, h, x, y);
-    console.log("Spawned Rectangle: ", newRect);
+    //console.log("Spawned Rectangle: ", newRect);
     return newRect;
   }
 

@@ -1,5 +1,3 @@
-import House from "./House";
-
 class HouseCalculator {
   // Private static instance to hold the singleton
   static #instance;
@@ -77,6 +75,15 @@ class HouseCalculator {
   }
 
   /**
+   * Calculate max Apartments for a given LA rect
+   * @param {} laRect The Living Apartment Rect the max Apartment amount should be calculated for
+   * @param {} minApartmentWidth The min width for apartments
+   */
+  calculateMaxApartmentsLivingArea(laRect, minApartmentWidth) {
+    return Math.floor(laRect.longerSideLength / minApartmentWidth);
+  }
+
+  /**
    * Calculates the max amount of Apartments, which will be close to minimal size
    * for the given corridor layout (amount of corridors placed along the longer side of the poop)
    * @param {float} houseWidth
@@ -125,6 +132,50 @@ class HouseCalculator {
       2 * maxApartmentsWholeLivingArea +
       halfLivingAreaCount * maxApartmentsHalfLivingArea
     );
+  }
+
+  /**
+   * Distributes the n wanted Apartments over the corridorRects
+   * @param {} livingAreaRects i corrirdor
+   * @returns
+   */
+
+  // TODO: Min Max based. Currenlty only minbased
+
+  // TODO: Distribution orientation: Bigger LAs can be more likely to be spread than smaller ones?
+  // or would this be autofixed by maxbasing?
+  calculateNDivisions(livingAreaRects, n, minApartmentWidth) {
+    console.log("inputs", livingAreaRects, n, minApartmentWidth);
+    let nSplits = [];
+    if (livingAreaRects.length > n) {
+      console.error(
+        "calcNDivisions error: n",
+        n,
+        " too small! each of the ",
+        livingAreaRects.length,
+        " la must at least have one apartment"
+      );
+    }
+
+    // 1. Max out every corridor rect's apartment count
+    for (let la of livingAreaRects) {
+      nSplits.push(
+        this.calculateMaxApartmentsLivingArea(la, minApartmentWidth)
+      );
+    }
+    console.log("calcNDivs max nSplits:", nSplits);
+
+    while (nSplits.reduce((acc, val) => acc + val, 0) != n) {
+      let currentNSplitIndex = Math.floor(Math.random() * nSplits.length);
+      // Keep each la at least at 1 apartment
+      if (nSplits[currentNSplitIndex] > 1) {
+        nSplits[currentNSplitIndex]--;
+      }
+    }
+
+    console.log("calculateNDivisions produced following splits:", nSplits);
+
+    return nSplits;
   }
 }
 export default HouseCalculator;

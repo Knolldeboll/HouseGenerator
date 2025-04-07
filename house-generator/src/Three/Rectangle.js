@@ -6,6 +6,8 @@ import ShapeObject from "./ShapeObject";
 import PreApartment from "./PreApartment";
 import Apartment from "./Apartment";
 import Tools from "./Tools";
+import { sub } from "three/tsl";
+import { Vector2 } from "three/webgpu";
 
 //TODO: Getters/Setters
 
@@ -331,10 +333,10 @@ class Rectangle {
    * Split into n randomly sized parts, each part with size between min and max
    * Oriented along the longer side
    * Can be used to keep AR intact by calculating the maxArea and minArea beforehand!
-   * @param {*} max
-   *
+   * @param {*} min minimum Area of subrects
+   * @param {*} max maximum Area of subrects
    *  */
-  splitRandomlyMinMaxOriented(n, min, max) {
+  splitRandomlyMinMaxSizeOriented(n, min, max) {
     // TODO: Check orientation!
     // Where
 
@@ -373,18 +375,38 @@ class Rectangle {
   }
 
   /**
+   * Splits this rect into n parts along the longer edge, which are between min and max wide
+   * @param {*} n  Parts to be split into
+   * @param {*} min Min width of the subrects
+   * @param {*} max Max width of the subrects
+   */
+
+  // TODO: Implement
+  /// TODO: Max values is currently this.longerSideLength,
+  // should be parametrisable
+  splitRandomlyMinMaxWidthOriented(n, min) {
+    // Split longer side into n random parts of min width
+    const parts = Tools.getInstance().divideValueIntoPartsMinMax(
+      this.longerSideLength,
+      n,
+      min,
+      this.longerSideLength
+    );
+
+    // generate subrects from these parts
+    return this.generateSubRectsFromEdgePartsOriented(parts);
+  }
+
+  // TODO: Hier wird anscheinend jedes fertige STM Rectangle an dieselbe Position gepackt
+  // also als ob das Parent-Rect bei 0,0 wäre oder so
+  // Wird zum initialisieren denn die width/height von dem ding hier benutzt oder auch irgendwie die position?
+
+  /**
    * Split with STM into n parts of random size, each part with size between min and max
    * @param {number} n
    * @param {number} minPercentage The minimum size a subrect must have, given as percentage of this rectangles area
    * @param {number} maxPercentage The maximum size a subrect must have, given as percentage of this rectangles area
    */
-
-  //
-
-  // TODO: Hier wird anscheinend jedes fertige STM Rectangle an dieselbe Position gepackt
-  // also als ob das Parent-Rect bei 0,0 wäre oder so
-
-  // Wird zum initialisieren denn die width/height von dem ding hier benutzt oder auch irgendwie die position?
   splitSTMMinMax(n, minPercentage, maxPercentage) {
     console.log(
       ">>> Start Rect STM for Rect: ",
@@ -981,6 +1003,38 @@ class Rectangle {
     //return parts;
   }
 
+  /**
+   * Generate Subrects based on parts of one of this.edges
+   * @param {List} parts Edge parts of concrete length
+   */
+  generateSubRectsFromEdgePartsOriented(parts) {
+    let subRects = [];
+    // Split one longer edge into subedges
+
+    if (this.isHorizontal) {
+      // lower edge, then up
+      const edgeParts = this.edges.lowerEdge.splitIntoParts(parts);
+
+      for (const e of edgeParts) {
+        subRects.push(
+          e.spawnRectangle(this.shorterSideLength, new Vector2(0, 1))
+        );
+      }
+    } else {
+      // right edge, then left
+      const edgeParts = this.edges.rightEdge.splitIntoParts(parts);
+
+      for (const e of edgeParts) {
+        subRects.push(
+          e.spawnRectangle(this.shorterSideLength, new Vector2(-1, 0))
+        );
+      }
+    }
+
+    // Spawn rects from subedges
+
+    return subRects;
+  }
   // TODO: Outsource the "generate vertices" part into separate
   generateHorizontalRectangles(parts) {
     // Kann man nicht vereinen, da bei SplitEven mit den Edges gearbeitet wird
