@@ -17,7 +17,7 @@ export const SettingsTab = (props) => {
         type="email"
         className="form-control"
         id="exampleFormControlInput1"
-        placeholder={props.n} //onChange nimmt Callback aus den Props!
+        placeholder={props.placeHolder} //onChange nimmt Callback aus den Props!
         //TODO: aktuellen Value reinpacken
         // Value ist im state drinnrn
         onChange={(e) => {
@@ -25,6 +25,12 @@ export const SettingsTab = (props) => {
         }}
         style={{ width: "80%" }}
       ></input>
+
+      {props.limitValue && (
+        <label htmlFor="exampleFormControlInput1" className="form-label">
+          Limit: {props.limitValue}
+        </label>
+      )}
     </div>
   );
 };

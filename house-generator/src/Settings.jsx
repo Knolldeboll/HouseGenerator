@@ -24,14 +24,33 @@ const Settings = (props) => {
       }}
     >
       <SettingsTab
-        n={n}
-        labelText="Apartments"
+        placeHolder={n}
+        labelText="House Width"
         onDataChange={props.onDataChange}
-      />{" "}
-      <SettingsTab n={n} labelText="Test1" onDataChange={props.onDataChange} />
-      <SettingsTab n={n} labelText="Test2" onDataChange={props.onDataChange} />
-      <SettingsTab n={n} labelText="Test3" onDataChange={props.onDataChange} />
-      <SettingsTab n={n} labelText="Test4" onDataChange={props.onDataChange} />
+      />
+      <SettingsTab
+        placeHolder={n}
+        labelText="House Height"
+        onDataChange={props.onDataChange}
+      />
+      <SettingsTab
+        placeHolder={n}
+        labelText="Corridor Width"
+        limitValue="longer Side"
+        onDataChange={props.onDataChange}
+      />
+      <SettingsTab
+        placeHolder={n}
+        labelText="Min Apartment Width"
+        limitValue="shorter side"
+        onDataChange={props.onDataChange}
+      />
+      <SettingsTab
+        placeHolder={n}
+        labelText="Apartments"
+        limitValue="x"
+        onDataChange={props.onDataChange}
+      />
     </div>
   );
 };

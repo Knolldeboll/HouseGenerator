@@ -588,6 +588,33 @@ class Tests {
       ...house.apartmentRects.flatMap((ap) => ap.generateShapeMesh()),
     ]);
   }
+
+  testMaxedOutMultiCorridor(
+    houseWidth,
+    houseHeight,
+    corridorWidth,
+    corridorCount,
+    n,
+    minApWidth
+  ) {
+    const calc = HouseCalculator.getInstance();
+    const maxCorridors = calc.calculateMaxCorridors();
+    s;
+    //const maxApartments = calc
+
+    let house = new House(
+      houseWidth * houseHeight,
+      null,
+      n,
+      houseWidth,
+      houseHeight,
+      null,
+      null
+    )
+      .multiCorridorLayout(corridorWidth, corridorCount)
+      .generateLivingAreaRects()
+      .fillLivingAreasWithRooms(n, 3);
+  }
 }
 
 export default Tests;

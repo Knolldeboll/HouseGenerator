@@ -12,7 +12,7 @@ const ThreeCanvas = (props) => {
   //TODO: Muss hier für rendering ne ref verwendet werden?
   // Für canvasRef ja, aber für rendering?
 
-  // useEffect (callback, [dependencies])
+  // useEffect (callback, [dependencies]) -> hier spezielle Bedeutung!
   // callback wird bei mount aufgerufen, auch wenn sich dependencies ändern
   // Muss verwendet werden, da Rendering von DOM-Elementen abhängig ist, die erst nach mount vorhanden sind!
   useEffect(() => {
@@ -28,6 +28,9 @@ const ThreeCanvas = (props) => {
     );
 
     const tests = new Tests(rendering);
+
+    //TODO: State  for the Limit values, which are then passed into the settings tabs
+
     //this.rendering = RenderingDemo(this.canvasRef);
     // Tests
 
@@ -49,7 +52,7 @@ const ThreeCanvas = (props) => {
 
     //tests.testEdgeRectSpawn();
     //tests.testLivingAreaGeneration(30, 20, 2, 3);
-    tests.testLivingAreaApartmentFilling(30, 20, 2, 4, 25);
+    ///tests.testLivingAreaApartmentFilling(30, 20, 2, 10, 25);
     //tests.testRectangleRandomWidthSplitting();
   }, []);
 
