@@ -29,7 +29,10 @@ const ThreeCanvas = (props) => {
 
     const tests = new Tests(rendering);
 
-    //TODO: State  for the Limit values, which are then passed into the settings tabs
+    // Limit Values are generated here (from House/other js stuff) and accessed in the Settings tabs
+    //TODO: Context for the Limit values, which are then passed into the settings tabs as limitValue prop for the labels
+    // Settings Values are generated in the Settings Tabs and accessed here in the house/js stuff in method calls
+    // for example: n changes, call house.generateMultiLayout(...,n,...)
 
     //this.rendering = RenderingDemo(this.canvasRef);
     // Tests
@@ -52,7 +55,7 @@ const ThreeCanvas = (props) => {
 
     //tests.testEdgeRectSpawn();
     //tests.testLivingAreaGeneration(30, 20, 2, 3);
-    ///tests.testLivingAreaApartmentFilling(30, 20, 2, 10, 25);
+    //tests.testLivingAreaApartmentFilling(30, 20, 2, 3, 25);
     //tests.testRectangleRandomWidthSplitting();
   }, []);
 
