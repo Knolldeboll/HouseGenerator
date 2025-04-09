@@ -2,6 +2,7 @@ import { use } from "react";
 import { useLimitStore } from "./LimitStore";
 import { SettingsTab } from "./SettingsTab";
 import React, { Component, useState } from "react"; // Oben ein Bereich, der mehrere Inputdingers für Settings enthält
+import { useParamStore } from "./ParamStore";
 
 // Oben ein Bereich, der mehrere Inputdingers für Settings enthält
 const Settings = (props) => {
@@ -30,12 +31,21 @@ const Settings = (props) => {
   );
   */
 
-  // Store access, here only reading!
+  // Limit Store access, here only reading!
   const maxCorridorWidth = useLimitStore((state) => state.maxCorridorWidth);
   const maxMinApartmentWidth = useLimitStore(
     (state) => state.maxMinApartmentWidth
   );
   const maxN = useLimitStore((state) => state.maxN);
+
+  // Get the ParamStore setters here and pass them to the SettingsTabs, to be used as a callback function
+  const setHouseWidth = useParamStore((state) => state.setHouseWidth);
+  const setHouseHeight = useParamStore((state) => state.setHouseHeight);
+  const setCorridorWidth = useParamStore((state) => state.setCorridorWidth);
+  const setMinApartmentWidth = useParamStore(
+    (state) => state.setMinApartmentWidth
+  );
+  const setN = useParamStore((state) => state.setN);
 
   return (
     // div surrounds one setting tab
@@ -51,29 +61,29 @@ const Settings = (props) => {
       <SettingsTab
         placeHolder={n}
         labelText="House Width"
-        onDataChange={props.onDataChange}
+        onDataChange={setHouseWidth}
       />
       <SettingsTab
         placeHolder={n}
         labelText="House Height"
-        onDataChange={props.onDataChange}
+        onDataChange={setHouseHeight}
       />
       <SettingsTab
         placeHolder={n}
         labelText="Corridor Width"
-        limitValue={maxCorridorWidth}
-        onDataChange={props.onDataChange}
+        limitValue={maxCorridorWidth || "x"}
+        onDataChange={setCorridorWidth}
       />
       <SettingsTab
         placeHolder={n}
         labelText="Min Apartment Width"
-        limitValue={maxMinApartmentWidth}
-        onDataChange={props.onDataChange}
+        limitValue={maxMinApartmentWidth || "x"}
+        onDataChange={setMinApartmentWidth}
       />
       <SettingsTab
         placeHolder={n}
         labelText="Apartments"
-        limitValue={maxN}
+        limitValue={maxN || "x"}
         onDataChange={props.onDataChange}
       />
     </div>

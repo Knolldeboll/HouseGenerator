@@ -13,11 +13,11 @@ class InputChecker {
     // mit shorterSide wäre dann n immer 1
 
     // maxN wird dann später berechnet
-    this.houseWidth = houseWidth;
-    this.houseHeight = houseHeight;
+    this.houseWidth = undefined;
+    this.houseHeight = undefined;
     this.corridorWidth = corridorWidth;
     this.minApartmentWidth = minApartmentWidth;
-    this.houseCalc = new HouseCalculator();
+    this.houseCalc = HouseCalculator.getInstance();
 
     this.longerSide = undefined;
     this.shorterSide = undefined;
@@ -25,20 +25,84 @@ class InputChecker {
     this.checkCorridorWidth();
   }
 
-  checkCorridorWidth() {
+  // Hier machen wir für die Limits alles mit gettern und für die Settings alles mit Settern.
+  // Überall werden die relevanten Werte erneut eingegeben, sodass man bei Eingabe von Settings direkt den
+  // neuen Wert für die Limits abfragen kann.
+
+  // Machts nicht mehr Sinn, einfach eine Methode zu machen wo man alle Änderungen optional reingibt?
+  // Dann werden direkt die Limits berechnet und zurückgegeben.
+  // Das wird aber eh nur bei Änderung eines Wertes ausgeführt, weil die Verarbeitung ja Instant ist.. oder?
+  //
+  // So wie's jetzt ist muss man in jedem Spezialfall die richtigen getter für die Limits aufrufen
+  // aber eigentlich nur alle einmal einzeln für jedes Limit eben
+
+  /**
+   * Returns the max corridor width for given width/height
+   * Also updates this. width/height and sides
+   * @param {*} width
+   * @param {*} height
+   * @returns
+   */
+  getMaxCorridorWidth(width, height) {
+    // let longerSide = width > height ? width : height;
+    this.houseWidth = width;
+    this.houseHeight = height;
+    this.calculateSides(width, height);
+
+    return this.longerSide;
+  }
+
+  /**
+   * calcultes the maximum minApartmentWidth that can fit into the building with the least amount of corridors
+   * -> May also be the shorter side of the building, which will result in n = 1
+   * @param {*} width
+   * @param {*} height
+   * @returns
+   */
+  getMaxMinApWidth(width, height) {
+    this.houseWidth = width;
+    this.houseHeight = height;
+    this.calculateSides(width, height);
+    //console.log("maxmin", width, height, this.longerSide, this.shorterSide);
+    return this.shorterSide;
+    // solange minApWidth > als k ist wird n immer 1 sein.
+    // Erst wenn minApWidh = k kann man einen Korridor machen, was mindestens zu n = 2 führt.
+  }
+
+  /**
+   * Calculates the absolute max of apartments that fit.
+   * @param {} width
+   * @param {*} height
+   * @param {*} corridorWidth
+   * @param {*} minApartmentWidth
+   * @returns
+   */
+  getMaxN(width, height, corridorWidth, minApartmentWidth) {
+    return this.houseCalc.calculateMaxAparmentsAbsolute(
+      width,
+      height,
+      corridorWidth,
+      minApartmentWidth
+    );
+  }
+
+  // is called when trying to enter width? macht aber keinen sinn.
+  // Lieber ne settermethode, die fehlschlägt wenn man shit eingibt.
+  checkCorridorWidth(width, height, corridorWidth) {
+    this.calculateSides(width, height);
     if (this.corridorWidth >= this.longerSide) {
       console.error("Corridor too big to fit into the building");
       return false;
     }
     return true;
   }
+
+  setWidth() {}
   // TODO: Handle every error with exceptions!
 
-  calculateSides() {
-    this.longerSide =
-      this.houseWidth > this.houseWidth ? this.houseWidth : this.houseHeight;
-    this.shorterSide =
-      this.houseWidth < this.houseWidth ? this.houseWidth : this.houseHeight;
+  calculateSides(width, height) {
+    this.longerSide = width > height ? width : height;
+    this.shorterSide = width < height ? width : height;
   }
   /**
    * Calculates the max amount of Apartments and the thresholds for new corridors for the given configuration
@@ -79,14 +143,5 @@ class InputChecker {
     let maxCorridors1 = this.houseCalc.calculateMaxCorridors();
     let maxCorridors2 = this.houseCalc.calculateMaxCorridors();
   }
-
-  /**
-   * calcultes the maximum minApartmentWidth that can fit into the building with the least amount of corridors
-   * -> May also be the shorter side of the building, which will result in n = 1
-   */
-  getMinApWidthRange() {
-    return [0, this.shorterSide];
-    // solange minApWidth > als k ist wird n immer 1 sein.
-    // Erst wenn minApWidh = k kann man einen Korridor machen, was mindestens zu n = 2 führt.
-  }
 }
+export default InputChecker;

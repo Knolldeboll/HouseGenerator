@@ -3,12 +3,32 @@ import * as THREE from "three";
 import RenderingDemo from "./Three/RenderingDemo";
 import Rendering from "./Three/Rendering";
 import Tests from "./Three/tests.js";
+import { useLimitStore } from "./LimitStore.js";
+import InputChecker from "./Three/InputChecker.js";
+import { useParamStore } from "./ParamStore.js";
+import { cos } from "three/tsl";
 
 const ThreeCanvas = (props) => {
   //const rendering = useRef();
   // CanvasRef ist nur zum Referenzieren des hier erzeugten canvas-Element in Rendering.js da!
   const canvasRef = useRef();
 
+  const setMaxCorridorWidth = useLimitStore(
+    (state) => state.setMaxCorridorWidth
+  );
+  const setMaxMinApartmentWidth = useLimitStore(
+    (state) => state.setMaxMinApartmentWidth
+  );
+
+  const setMaxN = useLimitStore((state) => state.setMaxN);
+
+  const widthInput = useParamStore((state) => state.houseWidth);
+  const heightInput = useParamStore((state) => state.houseHeight);
+  const corrInput = useParamStore((state) => state.corridorWidth);
+  const minApWidthInput = useParamStore((state) => state.minApartmentWidth);
+  const nInput = useParamStore((state) => state.n);
+
+  const inputChecker = new InputChecker(30, 20, 3, 3);
   //TODO: Muss hier für rendering ne ref verwendet werden?
   // Für canvasRef ja, aber für rendering?
 
@@ -27,12 +47,17 @@ const ThreeCanvas = (props) => {
       props.heightFactor
     );
 
+    //const InputChecker = new InputChecker();
+
     const tests = new Tests(rendering);
 
     // Limit Values are generated here (from House/other js stuff) and accessed in the Settings tabs
     //TODO: Context for the Limit values, which are then passed into the settings tabs as limitValue prop for the labels
+
     // Settings Values are generated in the Settings Tabs and accessed here in the house/js stuff in method calls
     // for example: n changes, call house.generateMultiLayout(...,n,...)
+
+    // TODO: How do I process value changes in the
 
     //this.rendering = RenderingDemo(this.canvasRef);
     // Tests
@@ -57,7 +82,70 @@ const ThreeCanvas = (props) => {
     //tests.testLivingAreaGeneration(30, 20, 2, 3);
     //tests.testLivingAreaApartmentFilling(30, 20, 2, 3, 25);
     //tests.testRectangleRandomWidthSplitting();
+
+    // Test Limit generation
+
+    // Das hier soll eig nur ausgeführt werden, wenn ein Input geändert wurde
+    // und die Inputs werden in SettingsTab geändert
+    //setMaxMinApartmentWidth(inputChecker.getMinApWidthRange()[1]);
   }, []);
+
+  // useEffect mit Dependency auf width values aus dem Store!
+  useEffect(() => {
+    //only update maxminApLimit/corrLimit if width and height is given
+    if (widthInput === "" || heightInput === "") return;
+
+    let maxminApLimit = inputChecker.getMaxMinApWidth(widthInput, heightInput);
+    console.log();
+    setMaxMinApartmentWidth(maxminApLimit);
+
+    let maxCorrWidth = inputChecker.getMaxCorridorWidth(
+      widthInput,
+      heightInput
+    );
+    setMaxCorridorWidth(maxCorrWidth);
+
+    //TODO: update n limit if apWidth and corr are also given
+  }, [widthInput, heightInput]);
+
+  // Change n on corrInput and all others present
+  useEffect(() => {
+    if (
+      widthInput === "" ||
+      heightInput === "" ||
+      minApWidthInput === "" ||
+      corrInput === ""
+    )
+      return;
+
+    let n = inputChecker.getMaxN(
+      widthInput,
+      heightInput,
+      corrInput,
+      minApWidthInput
+    );
+    setMaxN(n);
+  }, [corrInput]);
+
+  // Change n on corrInput and all others present
+  useEffect(() => {
+    if (
+      widthInput === "" ||
+      heightInput === "" ||
+      corrInput === "" ||
+      minApWidthInput === ""
+    )
+      return;
+
+    let n = inputChecker.getMaxN(
+      widthInput,
+      heightInput,
+      corrInput,
+      minApWidthInput
+    );
+
+    setMaxN(n);
+  }, [minApWidthInput]);
 
   //Bei canvas den canvasRef reinpacken, damit in canvasRef dieses Element referenziert werden kann
 

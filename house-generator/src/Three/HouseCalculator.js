@@ -57,6 +57,9 @@ class HouseCalculator {
    * @param {*} corridorWidth
    * @param {*} minApartmentWidth
    */
+
+  //TODO: Bums passt nicht. Da kommt voll oft 0 raus obwohls eigentlich passen sollte.
+  // Vielleicht doch iterativ machen.
   calculateMaxCorridors(length, corridorWidth, minApartmentWidth) {
     // return imax
     console.log(
@@ -83,9 +86,41 @@ class HouseCalculator {
     return Math.floor(laRect.longerSideLength / minApartmentWidth);
   }
 
+  // TODO: Handle 1 corridor
+  /**
+   * Calculates the max amount of Apartments for the max amount of corridors, which is computed here.
+   *
+   * @param {float} houseWidth
+   * @param {float} houseHeight
+   * @param {float} corridorWidth
+   * @param {float} minApartmentWidth
+   */
+  calculateMaxAparmentsAbsolute(
+    houseWidth,
+    houseHeight,
+    corridorWidth,
+    minApartmentWidth
+  ) {
+    let longerSide = houseWidth > houseHeight ? houseWidth : houseHeight;
+    let maxCorridors = this.calculateMaxCorridors(
+      longerSide,
+      corridorWidth,
+      minApartmentWidth
+    );
+
+    return this.calculateMaxAparmentsCounted(
+      houseWidth,
+      houseHeight,
+      corridorWidth,
+      minApartmentWidth,
+      maxCorridors
+    );
+  }
+
   /**
    * Calculates the max amount of Apartments, which will be close to minimal size
    * for the given corridor layout (amount of corridors placed along the longer side of the poop)
+   * is also able to handle 1 corridor, as then no half living areas are counted
    * @param {float} houseWidth
    * @param {float} houseHeight
    * @param {float} corridorWidth
@@ -98,7 +133,7 @@ class HouseCalculator {
   // TODO better: always calculate for placelement along the longer AND shorter side and return the max amount for
   // the direction!
   // TODO: also notify (return?) the caller of the placement direction of the corridors!
-  calculateMaxAparments(
+  calculateMaxAparmentsCounted(
     houseWidth,
     houseHeight,
     corridorWidth,
@@ -120,6 +155,7 @@ class HouseCalculator {
       shorterSide / minApartmentWidth
     );
     // 2.2 calc max amount of aps per half living area
+    // When i = 1, this is 0
     let maxApartmentsHalfLivingArea = Math.floor(
       ((shorterSide - corridorWidth) * 0.5) / minApartmentWidth
     );

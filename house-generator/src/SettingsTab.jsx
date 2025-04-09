@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 export const SettingsTab = (props) => {
-  console.log("SettingsTab props: ", props);
+  //console.log("SettingsTab props: ", props);
 
   return (
     <div
