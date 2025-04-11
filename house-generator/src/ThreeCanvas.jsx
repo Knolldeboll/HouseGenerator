@@ -43,24 +43,31 @@ const ThreeCanvas = (props) => {
   //let rendering;
   //let tests;
 
+  // TODO: Number()-fy the inputs EVERYWHERE to process them for Limit comparision and for passing these into house generation
+  // Maybe to do this in SettingsTab is enough!
+
   /** Call this if inputs have been changed to rerender stuff in the canvas, for example to rerender corridors! */
   // Currently called only on n change
   let refreshCanvas = () => {
-    // Hier kann dann nicht auf renderer und tests zugegriffen werden, weil die nur lokal in
-    //console.error("Correct inputs, redo tests. tests object:", tests.current);
-    //tests.current?.testTests();
-    // Hier wird noch corridorCount angegeben, aber der soll später komplett ohne auskommen und einfach
-    // den zum n passenden count verwenden
-
-    //return;
+    /*
     tests.current?.testLivingAreaApartmentFilling(
-      widthInput,
-      heightInput,
-      corrInput,
-      3,
-      nInput
+      Number(widthInput),
+      Number(heightInput),
+      Number(corrInput),
+      Number(minApWidthInput),
+      Number(nInput)
+    );
+    */
+
+    tests.current?.testAdaptiveMultiCorridorLayout(
+      Number(widthInput),
+      Number(heightInput),
+      Number(corrInput),
+      Number(minApWidthInput),
+      Number(nInput)
     );
   };
+
   // useEffect (callback, [dependencies]) -> hier spezielle Bedeutung!
   // Hier wird callback bei mount aufgerufen
   // Muss verwendet werden, da Rendering von DOM-Elementen abhängig ist, die erst nach mount vorhanden sind!
@@ -73,7 +80,7 @@ const ThreeCanvas = (props) => {
       props.heightFactor
     );
 
-    tests.current = new Tests(rendering);
+    tests.current = new Tests(rendering.current);
 
     console.log(" Objects after mounting: ", rendering.current, tests.current);
     //callback
@@ -183,7 +190,7 @@ const ThreeCanvas = (props) => {
 
   // on nInput changes
   useEffect(() => {
-    console.log("n Input Changed to ", nInput);
+    console.log("nInput Changed to ", nInput);
     if (
       widthInput === "" ||
       heightInput === "" ||

@@ -609,31 +609,47 @@ class Tests {
     ]);
   }
 
-  testMaxedOutMultiCorridor(
+  // TODO: Check Input Datatypes.
+  // Den shit hats nämlich seit den InputField-Inputs zerrupft und da stehen Strings drinnen und keine numbers
+  testAdaptiveMultiCorridorLayout(
     houseWidth,
     houseHeight,
     corridorWidth,
-    corridorCount,
-    n,
-    minApWidth
+    minApWidth,
+    n
   ) {
-    const calc = HouseCalculator.getInstance();
-    const maxCorridors = calc.calculateMaxCorridors();
-    s;
-    //const maxApartments = calc
+    console.log(
+      "inputs for type validation:",
+      houseWidth,
+      houseHeight,
+      corridorWidth,
+      minApWidth,
+      n
+    );
 
     let house = new House(
       houseWidth * houseHeight,
       null,
-      n,
+      null,
       houseWidth,
       houseHeight,
       null,
       null
     )
-      .multiCorridorLayout(corridorWidth, corridorCount)
-      .generateLivingAreaRects()
-      .fillLivingAreasWithApartments(n, 3);
+      .adaptiveMultiCorridorLayout(corridorWidth, minApWidth, n)
+      .generateLivingAreaRects();
+
+    console.log("adaptive corr house: ", house);
+
+    this.rendering.addAllToScene([
+      ...house.mainCorridorRects.flatMap((mcr) => mcr.generateShapeMesh()),
+      ...house.connectorRects.flatMap((cr) => cr.generateShapeMesh()),
+      ...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
+    ]);
+
+    return;
+
+    // TODO: Add shit to rendering
   }
 }
 

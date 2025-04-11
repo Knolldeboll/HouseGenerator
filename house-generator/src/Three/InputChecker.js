@@ -59,6 +59,10 @@ class InputChecker {
    * @param {*} height
    * @returns
    */
+
+  // TODO: somehow also respond to the current corridorWidth,
+  // return Math.min (k for corridorWidth and min # of corrs, shorterSide)
+  // -> Width of biggest square that can fit into the living area
   getMaxMinApWidth(width, height) {
     this.houseWidth = width;
     this.houseHeight = height;

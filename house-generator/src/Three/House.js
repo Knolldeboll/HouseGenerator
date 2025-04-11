@@ -796,6 +796,16 @@ class House {
     let shorterSide =
       this.houseWidth > this.houseHeight ? this.houseHeight : this.houseWidth;
 
+    if (corridorCount == 0) {
+      // TODO: Einziges Apartment ist houseRectangle
+      console.log("Multicorr not implemented for 0 corr");
+      return this;
+    }
+    if (corridorCount == 1) {
+      console.log("Multicorr not implemented for 1 corr");
+      // TODO: reimplement simpleCorridorLayout and use it here
+      return this;
+    }
     // calculate k
     // longer side,i, corrwidth
     // K passt!
@@ -863,6 +873,63 @@ class House {
   }
 
   /**
+   * Generate 0,1 or multi corridor layout where the amount of corridors adapts to the
+   * desired amount of apartments (n) and chooses the minimal amount of corridors
+   */
+  adaptiveMultiCorridorLayout(corridorWidth, minApartmentWidth, n) {
+    // this.corridorWidth = corridorWidth;
+    // this.minApartmentWidth = minApartmentWidth;
+
+    console.log(">adaptiveMultiCorridorLayout");
+    // TODO: Recall saved Thresholds. Can only be done if only n changed and the other stuff is the same!
+    this.corridorThresholds = this.houseCalc.calculateCorridorThresholds(
+      this.houseWidth,
+      this.houseHeight,
+      corridorWidth,
+      minApartmentWidth
+    );
+
+    // Doublecheck: n überschreitet maximale Anzahl an Wohnungen beim Layout mit den meistmöglichen Korridoren
+    if (n > this.corridorThresholds[this.corridorThresholds.length]) {
+      console.error(
+        "Error: more desired apartments than max amount of possible apartments in the biggest corridor layout!"
+      );
+    }
+
+    // 1. Calculate the needed amount of corridors for the inputs - iterate through thresholds and find the correct index.
+
+    let corridors = 0;
+
+    for (let t of this.corridorThresholds) {
+      /* console.log(
+        " i want ",
+        n,
+        " apartments but with ",
+        corridors,
+        " corridors only ",
+        t,
+        "are possible"
+      );
+
+      */
+      // beispiel: ich will 5 aps.
+      // in [0] passt max 1 : weiter
+      // in [1] passt max 4: weiter
+      // in [2] past max 5: OK!
+      if (n <= t) {
+        // console.log(" so take ", corridors, " corridors!");
+        break;
+      }
+
+      //console.log("so skip to corr++");
+      corridors++;
+    }
+
+    // 2. generate multi corridor layout with the found amount of apartments
+    return this.multiCorridorLayout(corridorWidth, corridors);
+  }
+
+  /**
    * Generates rect's for the current corridor Layout's living areas
    * @returns
    */
@@ -878,12 +945,18 @@ class House {
     console.log(">generateLivingAreaRects");
     if (this.k == undefined) {
       console.error(">LA Generation error: no corridors available!");
+      return this;
     }
 
     // TODO: L.A. Color from params, not hardcoded
     let livingAreaColor = new THREE.Color(255, 0, 220);
     // 1. Take the first two corridor rects, which are the first two in the corridor list
     // Exception: if corridor is only one
+
+    if (i == 0) {
+      // TODO: one Living Area, is the house rectange
+      // also is the only apartment.
+    }
 
     if (i == 1) {
       let corr = this.mainCorridorRects[0];
@@ -1015,6 +1088,9 @@ class House {
 
   // TODO: check this with the max amount of apartments /thresholds per specified i
   // the n specified here can't be higher than the current i's upper threshold
+
+  // TODO: Can this handle one Corridor?!?!?
+
   fillLivingAreasWithApartments(n, minApWidth) {
     // Generate splits  for livingAreaRects
 
@@ -1025,6 +1101,11 @@ class House {
       return;
     }
 
+    if (this.livingAreaRects.length == 1) {
+      // one living Area: one apartment
+      this.apartmentRects = this.livingAreaRects;
+      return this;
+    }
     // Divide n over all livingAreas
     // Does only calculate how many apartments are present for each living Area
 
@@ -1039,7 +1120,7 @@ class House {
 
     // Return here to only test if calculateRandomNDivisions works properly!
 
-    return this;
+    //return this;
     this.livingAreaRects.forEach((laRect, index) => {
       // split each LA randomly min max WIDTH oriented into corresponding n apartments
       // push to apartments

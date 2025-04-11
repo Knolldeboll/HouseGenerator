@@ -98,6 +98,55 @@ class HouseCalculator {
   }
 
   /**
+   * Calculate a list of apartment count thresholds for [0,1,...,maxCorridors] which needs swapping to one more corridor
+   * 0 corridors: 1 apartment
+   *
+   * @param {} length The side along which the corridors should be placed
+   * @param {*} houseWidth
+   * @param {*} houseHeight
+   * @param {*} corridorWidth
+   * @param {*} minApartmentWidth
+   * @returns
+   */
+  calculateCorridorThresholds(
+    houseWidth,
+    houseHeight,
+    corridorWidth,
+    minApartmentWidth
+  ) {
+    let length = houseWidth > houseHeight ? houseWidth : houseHeight;
+
+    console.log(">calculateCorridorThresholds");
+
+    // Wir gehen davon aus, dass die max-anzahl an Korridoren dann entlang der längeren Seite platziert werden.
+    // Da passen schließlich ja auch mehr rein als andersrum.
+    let maxCorridors = this.calculateMaxCorridors(
+      length,
+      corridorWidth,
+      minApartmentWidth
+    );
+
+    // 0 Corridors: 1 Apartment.
+    let thresholds = [1];
+
+    for (let i = 1; i <= maxCorridors; i++) {
+      // Hier wird dann automatisch bei i = 1 entlang der kurzen Seite, bei i > 1 entlang der Längeren Seite platziert
+
+      const currentMaxAps = this.calculateMaxAparmentsCounted(
+        houseWidth,
+        houseHeight,
+        corridorWidth,
+        minApartmentWidth,
+        i
+      );
+      thresholds.push(currentMaxAps);
+      console.log("Max Aps for ", i, " corridors: ", currentMaxAps);
+    }
+
+    return thresholds;
+  }
+
+  /**
    * Calculate max Apartments for a given LA rect
    * @param {} laRect The Living Apartment Rect the max Apartment amount should be calculated for
    * @param {} minApartmentWidth The min width for apartments
