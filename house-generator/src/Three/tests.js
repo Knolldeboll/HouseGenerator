@@ -13,6 +13,10 @@ class Tests {
     this.rendering = rendering;
   }
 
+  testTests() {
+    console.log("Tests work!");
+  }
+
   testRendering() {
     const material = new THREE.MeshBasicMaterial({
       color: 0xff6347,
@@ -398,11 +402,26 @@ class Tests {
     minApartmentWidth
   ) {
     const houseCalc = HouseCalculator.getInstance();
+
     let maxCorridors = houseCalc.calculateMaxCorridors(
       houseWidth,
       corridorWidth,
       minApartmentWidth
     );
+
+    console.log(
+      "maxCorridors for hw ",
+      houseWidth,
+      " hh ",
+      houseHeight,
+      " cw ",
+      corridorWidth,
+      " minApW ",
+      minApartmentWidth
+    );
+    console.log(">>", maxCorridors);
+
+    return;
     //length, i, corridorWidth
 
     // Test with house Width, maxI and
@@ -410,12 +429,11 @@ class Tests {
 
     console.log("k for ", maxCorridors, " corridors: ", k);
 
-    let maxAps = houseCalc.calculateMaxAparments(
+    let maxApsAbsolute = houseCalc.calculateMaxAparmentsAbsolute(
       houseWidth,
       houseHeight,
       corridorWidth,
-      minApartmentWidth,
-      maxCorridors
+      minApartmentWidth
     );
 
     console.log(
@@ -428,7 +446,7 @@ class Tests {
       " and min apartment width of ",
       minApartmentWidth
     );
-    console.log(">>>", maxAps, "<<<");
+    console.log(">>>", maxApsAbsolute, "<<<");
 
     console.log("testing Thresholds: ");
 
@@ -459,7 +477,7 @@ class Tests {
       new Rectangle().fromCoords(8, minWidth, 0, 0),
     ];
 
-    houseCalc.calculateNDivisions(testLArects, 15, minWidth);
+    houseCalc.calculateRandomNDivisions(testLArects, 15, minWidth);
   }
 
   // Passt soweit erstmal Kollegen
@@ -566,6 +584,7 @@ class Tests {
     corridorCount,
     n
   ) {
+    console.log("------ Test livingAreaApartmentFilling");
     let house = new House(
       houseWidth * houseHeight,
       null,
@@ -577,10 +596,11 @@ class Tests {
     )
       .multiCorridorLayout(corridorWidth, corridorCount)
       .generateLivingAreaRects()
-      .fillLivingAreasWithRooms(n, 3);
+      .fillLivingAreasWithApartments(n, 3);
 
     console.log("Testhouse", house);
 
+    return;
     this.rendering.addAllToScene([
       ...house.mainCorridorRects.flatMap((mcr) => mcr.generateShapeMesh()),
       ...house.connectorRects.flatMap((cr) => cr.generateShapeMesh()),
@@ -613,7 +633,7 @@ class Tests {
     )
       .multiCorridorLayout(corridorWidth, corridorCount)
       .generateLivingAreaRects()
-      .fillLivingAreasWithRooms(n, 3);
+      .fillLivingAreasWithApartments(n, 3);
   }
 }
 

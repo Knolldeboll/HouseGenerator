@@ -9,6 +9,7 @@ const App = (props) => {
   const canvasWidthFactor = 1;
   const canvasHeightFactor = 1;
 
+  console.log("Complete App component requested");
   //TODO: Define more state variables
 
   //TODO: Aktuell werden Inputs im SettingsTab angenommen, durch gepasste Callback-Methoden
@@ -33,7 +34,7 @@ const App = (props) => {
       return;
     }
     // setN veranlasst das rerendern des ThreeCanvas durch State-Change
-    setN(value);
+    // setN(value);
     //console.log("State: ", state.current);
   };
   //TODO: (aber nicht so wichtig) hier wieder Flexis reinpacken, damit mit beliebig vielen Settings gearbeitet werden kann
@@ -52,12 +53,15 @@ const App = (props) => {
 
       <ThreeCanvas
         //className=""
+
+        // Canvas soll eig nur beim rescalen neu gerendert werden.
+
         widthFactor={canvasWidthFactor}
         heightFactor={canvasHeightFactor}
         // Key enforced ein Re-Rendering. ggf nicht nötig.
-        key={n} // Wenn nur ne Zahl geändert wird, die nichtmal angezeigt wird bzw. in ner custom prop ohne nutzen ist,
+        //key={n} // Wenn nur ne Zahl geändert wird, die nichtmal angezeigt wird bzw. in ner custom prop ohne nutzen ist,
         // wird das Component nicht neu gerendert.
-        n={n}
+        // n={n}
       ></ThreeCanvas>
     </>
   );

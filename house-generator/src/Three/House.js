@@ -171,6 +171,7 @@ class House {
       y: this.houseHeight / 2,
     };
 
+    /*
     console.log(
       "width " +
         this.houseWidth +
@@ -179,7 +180,7 @@ class House {
         " aspect ratio later " +
         this.houseWidth / this.houseHeight
     );
-
+    */
     this.calculateHouseVertices();
 
     // Calculate Shape object
@@ -206,7 +207,7 @@ class House {
   calculateRandomHouseShape() {
     var aspectRatio = 0.6 + 0.8 * Math.random(); // AR zw. 0.6 und 1.4
 
-    console.log("random aspect ratio " + aspectRatio);
+    //  console.log("random aspect ratio " + aspectRatio);
     // aspectratio = a/b
     // a = aspectratio/b
 
@@ -785,7 +786,10 @@ class House {
   // decide which split direction shall be used
   // TODO: Think about which is the best corridor placement direction... heheheheheheh
 
+  // TODO: Use this in the real world case of
+  // "generate corridors for the specified amount of corridors according to the specified n"
   multiCorridorLayout(corridorWidth, corridorCount) {
+    console.log(">multiCorridorLayout");
     this.corridorWidth = corridorWidth;
     let longerSide =
       this.houseWidth > this.houseHeight ? this.houseWidth : this.houseHeight;
@@ -796,7 +800,7 @@ class House {
     // longer side,i, corrwidth
     // K passt!
     let k = this.houseCalc.calculateK(longerSide, corridorCount, corridorWidth);
-    console.log("k:", k);
+    //console.log("k:", k);
 
     // Place corridorCount* corridor rects along longer side with k + corridorWidth/2 distance to each other
     // x =
@@ -862,25 +866,26 @@ class House {
    * Generates rect's for the current corridor Layout's living areas
    * @returns
    */
+
+  // TODO: Handle i = 0 as one living area
+  // TODO: Handle i = 1 as two big living areas
   generateLivingAreaRects() {
     // i is given from this.corridorRects.length
     // NO! denn da sind alle Rects drinnen!
 
     const i = this.mainCorridorRects.length;
 
-    console.log(">generate Living area Rects");
+    console.log(">generateLivingAreaRects");
     if (this.k == undefined) {
       console.error(">LA Generation error: no corridors available!");
     }
-    console.log("> House generate Living Area Rects");
 
-    // TODO: L.A. Color from params
+    // TODO: L.A. Color from params, not hardcoded
     let livingAreaColor = new THREE.Color(255, 0, 220);
     // 1. Take the first two corridor rects, which are the first two in the corridor list
     // Exception: if corridor is only one
 
     if (i == 1) {
-      // TODO: Do bums
       let corr = this.mainCorridorRects[0];
       if (corr.isHorizontal) {
         // upper/lower
@@ -1003,15 +1008,17 @@ class House {
   //
 
   /**
-   * Divides the
+   * Divides the living areas in n total Apartments
    *
    * @param {} n
    */
 
   // TODO: check this with the max amount of apartments /thresholds per specified i
   // the n specified here can't be higher than the current i's upper threshold
-  fillLivingAreasWithRooms(n, minApWidth) {
+  fillLivingAreasWithApartments(n, minApWidth) {
     // Generate splits  for livingAreaRects
+
+    console.log("> fillLivingAreasWithRooms");
 
     if (this.livingAreaRects == undefined) {
       console.error("fillLivingAreasWithRooms error: no living areas present!");
@@ -1019,12 +1026,20 @@ class House {
     }
 
     // Divide n over all livingAreas
-    const livingAreaSplits = this.houseCalc.calculateNDivisions(
+    // Does only calculate how many apartments are present for each living Area
+
+    //
+    const livingAreaSplits = this.houseCalc.calculateRandomNDivisions(
       this.livingAreaRects,
       n,
       minApWidth
     );
 
+    // console.log("Living area Splits: ");
+
+    // Return here to only test if calculateRandomNDivisions works properly!
+
+    return this;
     this.livingAreaRects.forEach((laRect, index) => {
       // split each LA randomly min max WIDTH oriented into corresponding n apartments
       // push to apartments

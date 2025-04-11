@@ -9,7 +9,14 @@ import { useParamStore } from "./ParamStore.js";
 import { cos } from "three/tsl";
 
 const ThreeCanvas = (props) => {
-  //const rendering = useRef();
+  //console.log("ThreeCanvas Component requested!");
+
+  // useRef hält Zeugs zwischen Renders konstant und lädt die nicht neu!
+
+  // Rerender-Stable rendering and tests objects.
+  const rendering = useRef(null);
+  const tests = useRef(null);
+
   // CanvasRef ist nur zum Referenzieren des hier erzeugten canvas-Element in Rendering.js da!
   const canvasRef = useRef();
 
@@ -29,39 +36,59 @@ const ThreeCanvas = (props) => {
   const nInput = useParamStore((state) => state.n);
 
   const inputChecker = new InputChecker(30, 20, 3, 3);
-  //TODO: Muss hier für rendering ne ref verwendet werden?
-  // Für canvasRef ja, aber für rendering?
 
+  // TODO: Problem. ThreeCanvas component gets rerendered on every input, which fucks up rendering and tests, as they only
+  // get initialized on mount. mount however is not redone on every rerender!
+
+  //let rendering;
+  //let tests;
+
+  /** Call this if inputs have been changed to rerender stuff in the canvas, for example to rerender corridors! */
+  // Currently called only on n change
+  let refreshCanvas = () => {
+    // Hier kann dann nicht auf renderer und tests zugegriffen werden, weil die nur lokal in
+    //console.error("Correct inputs, redo tests. tests object:", tests.current);
+    //tests.current?.testTests();
+    // Hier wird noch corridorCount angegeben, aber der soll später komplett ohne auskommen und einfach
+    // den zum n passenden count verwenden
+
+    //return;
+    tests.current?.testLivingAreaApartmentFilling(
+      widthInput,
+      heightInput,
+      corrInput,
+      3,
+      nInput
+    );
+  };
   // useEffect (callback, [dependencies]) -> hier spezielle Bedeutung!
-  // callback wird bei mount aufgerufen, auch wenn sich dependencies ändern
+  // Hier wird callback bei mount aufgerufen
   // Muss verwendet werden, da Rendering von DOM-Elementen abhängig ist, die erst nach mount vorhanden sind!
   useEffect(() => {
-    //callback
-    // Initialize Scene
-    // Rendering: Three.js Basis
-    // Nimm den hier erzeugten canvas und gib dessen Ref an den Rendering-Konstruktor weiter
-    // Prinzipiell geht da aber bestimmt auch "findElementById"
-    const rendering = new Rendering(
+    console.log("MOUNTING");
+
+    rendering.current = new Rendering(
       canvasRef,
       props.widthFactor,
       props.heightFactor
     );
 
+    tests.current = new Tests(rendering);
+
+    console.log(" Objects after mounting: ", rendering.current, tests.current);
+    //callback
+    // Initialize Scene
+    // Rendering: Three.js Basis
+    // Nimm den hier erzeugten canvas und gib dessen Ref an den Rendering-Konstruktor weiter
+    // Prinzipiell geht da aber bestimmt auch "findElementById"
     //const InputChecker = new InputChecker();
-
-    const tests = new Tests(rendering);
-
     // Limit Values are generated here (from House/other js stuff) and accessed in the Settings tabs
     //TODO: Context for the Limit values, which are then passed into the settings tabs as limitValue prop for the labels
-
     // Settings Values are generated in the Settings Tabs and accessed here in the house/js stuff in method calls
     // for example: n changes, call house.generateMultiLayout(...,n,...)
-
     // TODO: How do I process value changes in the
-
     //this.rendering = RenderingDemo(this.canvasRef);
     // Tests
-
     //tests.testRendering();
     //tests.testVectors();
     //tests.testEdges();
@@ -72,25 +99,26 @@ const ThreeCanvas = (props) => {
     //tests.testRectangleHelpers();
     //
     //tests.testRectangleSTMSplitting();
-    //tests.testHouseCalculator(60, 40, 6, 5);
-
+    //tests.testHouseCalculator(10, 20, 6, 5);
     //tests.testHouseDefinedShape(30, 20);
     // Perfection!
     //tests.testMultiCorridorHouse(30, 20, 2, 3);
-
     //tests.testEdgeRectSpawn();
+    // Das hier funzt glaub ganz gut soweit.
     //tests.testLivingAreaGeneration(30, 20, 2, 3);
-    //tests.testLivingAreaApartmentFilling(30, 20, 2, 3, 25);
+    // Das hier funzt oft nicht:
+    // Möglicherweise wegen Endlosem Random Splitting
+    //console.log("hi");
     //tests.testRectangleRandomWidthSplitting();
-
     // Test Limit generation
-
     // Das hier soll eig nur ausgeführt werden, wenn ein Input geändert wurde
     // und die Inputs werden in SettingsTab geändert
     //setMaxMinApartmentWidth(inputChecker.getMinApWidthRange()[1]);
   }, []);
 
   // useEffect mit Dependency auf width values aus dem Store!
+
+  // on width / height input change
   useEffect(() => {
     //only update maxminApLimit/corrLimit if width and height is given
     if (widthInput === "" || heightInput === "") return;
@@ -108,15 +136,19 @@ const ThreeCanvas = (props) => {
     //TODO: update n limit if apWidth and corr are also given
   }, [widthInput, heightInput]);
 
-  // Change n on corrInput and all others present
+  // Change n Limit on corrInput and all others present
+
+  // on corridorInput changes
   useEffect(() => {
+    //console.log("corrInput changed!")
     if (
       widthInput === "" ||
       heightInput === "" ||
       minApWidthInput === "" ||
       corrInput === ""
-    )
+    ) {
       return;
+    }
 
     let n = inputChecker.getMaxN(
       widthInput,
@@ -124,10 +156,12 @@ const ThreeCanvas = (props) => {
       corrInput,
       minApWidthInput
     );
+
+    // set the limit for n
     setMaxN(n);
   }, [corrInput]);
 
-  // Change n on corrInput and all others present
+  // on minApartmentWidth Input
   useEffect(() => {
     if (
       widthInput === "" ||
@@ -147,6 +181,22 @@ const ThreeCanvas = (props) => {
     setMaxN(n);
   }, [minApWidthInput]);
 
+  // on nInput changes
+  useEffect(() => {
+    console.log("n Input Changed to ", nInput);
+    if (
+      widthInput === "" ||
+      heightInput === "" ||
+      corrInput === "" ||
+      minApWidthInput === "" ||
+      nInput === ""
+    ) {
+      console.log("but returned!");
+      return;
+    }
+
+    refreshCanvas();
+  }, [nInput]);
   //Bei canvas den canvasRef reinpacken, damit in canvasRef dieses Element referenziert werden kann
 
   // canvasWrapper dictates the width/heigt of the canvas

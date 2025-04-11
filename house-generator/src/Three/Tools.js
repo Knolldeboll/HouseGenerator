@@ -86,6 +86,9 @@ class Tools {
     let rest = value - n * min;
 
     // Distribute the remaining value randomly across the parts
+
+    let endlessMitigationCounter = 0;
+
     while (rest > 0) {
       //console.log("rest > 0", rest);
       // Iterate over every part
@@ -122,6 +125,13 @@ class Tools {
 
         // Round rest
         rest = Math.round(rest * 100) / 100;
+      }
+
+      endlessMitigationCounter++;
+
+      if (endlessMitigationCounter > 50) {
+        console.error("ENDLESSMITIGATION 50 in calculateRandomNDivisions");
+        return [];
       }
     }
 

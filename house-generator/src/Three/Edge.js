@@ -64,7 +64,7 @@ class Edge {
    * @returns The newly generated Edges
    */
   splitEvenly(n) {
-    console.log("> split Edge evenly in n edges");
+    //console.log("> split Edge evenly in n edges");
     let subEdges = [];
     let direction = new THREE.Vector2();
 
@@ -100,7 +100,7 @@ class Edge {
    * @returns The two generated Edgess
    */
   splitByLength(len) {
-    console.log("> Split Edge by length ");
+    //console.log("> Split Edge by length ");
     let newEdges = [];
 
     if (len >= this.length) {

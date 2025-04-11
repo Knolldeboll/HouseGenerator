@@ -6,8 +6,10 @@ import { useParamStore } from "./ParamStore";
 
 // Oben ein Bereich, der mehrere Inputdingers für Settings enthält
 const Settings = (props) => {
-  console.log("Settings props: ", props);
+  // console.log("Settings props: ", props);
   //const [n, setN] = useState(6);
+
+  //console.log("Settings Component requested!");
 
   const n = "poop";
   /*
@@ -84,7 +86,7 @@ const Settings = (props) => {
         placeHolder={n}
         labelText="Apartments"
         limitValue={maxN || "x"}
-        onDataChange={props.onDataChange}
+        onDataChange={setN}
       />
     </div>
   );
