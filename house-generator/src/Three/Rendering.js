@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { thickness } from "three/tsl";
 
 class Rendering {
   // This class initiates everything that three.js needs to render and containts the animation update loop
@@ -12,6 +13,8 @@ class Rendering {
     console.log("Wrapper: ", this.wrapper);
     this.widthFactor = widthFactor;
     this.heightFactor = heightFactor;
+
+    this.meshes = [];
 
     // Camera
     // (fov, aspect ratio,  view frustrum, view frustru,)
@@ -164,6 +167,7 @@ class Rendering {
    */
   addToScene(mesh) {
     this.scene.add(mesh);
+    this.meshes.push(mesh);
   }
 
   /**
@@ -174,7 +178,17 @@ class Rendering {
     for (let m of meshes) {
       // console.log("Add all mesh to scene:",m)
       this.scene.add(m);
+      this.meshes.push(m);
     }
+  }
+
+  clearScene() {
+    // .clear is too harsh!
+    // only remove the meshes.
+    this.scene.remove(...this.meshes);
+
+    console.log(this.scene);
+    this.meshes = [];
   }
 
   animate = () => {

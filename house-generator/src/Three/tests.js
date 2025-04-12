@@ -618,6 +618,7 @@ class Tests {
     minApWidth,
     n
   ) {
+    console.log(">testAdaptiveMultiCorridorLayout");
     console.log(
       "inputs for type validation:",
       houseWidth,
@@ -626,6 +627,10 @@ class Tests {
       minApWidth,
       n
     );
+
+    console.log("Removed all per scene");
+    this.rendering.clearScene();
+    // remove all from scene!
 
     let house = new House(
       houseWidth * houseHeight,

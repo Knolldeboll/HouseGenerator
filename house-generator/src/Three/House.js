@@ -457,6 +457,7 @@ class House {
     this.corridorWidth = corridorHeight;
     // x/y = width/height /2
 
+    this.resetRects();
     // TODO: Move houseRect generation to generateHouseShape()
     // TODO: Look what to do with uneven n's - Maybe just throw an error
 
@@ -506,7 +507,6 @@ class House {
       let lowerRooms = lowerRect.splitEvenlyOriented(n / 2);
 
       this.totalRects = this.totalRects.concat(upperRooms, lowerRooms);
-      return this.totalRects;
     } else {
       //let totalRects =[];
       let houseRect = new Rectangle().fromCoords(
@@ -546,8 +546,9 @@ class House {
       let rightRooms = rightRect.splitEvenlyOriented(n / 2);
 
       this.totalRects = this.totalRects.concat(leftRooms, rightRooms);
-      return this.totalRects;
     }
+
+    return this;
 
     //1. Place Corridor with defined width.
     //2. Generate Rectangles from Corridor Vertices and House Vertices
@@ -574,6 +575,8 @@ class House {
   randomizedICorridor(n, corridorWidth) {
     this.corridorWidth = corridorWidth;
     console.log("> RandomizedICorridor");
+
+    this.resetRects();
     // x/y = width/height /2
 
     // TODO: Error for Both corridor Types! when using uneven numbers <=5
@@ -596,6 +599,8 @@ class House {
        * All rects that will be passed to rendering
        */
       //let totalRects = [];
+
+      this.totalRects = [];
 
       this.k = (this.houseHeight - corridorWidth) / 2;
       console.log("Horizontal Corridor! with k", this.k);
@@ -789,6 +794,7 @@ class House {
   // TODO: Use this in the real world case of
   // "generate corridors for the specified amount of corridors according to the specified n"
   multiCorridorLayout(corridorWidth, corridorCount) {
+    this.resetRects();
     console.log(">multiCorridorLayout");
     this.corridorWidth = corridorWidth;
     let longerSide =
@@ -806,6 +812,7 @@ class House {
       // TODO: reimplement simpleCorridorLayout and use it here
       return this;
     }
+
     // calculate k
     // longer side,i, corrwidth
     // K passt!
@@ -879,7 +886,7 @@ class House {
   adaptiveMultiCorridorLayout(corridorWidth, minApartmentWidth, n) {
     // this.corridorWidth = corridorWidth;
     // this.minApartmentWidth = minApartmentWidth;
-
+    this.resetRects();
     console.log(">adaptiveMultiCorridorLayout");
     // TODO: Recall saved Thresholds. Can only be done if only n changed and the other stuff is the same!
     this.corridorThresholds = this.houseCalc.calculateCorridorThresholds(
@@ -939,6 +946,10 @@ class House {
   generateLivingAreaRects() {
     // i is given from this.corridorRects.length
     // NO! denn da sind alle Rects drinnen!
+
+    // Reset LA rects only.
+    // Corridors are generated before and in these methods, every other rect array is reset
+    this.livingAreaRects = [];
 
     const i = this.mainCorridorRects.length;
 
@@ -1093,7 +1104,7 @@ class House {
 
   fillLivingAreasWithApartments(n, minApWidth) {
     // Generate splits  for livingAreaRects
-
+    this.apartmentRects = [];
     console.log("> fillLivingAreasWithRooms");
 
     if (this.livingAreaRects == undefined) {
@@ -1792,6 +1803,15 @@ class House {
 
     // Nach Schritt "Aspect Ratio verschlechtert sich": undo des Hinzufügens des neuen Apartments an die Wand
     // Setze die Wand-Koordinaten dann neu auf vertex b des oberen und vertex d des unteren Apartments.
+  }
+
+  resetRects() {
+    this.totalRects = [];
+    this.apartmentRects = [];
+    this.roomRects = [];
+    this.mainCorridorRects = [];
+    this.connectorRects = [];
+    this.livingAreaRects = [];
   }
 }
 
