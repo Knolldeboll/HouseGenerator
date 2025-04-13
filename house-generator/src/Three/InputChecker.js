@@ -43,6 +43,7 @@ class InputChecker {
    * @param {*} height
    * @returns
    */
+
   getMaxCorridorWidth(width, height) {
     // let longerSide = width > height ? width : height;
     this.houseWidth = width;
@@ -82,6 +83,9 @@ class InputChecker {
    * @returns
    */
   getMaxN(width, height, corridorWidth, minApartmentWidth) {
+    // TODO: Anpassen, denn hier hat sich was verändert!
+
+    // Es soll eigentlich der höchste Wert aus Thresholds kommen.
     return this.houseCalc.calculateMaxAparmentsAbsolute(
       width,
       height,
@@ -111,6 +115,8 @@ class InputChecker {
   /**
    * Calculates the max amount of Apartments and the thresholds for new corridors for the given configuration
    * and returns them as []
+   *
+   * WIRD NICHT VERWENDET
    */
   getNRange() {
     // Berechnet k - wenn minApWidth > k, muss n = 1 sein.

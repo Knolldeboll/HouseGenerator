@@ -174,6 +174,7 @@ class House {
       y: this.houseHeight / 2,
     };
 
+    // this.houseRect only changes here, if width and height are changed
     this.houseRect = new Rectangle().fromCoords(
       this.houseWidth,
       this.houseHeight,
@@ -750,12 +751,6 @@ class House {
 
   singleCorridor() {}
 
-  /**
-   * Places multiple corridors along the longer side of the house
-   * corridorCount must be calculated before and can be anything, but should not exceed maxI,
-   * which should be calculated beforehand
-   */
-
   // TODO: exctract method for filling living area rectangles/ rectangles in general along their longer side
   // TODO: Handle "1" as corridorCount input
 
@@ -765,7 +760,16 @@ class House {
 
   // TODO: Use this in the real world case of
   // "generate corridors for the specified amount of corridors according to the specified n"
-  multiCorridorLayout(corridorWidth, corridorCount) {
+
+  /**
+   * Places multiple corridors along the specified side of the house
+   * corridorCount and orientation must be calculated before and can be anything
+   * @param {*} corridorWidth
+   * @param {*} corridorCount
+   * @param {*} orientation
+   * @returns
+   */
+  multiCorridorLayout(corridorWidth, corridorCount, orientation) {
     this.resetRects();
     console.log(">multiCorridorLayout");
     this.corridorWidth = corridorWidth;
@@ -776,12 +780,16 @@ class House {
 
     if (corridorCount == 0) {
       // TODO: Einziges Apartment ist houseRectangle
-      console.error("Multicorr not implemented for 0 corr");
+      // livingAreaGeneration can handle this!
+      console.error("No Corridors!");
+      this.k = shorterSide;
       return this;
     }
     if (corridorCount == 1) {
       console.error("Multicorr not implemented for 1 corr");
       // TODO: reimplement simpleCorridorLayout and use it here
+      // --- Along which side?
+      // needs "orientation Parameter!"
       return this;
     }
 
@@ -861,6 +869,12 @@ class House {
     this.resetRects();
     console.log(">adaptiveMultiCorridorLayout");
     // TODO: Recall saved Thresholds. Can only be done if only n changed and the other stuff is the same!
+
+    if (n == 1) {
+      return this.multiCorridorLayout(corridorWidth, 0);
+    }
+
+    // Achtung: corridorThresholds enthält jetzt sowas wie [1, {vertical:13,horizontal:15}, {vertical:20,horizontal:25},]
     this.corridorThresholds = this.houseCalc.calculateCorridorThresholds(
       this.houseWidth,
       this.houseHeight,
@@ -868,8 +882,18 @@ class House {
       minApartmentWidth
     );
 
+    console.log("New Thresholds: ", this.corridorThresholds);
+
     // Doublecheck: n überschreitet maximale Anzahl an Wohnungen beim Layout mit den meistmöglichen Korridoren
-    if (n > this.corridorThresholds[this.corridorThresholds.length]) {
+    // .at(-1): letztes
+
+    let maxThreshold = this.corridorThresholds.at(-1);
+
+    // null has value 0
+    if (
+      (maxThreshold.shorter != null && n > maxThreshold.shorter) ||
+      (maxThreshold.longer != null && n > maxThreshold.longer)
+    ) {
       console.error(
         "Error: more desired apartments than max amount of possible apartments in the biggest corridor layout!"
       );
@@ -877,8 +901,43 @@ class House {
 
     // 1. Calculate the needed amount of corridors for the inputs - iterate through thresholds and find the correct index.
 
-    let corridors = 0;
+    // fetch the value out of the threshold array's threshold sets, that is either == n or the smallest that is >n
 
+    let corridors = 0;
+    let isShorter;
+    for (let ts of this.corridorThresholds) {
+      //   if()
+      // Wir gehen frech davon aus dass die Dinger sortiert sind und dass nicht
+      // bei höheren Korridoren nochmal bessere Elemente kommen
+
+      // check for direct hits
+      if (ts.shorter >= n) {
+        isShorter = true;
+        console.log(
+          "the best threshold is ",
+          ts.shorter,
+          " and on shorter side"
+        );
+        break;
+      }
+      if (ts.longer >= n) {
+        isShorter = false;
+        console.log("the best threshold is ", ts.longer, " and on longer side");
+        break;
+      }
+
+      corridors++;
+    }
+
+    console.log(
+      "amount of corridors: ",
+      corridors,
+      " and ",
+      isShorter ? " shorter" : " longer"
+    );
+
+    return this;
+    /*
     for (let t of this.corridorThresholds) {
       /* console.log(
         " i want ",
@@ -890,7 +949,7 @@ class House {
         "are possible"
       );
 
-      */
+      
       // beispiel: ich will 5 aps.
       // in [0] passt max 1 : weiter
       // in [1] passt max 4: weiter
@@ -903,7 +962,13 @@ class House {
       //console.log("so skip to corr++");
       corridors++;
     }
+*/
 
+    console.log(
+      "adapted to ",
+      corridors,
+      " corridors, do multicorridor with it"
+    );
     // 2. generate multi corridor layout with the found amount of apartments
     return this.multiCorridorLayout(corridorWidth, corridors);
   }
@@ -921,22 +986,27 @@ class House {
 
     // Reset LA rects only.
     // Corridors are generated before and in these methods, every other rect array is reset
-    this.livingAreaRects = [];
-
-    const i = this.mainCorridorRects.length;
 
     console.log(">generateLivingAreaRects");
+
+    let livingAreaColor = new THREE.Color(255, 0, 220);
+    this.livingAreaRects = [];
+    const i = this.mainCorridorRects.length;
+
     if (this.k == undefined) {
-      console.error(">LA Generation error: no corridors available!");
+      console.error(">LA Generation error: corridor generation was skipped!");
       return this;
     }
 
     // TODO: L.A. Color from params, not hardcoded
-    let livingAreaColor = new THREE.Color(255, 0, 220);
+
     // 1. Take the first two corridor rects, which are the first two in the corridor list
     // Exception: if corridor is only one
 
     if (i == 0) {
+      console.log("0 corridors: 1 Living Area");
+      this.livingAreaRects.push(this.houseRect.setColor(livingAreaColor));
+      return this;
       // TODO: one Living Area, is the house rectange
       // also is the only apartment.
     }
