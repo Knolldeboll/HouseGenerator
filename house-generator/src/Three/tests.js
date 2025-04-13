@@ -585,15 +585,8 @@ class Tests {
     n
   ) {
     console.log("------ Test livingAreaApartmentFilling");
-    let house = new House(
-      houseWidth * houseHeight,
-      null,
-      n,
-      houseWidth,
-      houseHeight,
-      null,
-      null
-    )
+    let house = new House()
+      .definedHouseShape(houseWidth, houseHeight)
       .multiCorridorLayout(corridorWidth, corridorCount)
       .generateLivingAreaRects()
       .fillLivingAreasWithApartments(n, 3);
@@ -619,28 +612,13 @@ class Tests {
     n
   ) {
     console.log(">testAdaptiveMultiCorridorLayout");
-    console.log(
-      "inputs for type validation:",
-      houseWidth,
-      houseHeight,
-      corridorWidth,
-      minApWidth,
-      n
-    );
 
-    console.log("Removed all per scene");
+    console.log("Removed all previous per scene");
     this.rendering.clearScene();
     // remove all from scene!
 
-    let house = new House(
-      houseWidth * houseHeight,
-      null,
-      null,
-      houseWidth,
-      houseHeight,
-      null,
-      null
-    )
+    let house = new House()
+      .definedHouseShape(houseWidth, houseHeight)
       .adaptiveMultiCorridorLayout(corridorWidth, minApWidth, n)
       .generateLivingAreaRects();
 
@@ -651,10 +629,14 @@ class Tests {
       ...house.connectorRects.flatMap((cr) => cr.generateShapeMesh()),
       ...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
     ]);
+  }
 
-    return;
+  // Passt!
+  testNewHouseConstructor(houseWidth, houseHeight) {
+    let house = new House().definedHouseShape(houseWidth, houseHeight);
 
-    // TODO: Add shit to rendering
+    this.rendering.addToScene(house.houseRect.generateShapeMesh());
+    console.log("House: ", house);
   }
 }
 

@@ -66,6 +66,12 @@ const ThreeCanvas = (props) => {
       Number(minApWidthInput),
       Number(nInput)
     );
+
+    return;
+    tests.current?.testNewHouseConstructor(
+      Number(widthInput),
+      Number(heightInput)
+    );
   };
 
   // useEffect (callback, [dependencies]) -> hier spezielle Bedeutung!

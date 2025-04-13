@@ -9,32 +9,31 @@ import Tools from "./Tools";
 import HouseCalculator from "./HouseCalculator";
 import { IndirectStorageBufferAttribute, Vector2 } from "three/webgpu";
 
-// TODO: Create ShapeObject interface and make House and Apartment implement this.
-// They inherit the ability to create a THREE.Shape from vertices.
+// TODO: Use new House constructor everywhere
 
 class House {
-  // TODO: Parametrize width/height
-  // TODO: Parametrize other stuff
   /**
-   * Generates a House from the given parameters and automatically
-   * generates the outer walls (calls generateHouseShape)
-   * Everything else must be done by decorator methods
+   * Generates an empty house object.
+   * Fill or redefine with decorator methods.
    */
-  constructor(
-    houseArea,
-    gardenArea,
-    apartmentCount,
-    houseWidth,
-    houseHeight,
-    minApartmentSize,
-    maxApartmentSize
-  ) {
+  constructor() {
     // House Area wird eig nur in randomShape verwendet glaub
-    this.houseArea = houseArea;
-    this.gardenArea = gardenArea;
-    this.apartmentCount = apartmentCount;
-    this.houseWidth = houseWidth;
-    this.houseHeight = houseHeight;
+    this.houseArea = undefined;
+
+    /**
+     * current n
+     */
+    this.apartmentCount = undefined;
+
+    /**
+     * width of building
+     */
+    this.houseWidth = undefined;
+
+    /**
+     * height of building
+     */
+    this.houseHeight = undefined;
     /**
      * current height of living areas
      */
@@ -64,6 +63,9 @@ class House {
     /**
      * The rects from the Apartments, corridor and rooms
      */
+    this.houseRect = undefined;
+
+    // TotalRects macht eigentlich nie Sinn, oder?
     this.totalRects = [];
     this.apartmentRects = [];
     this.roomRects = [];
@@ -76,9 +78,7 @@ class House {
     // c: lower left
     // d: lower right
 
-    // TODO: Define edge mappings for vertices, so for say "upperEdge" = a and b
-    // so that we can say apartment1.upperEdge = apartment2.lowerEdge = a and b for placing apartment1 below apartment2
-    // Otherwise the vertices have to be called separately, so
+    // Edges and stuff are done in house-Rectangle creation
 
     // TODO: Doublecheck vertex order
     /**
@@ -88,6 +88,8 @@ class House {
      * d: lower right
      *
      */
+
+    // TODO: Maybe remove this, as this is also done in Rectangle
     this.vertices = {
       a: null,
       b: null,
@@ -95,29 +97,25 @@ class House {
       d: null,
     };
 
+    /*
     this.minApartmentSize = minApartmentSize;
     this.maxApartmentSize = maxApartmentSize;
-
+*/
     // List of Apartment ShapeObjects
+
+    // Apartments for STM Room generation
+    // Möglicherweise auch obsolete mittlerweile, da alles in Rectangles gemacht werden kann.
     this.apartments = [];
 
+    // Größen (Area) der einzelnen Apartments -
+    // Wird eigentlich auch nirgends verwendet, außer vielleicht in STM
     this.apartmentSizes = [];
-
-    // ShapeObject of Garden area
-    this.gardenShapeObject = null;
 
     // ShapeObject of house base shape
     this.houseShapeObject = null;
 
     // Utilities
     this.houseCalc = HouseCalculator.getInstance();
-
-    // check if random or defined houseshape should be used
-    if (this.houseWidth == null || this.houseHeight == null) {
-      this.calculateRandomHouseShape();
-    } else {
-      this.calculateDefinedHouseShape();
-    }
 
     // this.calculateRooms();
   }
@@ -127,7 +125,7 @@ class House {
    * - Obsolete?
    */
   calculateRooms() {
-    this.calculateRandomHouseShape(); // Mirahmadi Step 1/
+    this.randomHouseShape(); // Mirahmadi Step 1/
     this.setFixedApartmentSizes(); // Placeholder for calculateApartmentSizes
 
     //this.calculateApartmentSizes();
@@ -155,32 +153,34 @@ class House {
   }
 
   /**
-   * Calculate House Rectangle shape, according to given width and height
-   * Sets house position and vertices and shapeobject
+   *
    */
-  calculateDefinedHouseShape() {
-    if (this.houseWidth == null || this.houseHeight == null) {
+
+  definedHouseShape(width, height) {
+    if (width == null || height == null) {
       console.error(
         ">calculateDefinedHouseShape: House width or height not specified!"
       );
       return;
     }
 
+    this.houseWidth = width;
+    this.houseHeight = height;
+
+    this.houseArea = width * height;
+
     this.position = {
       x: this.houseWidth / 2,
       y: this.houseHeight / 2,
     };
 
-    /*
-    console.log(
-      "width " +
-        this.houseWidth +
-        "height " +
-        this.houseHeight +
-        " aspect ratio later " +
-        this.houseWidth / this.houseHeight
+    this.houseRect = new Rectangle().fromCoords(
+      this.houseWidth,
+      this.houseHeight,
+      this.position.x,
+      this.position.y
     );
-    */
+
     this.calculateHouseVertices();
 
     // Calculate Shape object
@@ -192,19 +192,20 @@ class House {
       this.vertices.d,
     ];
     // TODO: Specify housecolor
-    // TODO: Somehow bums that shit.
-    // ShapeObject war gedacht für tatsächliche Shapes.
-    // Apartment ist gedacht zum unterscheiden von House und Apartments, da --- eh...
 
     // Create Shape from vertices and color
+    // Shape ist sowas wie Rectangle, aber älter
     this.houseShapeObject = new ShapeObject(shapeVertices, 0xffff11);
+
+    return this;
   }
 
-  /**  Calculates Random House Rectangle Shape with aspect ratio from 0.8 to 1.2, without any appartments placed in the floor
+  /**  Calculates Random House Rectangle Shape with aspect ratio from 0.8 to 1.2,
+   *   with defined area
    * sets house position and vertices and shapeobject
    */
 
-  calculateRandomHouseShape() {
+  randomHouseShape(houseArea) {
     var aspectRatio = 0.6 + 0.8 * Math.random(); // AR zw. 0.6 und 1.4
 
     //  console.log("random aspect ratio " + aspectRatio);
@@ -217,42 +218,10 @@ class House {
 */
 
     // 0.4 = maxAspectRatio - minAspectRatio
-    var width = Math.sqrt(this.houseArea * aspectRatio);
-    var height = this.houseArea / width;
+    var width = Math.sqrt(houseArea * aspectRatio);
+    var height = houseArea / width;
 
-    this.houseWidth = width;
-    this.houseHeight = height;
-
-    this.position = {
-      x: width / 2,
-      y: height / 2,
-    };
-    console.log(
-      "width " +
-        width +
-        "height " +
-        height +
-        " aspect ratio later " +
-        width / height
-    );
-
-    // Calculate the vertices from w/h and
-    this.calculateHouseVertices();
-
-    const shapeVertices = [
-      this.vertices.a,
-      this.vertices.b,
-      this.vertices.c,
-      this.vertices.d,
-    ];
-
-    // TODO: Specify housecolor
-    // TODO: Somehow bums that shit.
-    // ShapeObject war gedacht für tatsächliche Shapes.
-    // Apartment ist gedacht zum unterscheiden von House und Apartments, da
-
-    // Create Shape from vertices and color
-    this.houseShapeObject = new ShapeObject(shapeVertices, 0xffff11);
+    return this.definedHouseShape(width, height);
   }
 
   /**
@@ -447,9 +416,6 @@ class House {
   // - divide middle area corridor side through n-4 /2
   // - fill side areas:
   // - divide
-
-  // TODO: Implement Rectangle Class/Interface
-  // TODO: Has "divide" Function, which returns n subrectangles of thss
 
   // Generate a simple Building with an I-Shaped Corridor, connecting both sides of the Building
   // with n Apartments
@@ -779,6 +745,12 @@ class House {
   }
 
   /**
+   * Better implemenentation of "simpleICorridor" without apartments or living areas
+   */
+
+  singleCorridor() {}
+
+  /**
    * Places multiple corridors along the longer side of the house
    * corridorCount must be calculated before and can be anything, but should not exceed maxI,
    * which should be calculated beforehand
@@ -804,11 +776,11 @@ class House {
 
     if (corridorCount == 0) {
       // TODO: Einziges Apartment ist houseRectangle
-      console.log("Multicorr not implemented for 0 corr");
+      console.error("Multicorr not implemented for 0 corr");
       return this;
     }
     if (corridorCount == 1) {
-      console.log("Multicorr not implemented for 1 corr");
+      console.error("Multicorr not implemented for 1 corr");
       // TODO: reimplement simpleCorridorLayout and use it here
       return this;
     }
@@ -1657,6 +1629,7 @@ class House {
     return this.houseShapeObject.getMesh();
   }
 
+  // TODO: Legacy method
   getAllMeshes() {
     let allMeshes = [this.getHouseMesh()];
     // Move houseMesh to Background
@@ -1805,6 +1778,9 @@ class House {
     // Setze die Wand-Koordinaten dann neu auf vertex b des oberen und vertex d des unteren Apartments.
   }
 
+  /**
+   * Alle Rects löschen
+   */
   resetRects() {
     this.totalRects = [];
     this.apartmentRects = [];
