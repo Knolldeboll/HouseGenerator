@@ -53,7 +53,7 @@ class Tools {
   // very often the first one is max, the rest is min
   // Prolly
   divideValueIntoPartsMinMax(value, n, min, max) {
-    console.log("> Tools: divideValueIntoPartsMinMax", value, n, min, max);
+    // console.log("> Tools: divideValueIntoPartsMinMax", value, n, min, max);
 
     // Check if n* min would exceed the value or if n*max would be smaller than the value
     if (value < n * min) {
@@ -141,8 +141,8 @@ class Tools {
       sum += p;
     }
 
-    console.log("Tools: Sum of parts: ", sum, "vs initial value: ", value);
-    console.log("Generated parts: ", parts);
+    //console.log("Tools: Sum of parts: ", sum, "vs initial value: ", value);
+    //console.log("Generated parts: ", parts);
     return parts;
   }
 }

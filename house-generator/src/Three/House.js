@@ -751,7 +751,29 @@ class House {
    */
 
   singleCorridor(corridorWidth, horizontalPlacement) {
-    // TODO: Checkt LAGeneration das?
+    // TODO: Checkt LAGeneration das? ja.
+
+    if (horizontalPlacement) {
+      this.mainCorridorRects.push(
+        new Rectangle().fromCoords(
+          this.houseWidth,
+          corridorWidth,
+          this.houseWidth / 2,
+          this.houseHeight / 2
+        )
+      );
+    } else {
+      this.mainCorridorRects.push(
+        new Rectangle().fromCoords(
+          corridorWidth,
+          this.houseWidth,
+          this.houseWidth / 2,
+          this.houseHeight / 2
+        )
+      );
+    }
+
+    return this;
   }
 
   // TODO: exctract method for filling living area rectangles/ rectangles in general along their longer side
@@ -793,11 +815,11 @@ class House {
 
     // TODO: Check if the placementSide (shorter or longer) is horizontal or vertical
 
-    // wenn rect horizontal und shorterSide: vertical (y++)
-    // wenn rect horiziontal und longerSide: horizontal (x++)
+    // wenn rect horizontal und onShorterSide: vertical (y++)
+    // wenn rect horiziontal und onLongerSide: horizontal (x++)
 
-    // wenn rect vertical und shorterSide: horizontal (x++)
-    // wenn rect vertical und longerside: vertical (y++)
+    // wenn rect vertical und onShorterSide: horizontal (x++)
+    // wenn rect vertical und onLongerside: vertical (y++)
 
     let horizontalPlacement =
       (this.houseRect.isHorizontal && !onShorterSide) ||
@@ -809,13 +831,23 @@ class House {
       horizontalPlacement ? "horizontalplacement" : "verticalplacement"
     );
 
+    // Kommt calcK mit 1 corridor klar?
+    let k = this.houseCalc.calculateK(
+      placementSide,
+      corridorCount,
+      corridorWidth
+    );
+
     if (corridorCount == 1) {
-      console.error("Multicorr not implemented for 1 corr");
+      this.k = k;
+      this.i = 1;
+      // console.error("Multicorr not implemented for 1 corr");
 
       // TODO: reimplement simpleCorridorLayout and use it here
       // --- Along which side?
       // needs "orientation Parameter!"
-      return this;
+
+      return this.singleCorridor(corridorWidth, horizontalPlacement);
     }
 
     // From here on: Placement always horizontally!
@@ -823,11 +855,7 @@ class House {
     // calculate k
     // longer side,i, corrwidth
     // K passt!
-    let k = this.houseCalc.calculateK(
-      placementSide,
-      corridorCount,
-      corridorWidth
-    );
+
     //console.log("k:", k);
 
     // Place corridorCount* corridor rects along longer side with k + corridorWidth/2 distance to each other
@@ -978,9 +1006,13 @@ class House {
     // Doublecheck: n überschreitet maximale Anzahl an Wohnungen beim Layout mit den meistmöglichen Korridoren
     // .at(-1): letztes
 
+    // Falsch! Das corridorreichste Layout hat nicht unbedingt die meisten Apartments!
+
     let maxThreshold = this.corridorThresholds.at(-1);
 
     // null has value 0
+
+    /*
     if (
       (maxThreshold.shorter != null && n > maxThreshold.shorter) ||
       (maxThreshold.longer != null && n > maxThreshold.longer)
@@ -988,12 +1020,25 @@ class House {
       console.error(
         "Error: more desired apartments than max amount of possible apartments in the biggest corridor layout!"
       );
-      return this;
+     // return this;
     }
+     */
 
     // 1. Calculate the needed amount of corridors for the inputs - iterate through thresholds and find the correct index.
 
     // fetch the value out of the threshold array's threshold sets, that is either == n or the smallest that is >n
+
+    // TODO: Welches corridorlayout wird präferiert?
+
+    // !! auf jeden Fall das mit weniger Korridoren, da weniger Korridorfläche = mehr platz für Wohnraum.
+    //
+    // bei n = 30 , i =  x und shorter = 38 / longer = 40
+
+    // 1. das präferieren, wo n genauer reinpasst, also shorter 38?
+    // -> genauer reinpassen bedeutet: weniger Random spielraum für Wohnungen!
+    // -> ungenauer reinpassen bedeutet: mehr Random spielraum für Wohnungen!
+    // oder
+    // 2. das präferieren, wo Weniger korridorfläche? als longer
 
     let corridors = 1;
     let isShorter;
@@ -1002,7 +1047,13 @@ class House {
       // Wir gehen frech davon aus dass die Dinger sortiert sind und dass nicht
       // bei höheren Korridoren nochmal bessere Elemente kommen
 
-      // check for direct hits
+      if (ts.longer >= n) {
+        isShorter = false;
+        console.log("the best threshold is ", ts.longer, " and on longer side");
+        break;
+      }
+
+      // Check if the threshold fits perfectly or is the first one that is bigger than n
       if (ts.shorter >= n) {
         isShorter = true;
         console.log(
@@ -1010,11 +1061,6 @@ class House {
           ts.shorter,
           " and on shorter side"
         );
-        break;
-      }
-      if (ts.longer >= n) {
-        isShorter = false;
-        console.log("the best threshold is ", ts.longer, " and on longer side");
         break;
       }
 
@@ -1056,7 +1102,7 @@ class House {
     }
 */
     // 2. generate multi corridor layout with the found amount of apartments
-    return this.multiCorridorLayout(corridorWidth, corridors);
+    return this.multiCorridorLayout(corridorWidth, corridors, isShorter);
   }
 
   /**
@@ -1277,6 +1323,8 @@ class House {
         )
       );
     });
+
+    console.log(this.apartmentRects);
 
     return this;
   }
