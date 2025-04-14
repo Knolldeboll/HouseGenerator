@@ -619,15 +619,18 @@ class Tests {
 
     let house = new House()
       .definedHouseShape(houseWidth, houseHeight)
-      .adaptiveMultiCorridorLayout(corridorWidth, minApWidth, n);
-    // .generateLivingAreaRects();
+      .adaptiveMultiCorridorLayout(corridorWidth, minApWidth, n)
+      .generateLivingAreaRects()
+      .fillLivingAreasWithApartments(n, minApWidth);
 
     console.log("adaptive corr house: ", house);
 
-    return;
+    //return;
     this.rendering.addAllToScene([
+      house.houseRect.generateShapeMesh(),
       ...house.mainCorridorRects.flatMap((mcr) => mcr.generateShapeMesh()),
       ...house.connectorRects.flatMap((cr) => cr.generateShapeMesh()),
+      //  ...house.livingAreaRects.flatMap((la) => la.shapeAndVerticesPointHelperMesh()),
       ...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
     ]);
   }

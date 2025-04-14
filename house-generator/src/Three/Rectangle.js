@@ -1102,6 +1102,10 @@ class Rectangle {
   //TODO: Edge getters
   //TODO: Vertice adjacent edgle getters
 
+  shapeAndVerticesPointHelperMesh() {
+    return this.generateShapeMesh().add(...this.getVerticesPointHelperMeshes());
+  }
+
   calculateOrientation() {
     if (this._height == undefined || this._width == undefined) {
       console.error(">calculateOrientation Error: height || width not set!");
