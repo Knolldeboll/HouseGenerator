@@ -11,7 +11,7 @@ const Settings = (props) => {
 
   //console.log("Settings Component requested!");
 
-  const n = "poop";
+  const n = "-";
   /*
   const [buildingWidth, setBuildingWidth] = useState(10);
   const [buildingHeight, setBuildingHeight] = useState(10);

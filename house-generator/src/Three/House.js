@@ -806,6 +806,13 @@ class House {
     let placementSide = onShorterSide ? shorterSide : longerSide;
     let nonPlacementSide = onShorterSide ? longerSide : shorterSide;
 
+    console.log(
+      "multicorr placementSide: ",
+      placementSide,
+      " nonplacement ",
+      nonPlacementSide
+    );
+
     if (corridorCount == 0) {
       // livingAreaGeneration can handle this!
       console.error("No Corridors!");
@@ -832,13 +839,17 @@ class House {
     );
 
     // Kommt calcK mit 1 corridor klar?
-    let k = this.houseCalc.calculateK(
-      placementSide,
-      corridorCount,
-      corridorWidth
-    );
+    // möglicherweise nicht!
 
     if (corridorCount == 1) {
+      let k = this.houseCalc.calculateK(
+        // TODO: Remove quick fix
+        // Hier einfach Quick fix, da k für 1 Korridor falsch berechnet wird warum auch immer
+        nonPlacementSide,
+        corridorCount,
+        corridorWidth
+      );
+
       this.k = k;
       this.i = 1;
       // console.error("Multicorr not implemented for 1 corr");
@@ -849,6 +860,12 @@ class House {
 
       return this.singleCorridor(corridorWidth, horizontalPlacement);
     }
+
+    let k = this.houseCalc.calculateK(
+      placementSide,
+      corridorCount,
+      corridorWidth
+    );
 
     // From here on: Placement always horizontally!
     // TODO: Check if placementSide is horizontal or vertical!
@@ -1003,27 +1020,6 @@ class House {
 
     console.log("New Thresholds: ", this.corridorThresholds);
 
-    // Doublecheck: n überschreitet maximale Anzahl an Wohnungen beim Layout mit den meistmöglichen Korridoren
-    // .at(-1): letztes
-
-    // Falsch! Das corridorreichste Layout hat nicht unbedingt die meisten Apartments!
-
-    let maxThreshold = this.corridorThresholds.at(-1);
-
-    // null has value 0
-
-    /*
-    if (
-      (maxThreshold.shorter != null && n > maxThreshold.shorter) ||
-      (maxThreshold.longer != null && n > maxThreshold.longer)
-    ) {
-      console.error(
-        "Error: more desired apartments than max amount of possible apartments in the biggest corridor layout!"
-      );
-     // return this;
-    }
-     */
-
     // 1. Calculate the needed amount of corridors for the inputs - iterate through thresholds and find the correct index.
 
     // fetch the value out of the threshold array's threshold sets, that is either == n or the smallest that is >n
@@ -1074,33 +1070,9 @@ class House {
       isShorter ? " shorter" : " longer"
     );
 
-    //return this;
-    /*
-    for (let t of this.corridorThresholds) {
-      /* console.log(
-        " i want ",
-        n,
-        " apartments but with ",
-        corridors,
-        " corridors only ",
-        t,
-        "are possible"
-      );
+    // TODO: Fix properly: When corridors = 1, the placementSide is flipped!
+    // Aktuell wird die einfach nur umgedreht, wenn corridors == 1;
 
-      
-      // beispiel: ich will 5 aps.
-      // in [0] passt max 1 : weiter
-      // in [1] passt max 4: weiter
-      // in [2] past max 5: OK!
-      if (n <= t) {
-        // console.log(" so take ", corridors, " corridors!");
-        break;
-      }
-
-      //console.log("so skip to corr++");
-      corridors++;
-    }
-*/
     // 2. generate multi corridor layout with the found amount of apartments
     return this.multiCorridorLayout(corridorWidth, corridors, isShorter);
   }
@@ -1113,6 +1085,8 @@ class House {
   // TODO: Handle i = 0 as one living area
   // TODO: Handle i = 1 as two big living areas
   generateLivingAreaRects() {
+    // TODO: k kommt falsch an.
+
     // i is given from this.corridorRects.length
     // NO! denn da sind alle Rects drinnen!
 
@@ -1137,7 +1111,7 @@ class House {
 
     if (i == 0) {
       console.log("0 corridors: 1 Living Area");
-      this.livingAreaRects.push(this.houseRect.setColor(livingAreaColor));
+      this.livingAreaRects.push(this.houseRect);
       return this;
       // TODO: one Living Area, is the house rectange
       // also is the only apartment.
@@ -1293,7 +1267,8 @@ class House {
 
     if (this.livingAreaRects.length == 1) {
       // one living Area: one apartment
-      this.apartmentRects = this.livingAreaRects;
+      console.log("1 living area: 1 room");
+      this.apartmentRects.push(this.houseRect);
       return this;
     }
     // Divide n over all livingAreas

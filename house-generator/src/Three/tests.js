@@ -630,7 +630,9 @@ class Tests {
       house.houseRect.generateShapeMesh(),
       ...house.mainCorridorRects.flatMap((mcr) => mcr.generateShapeMesh()),
       ...house.connectorRects.flatMap((cr) => cr.generateShapeMesh()),
-      //  ...house.livingAreaRects.flatMap((la) => la.shapeAndVerticesPointHelperMesh()),
+      /*...house.livingAreaRects.flatMap((la) =>
+        la.shapeAndVerticesPointHelperMesh()
+      ),*/
       //...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
       ...house.apartmentRects.flatMap((ar) => ar.generateShapeMesh()),
     ]);
