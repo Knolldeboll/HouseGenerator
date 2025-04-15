@@ -752,12 +752,14 @@ class House {
 
   singleCorridor(corridorWidth, horizontalPlacement) {
     // TODO: Checkt LAGeneration das? ja.
+    console.log(">singleCorridor");
 
+    // HorizontalPlacement: Platziere entlang der x-Achse, also vertikal!
     if (horizontalPlacement) {
       this.mainCorridorRects.push(
         new Rectangle().fromCoords(
-          this.houseWidth,
           corridorWidth,
+          this.houseHeight,
           this.houseWidth / 2,
           this.houseHeight / 2
         )
@@ -765,8 +767,8 @@ class House {
     } else {
       this.mainCorridorRects.push(
         new Rectangle().fromCoords(
-          corridorWidth,
           this.houseWidth,
+          corridorWidth,
           this.houseWidth / 2,
           this.houseHeight / 2
         )
@@ -796,7 +798,10 @@ class House {
    */
   multiCorridorLayout(corridorWidth, corridorCount, onShorterSide) {
     this.resetRects();
-    console.log(">multiCorridorLayout");
+
+    this.k = undefined;
+
+    console.log(">multiCorridorLayout on shorterside: ", onShorterSide);
     this.corridorWidth = corridorWidth;
     let longerSide =
       this.houseWidth > this.houseHeight ? this.houseWidth : this.houseHeight;
@@ -828,6 +833,9 @@ class House {
     // wenn rect vertical und onShorterSide: horizontal (x++)
     // wenn rect vertical und onLongerside: vertical (y++)
 
+    // HorizontalPlacement bedeutet: Entlang der x-Achse platzieren, nicht dass die
+    // Corridors Horizontal sind!
+
     let horizontalPlacement =
       (this.houseRect.isHorizontal && !onShorterSide) ||
       (!this.houseRect.isHorizontal && onShorterSide)
@@ -845,7 +853,8 @@ class House {
       let k = this.houseCalc.calculateK(
         // TODO: Remove quick fix
         // Hier einfach Quick fix, da k für 1 Korridor falsch berechnet wird warum auch immer
-        nonPlacementSide,
+        //nonPlacementSide,
+        placementSide,
         corridorCount,
         corridorWidth
       );
