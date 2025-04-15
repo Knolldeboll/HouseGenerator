@@ -1,3 +1,5 @@
+import { max } from "three/tsl";
+
 class HouseCalculator {
   // Private static instance to hold the singleton
   static #instance;
@@ -474,7 +476,7 @@ class HouseCalculator {
       );
     }
 
-    console.log("calcNDivs max nSplits:", nSplits);
+    // console.log("calcNDivs max nSplits:", nSplits);
 
     // Sum the initial
     const summedMax = nSplits.reduce((acc, val) => acc + val, 0);
@@ -547,22 +549,33 @@ class HouseCalculator {
    *
    * @param {} livingAreaRects
    * @param {*} n
-   * @param {*} minApartmentWidth
+   * @param {*} minApartmentWidth Wird beim anderen genutzt, um die maximale Anzahl an Aps pro LA zu berechnen.
    * @returns
    */
   calculateEvenNDivisions(livingAreaRects, n, minApartmentWidth) {
     console.log("> calculateEvenNDivisions");
     let nSplits = [];
 
+    let maxSplits = [];
+
+    for (let la of livingAreaRects) {
+      maxSplits.push(
+        this.calculateMaxApartmentsLivingArea(la, minApartmentWidth)
+      );
+    }
+
     // TODO: Can also k be longerSideLength?
     // This actually needs the opposite side of the side that is k long!
     // So the length shared with the corridor.
 
     // Gesamte Länge/"Größe", die für alle LA's zur Verfügung steht
+    // Hier gehen wir davon aus, dass die LivingRects mit der längeren Seite am Korridor liegen
     const totalLALength = livingAreaRects.reduce(
-      (acc, rect) => acc + rect.longerSideLength
+      (acc, rect) => acc + rect.longerSideLength,
+      0
     );
 
+    //console.log("totalLAlength:", totalLALength);
     const LAPercentages = [];
 
     // Berechne die Gewichtungen der LA's im Bezug auf die Gesamtbreite aller LA's
@@ -570,6 +583,9 @@ class HouseCalculator {
     for (const laRect of livingAreaRects) {
       LAPercentages.push(laRect.longerSideLength / totalLALength);
     }
+
+    //let testSum = LAPercentages.reduce((acc, perc) => acc + perc, 0);
+    //console.log("LApercentages:", LAPercentages, " sum up to ", testSum);
 
     // Berechne aufgrund der Gewichtungen, wie viele Aps in jedes LA kommen.
     // Aber abgerundet, damit Ganzzahlige Anzahlen
@@ -590,12 +606,45 @@ class HouseCalculator {
       // Rest berechnen
       rest += apsWhole - apsRounded;
       // Abrunden, Rest speichern
-      // nSplits beinhaltet nun die Abgerundete Anzahl an Aps pro Dings.
+      // nSplits beinhaltet nun die Abgerundete Anzahl an Aps pro LA.
       nSplits.push(apsRounded);
     }
 
     rest = Math.round(rest);
-    console.log("Rounded even divisions: ", nSplits, " rounded rest ", rest);
+    // console.log("Rounded even divisions: ", nSplits, " rounded rest ", rest);
+
+    // Nun die in "rest" definierten Apartments noch irgendwie aufteilen.
+
+    // Das machmer so: jede LA bekommt reihum einen dazu, solange deren max noch nicht erreicht ist.
+    // so ergibt es sich, dass bei einem n mehr einfach das nächste LA mehr gesplittet wird.
+
+    let endlessMitigationCounter = 0;
+    while (rest > 0) {
+      for (let i = 0; i < livingAreaRects.length; i++) {
+        // Wenn aktuelles nSplit sein Limit noch nicht erreicht hat,
+        // addiere eins drauf
+
+        if (nSplits[i] < maxSplits[i]) {
+          nSplits[i]++;
+          rest--;
+          if (rest == 0) {
+            break;
+          }
+        }
+      }
+
+      endlessMitigationCounter++;
+      if (endlessMitigationCounter > 50) {
+        console.log("HURENSOHN");
+        break;
+      }
+    }
+
+    //let nSplitTestSum = nSplits.reduce((acc, split) => acc + split, 0);
+    // console.log("maxSplits ", maxSplits);
+    // console.log("vs Final N-Splits:", nSplits, " sum up to ", nSplitTestSum);
+
+    return nSplits;
 
     // TODO: Möglicherweise rest auf Ganzzahl runden wegen  float Rechenfehlern
     while (rest != 0) {}

@@ -8,7 +8,7 @@ import Edge from "./Edge";
 import Tools from "./Tools";
 import HouseCalculator from "./HouseCalculator";
 import { IndirectStorageBufferAttribute, Vector2 } from "three/webgpu";
-import { cos } from "three/tsl";
+import { color, cos } from "three/tsl";
 
 // TODO: Use new House constructor everywhere
 
@@ -73,6 +73,15 @@ class House {
     this.mainCorridorRects = [];
     this.connectorRects = [];
     this.livingAreaRects = [];
+
+    this.corridorColor = new THREE.Color(0xffff00);
+    this.livingAreaColor = new THREE.Color(0xff00c8);
+    this.apartmentColors = [
+      new THREE.Color(0x6eb7d4),
+      new THREE.Color(0x43a9d1),
+      new THREE.Color(0x1e9ed1),
+      new THREE.Color(0x008bc2),
+    ];
 
     // a: upper left
     // b: upper right
@@ -757,21 +766,25 @@ class House {
     // HorizontalPlacement: Platziere entlang der x-Achse, also vertikal!
     if (horizontalPlacement) {
       this.mainCorridorRects.push(
-        new Rectangle().fromCoords(
-          corridorWidth,
-          this.houseHeight,
-          this.houseWidth / 2,
-          this.houseHeight / 2
-        )
+        new Rectangle()
+          .fromCoords(
+            corridorWidth,
+            this.houseHeight,
+            this.houseWidth / 2,
+            this.houseHeight / 2
+          )
+          .setColor(this.corridorColor)
       );
     } else {
       this.mainCorridorRects.push(
-        new Rectangle().fromCoords(
-          this.houseWidth,
-          corridorWidth,
-          this.houseWidth / 2,
-          this.houseHeight / 2
-        )
+        new Rectangle()
+          .fromCoords(
+            this.houseWidth,
+            corridorWidth,
+            this.houseWidth / 2,
+            this.houseHeight / 2
+          )
+          .setColor(this.corridorColor)
       );
     }
 
@@ -906,7 +919,7 @@ class House {
           currentX,
           nonPlacementSide / 2
         )
-        .setColor(new THREE.Color(255, 255, 0));
+        .setColor(this.corridorColor);
 
       corridorRects.push(firstRect);
 
@@ -920,7 +933,7 @@ class House {
             currentX,
             nonPlacementSide / 2
           )
-          .setColor(new THREE.Color(255, 255, 0));
+          .setColor(this.corridorColor);
         corridorRects.push(currentRect);
       }
 
@@ -936,7 +949,7 @@ class House {
         let currentConX = f * (2 * k + corridorWidth);
         let currentConRect = new Rectangle()
           .fromCoords(2 * k, corridorWidth, currentConX, nonPlacementSide / 2)
-          .setColor(new THREE.Color(255, 255, 0));
+          .setColor(this.corridorColor);
         connectorRects.push(currentConRect);
       }
 
@@ -959,7 +972,7 @@ class House {
           nonPlacementSide / 2,
           currentY
         )
-        .setColor(new THREE.Color(255, 255, 0));
+        .setColor(this.corridorColor);
 
       corridorRects.push(firstRect);
 
@@ -973,7 +986,7 @@ class House {
             nonPlacementSide / 2,
             currentY
           )
-          .setColor(new THREE.Color(255, 255, 0));
+          .setColor(this.corridorColor);
         corridorRects.push(currentRect);
       }
 
@@ -989,7 +1002,7 @@ class House {
         let currentConY = f * (2 * k + corridorWidth);
         let currentConRect = new Rectangle()
           .fromCoords(corridorWidth, 2 * k, nonPlacementSide / 2, currentConY)
-          .setColor(new THREE.Color(255, 255, 0));
+          .setColor(this.corridorColor);
         connectorRects.push(currentConRect);
       }
 
@@ -1104,7 +1117,7 @@ class House {
 
     console.log(">generateLivingAreaRects");
 
-    let livingAreaColor = new THREE.Color(255, 0, 220);
+    let livingAreaColor = this.livingAreaColor;
     this.livingAreaRects = [];
     const i = this.mainCorridorRects.length;
 
@@ -1309,6 +1322,69 @@ class House {
     });
 
     console.log(this.apartmentRects);
+
+    return this;
+  }
+
+  fillLivingAreasWithApartmentsEvenly(n, minApWidth) {
+    // Generate splits  for livingAreaRects
+    this.apartmentRects = [];
+    console.log("> fillLivingAreasWithRooms");
+
+    if (this.livingAreaRects == undefined) {
+      console.error("fillLivingAreasWithRooms error: no living areas present!");
+      return;
+    }
+
+    if (this.livingAreaRects.length == 1) {
+      // one living Area: one apartment
+      console.log("1 living area: 1 room");
+      this.apartmentRects.push(this.houseRect);
+      return this;
+    }
+    // Divide n over all livingAreas
+    // Does only calculate how many apartments are present for each living Area
+
+    //TODO: implement Even N Divisions
+    const livingAreaSplits = this.houseCalc.calculateEvenNDivisions(
+      this.livingAreaRects,
+      n,
+      minApWidth
+    );
+
+    // console.log("Living area Splits: ");
+
+    // Return here to only test if calculateRandomNDivisions works properly!
+
+    //return this;
+    this.livingAreaRects.forEach((laRect, index) => {
+      // split each LA randomly min max WIDTH oriented into corresponding n apartments
+      // push to apartments
+      // console.log("split ", laRect, " into ", livingAreaSplits[index]);
+
+      /*
+        ...laRect.splitRandomlyMinMaxWidthOriented(
+          livingAreaSplits[index],
+          minApWidth
+        )
+      */
+
+      this.apartmentRects.push(
+        ...laRect.splitEvenlyOriented(livingAreaSplits[index])
+      );
+    });
+
+    // Recolor for better visibility!
+
+    let i = 0;
+    for (let rect of this.apartmentRects) {
+      rect.changeColor(this.apartmentColors[i]);
+      i++;
+
+      if (i > 3) i = 0;
+    }
+
+    //console.log(this.apartmentRects);
 
     return this;
   }

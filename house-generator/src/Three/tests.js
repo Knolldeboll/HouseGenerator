@@ -267,6 +267,17 @@ class Tests {
     }
   }
 
+  testRectangleColors() {
+    // Warum checkt der das nicht, wenn 3 Farben angegeben werden?
+
+    let rect1 = new Rectangle().fromCoords(5, 5, 0, 0);
+    //  .setColor(new THREE.Color(0xff0efe));
+    //.setColor(new THREE.Color(255, 255, 22));
+
+    rect1.setColor(0xffff00);
+    console.log(rect1.generateShapeMesh());
+    this.rendering.addToScene(rect1.generateShapeMesh());
+  }
   testRectangleHelpers() {
     const vertsObject = {
       upperLeft: new Vector2(-5, 5),
@@ -633,6 +644,49 @@ class Tests {
       /*...house.livingAreaRects.flatMap((la) =>
         la.shapeAndVerticesPointHelperMesh()
       ),*/
+      //...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
+      ...house.apartmentRects.flatMap((ar) => ar.generateShapeMesh()),
+    ]);
+  }
+
+  // TODO: Den Shit von hier in ThreeCanvas direkt bringen und ausführen!
+  // Der kann dann z.B. auch das House behalten und bei Änderungen von n nur die Corridors/Apartments neu generieren!
+
+  testNonrandomAdaptiveMultiCorridorLayout(
+    houseWidth,
+    houseHeight,
+    corridorWidth,
+    minApWidth,
+    n
+  ) {
+    console.log(">testAdaptiveMultiCorridorLayout");
+
+    console.log("Removed all previous per scene");
+    this.rendering.clearScene();
+    // remove all from scene!
+
+    let house = new House()
+      .definedHouseShape(houseWidth, houseHeight)
+      .adaptiveMultiCorridorLayout(corridorWidth, minApWidth, n)
+      .generateLivingAreaRects()
+      .fillLivingAreasWithApartmentsEvenly(n, minApWidth);
+    //.fillLivingAreasWithApartments(n, minApWidth);
+
+    // Funktioniert auch beides nachträglich! Man kann also auch die Aps neu generieren!
+
+    console.log("adaptive corr house: ", house);
+
+    // Testing houseCalc even n Divisons
+
+    //return;
+    this.rendering.addAllToScene([
+      //house.houseRect.generateShapeMesh(),
+      ...house.mainCorridorRects.flatMap((mcr) => mcr.generateShapeMesh()),
+      ...house.connectorRects.flatMap((cr) => cr.generateShapeMesh()),
+      /* ...house.livingAreaRects.flatMap((la) =>
+        la.shapeAndVerticesPointHelperMesh()
+      ),
+      */
       //...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
       ...house.apartmentRects.flatMap((ar) => ar.generateShapeMesh()),
     ]);

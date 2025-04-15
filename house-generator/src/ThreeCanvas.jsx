@@ -29,6 +29,8 @@ const ThreeCanvas = (props) => {
 
   const setMaxN = useLimitStore((state) => state.setMaxN);
 
+  const nLimit = useLimitStore((state) => state.maxN);
+
   const widthInput = useParamStore((state) => state.houseWidth);
   const heightInput = useParamStore((state) => state.houseHeight);
   const corrInput = useParamStore((state) => state.corridorWidth);
@@ -59,6 +61,7 @@ const ThreeCanvas = (props) => {
     );
     */
 
+    /*
     tests.current?.testAdaptiveMultiCorridorLayout(
       Number(widthInput),
       Number(heightInput),
@@ -66,7 +69,18 @@ const ThreeCanvas = (props) => {
       Number(minApWidthInput),
       Number(nInput)
     );
+    */
 
+    //tests.current?.testRectangleColors();
+
+    //return;
+    tests.current?.testNonrandomAdaptiveMultiCorridorLayout(
+      Number(widthInput),
+      Number(heightInput),
+      Number(corrInput),
+      Number(minApWidthInput),
+      Number(nInput)
+    );
     return;
     tests.current?.testNewHouseConstructor(
       Number(widthInput),
@@ -205,6 +219,11 @@ const ThreeCanvas = (props) => {
       nInput === ""
     ) {
       console.log("but returned!");
+      return;
+    }
+
+    if (Number(nInput) > Number(nLimit)) {
+      console.log("Entered n is too big!");
       return;
     }
 

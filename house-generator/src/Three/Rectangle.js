@@ -17,6 +17,8 @@ class Rectangle {
     // TODO: Fix... even though rgb have values, its white. Maybe cap to integer
     //this._color =  new THREE.Color(0xffff00);
     // Warum kommt hier immer weiße farbe?
+
+    // COLOR IMMER MIT 0.0 - 1.0 oder hex!
     this._color = new THREE.Color(Math.random(), Math.random(), Math.random());
 
     this._material = new THREE.MeshStandardMaterial({
@@ -60,6 +62,13 @@ class Rectangle {
     return this;
   }
 
+  changeColor(color) {
+    this._color = color;
+    this._material = new THREE.MeshStandardMaterial({
+      color: color,
+      side: THREE.DoubleSide,
+    });
+  }
   // 2nd constructors
   // Verts must be given in clockwise order, starting at upper left
   /**
@@ -257,27 +266,20 @@ class Rectangle {
     return this._mesh;
   }
 
-  // Split into Random Sections with area between min, max
-  // In
-  splitRandomlyMinMax(n, min, max) {
-    // Vorgabe: Die Basisform ist fix vorgegeben und nicht anpassbar.
-    // 1. Calculate minimum/maximum Percentage of total area which will cover min/max-sized Rooms
-    // 2. Calculate Percentages of the Room Areas randomly.
-    // They must be between min/max-Percentage and total to 1
-    // Vielleicht so wie schonmal gemacht/gedacht:
-    // immer merken, wieviel man aktuell schon über/unter der Durchschnittspercentage, also 1/n liegt.
-    // Die Werte für die nächste Percentage berechnen. Wenn diese zur Summe addiert den min/max-Rahmen sprengen,
-    // berechne die random Percentage neu
-    // Die letzte Percentage ist der Rest der percentageSum, bzw. 1- sum(alle Percentages bisher)
-    // - Vorgehen geht nur, wenn min/max symmetrisch um 1/n liegen!
-  }
-
-  // Divide into n Rectangles of the same size, along the longer side
+  /**
+   *  Divide into n Rectangles of the same size, along the longer side
+   * @param {*} n
+   * @returns
+   */
   splitEvenlyOriented(n) {
     let newRects = [];
 
     console.log("> Split Rectangle evenly oriented along the longer side");
     //console.log("split w / h",this.width,this.height)
+
+    // TODO: Kleines Problem bei width = height, da ist dann undefiniertes Verhalten.
+    // Kann auch sein, dass die LA dann nicht entlang des Korridors gesplittet wird.
+
     if (this._width > this._height) {
       // Horizontally
 
@@ -1085,7 +1087,7 @@ class Rectangle {
     // For ...  of iterates over Arrays.
     // Object.values gives an array of the values of the object
     for (let vertice of Object.values(this._vertices)) {
-      console.log("vert:", vertice);
+      //console.log("vert:", vertice);
       const spheregeometry = new THREE.SphereGeometry(0.3, 32, 16);
       const spherematerial = new THREE.MeshBasicMaterial({
         color: colors[colorCount],
