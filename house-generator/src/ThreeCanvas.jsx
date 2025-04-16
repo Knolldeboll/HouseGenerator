@@ -36,6 +36,7 @@ const ThreeCanvas = (props) => {
   const corrInput = useParamStore((state) => state.corridorWidth);
   const minApWidthInput = useParamStore((state) => state.minApartmentWidth);
   const nInput = useParamStore((state) => state.n);
+  const randomInput = useParamStore((state) => state.isRandom);
 
   const inputChecker = new InputChecker(30, 20, 3, 3);
 
@@ -74,13 +75,25 @@ const ThreeCanvas = (props) => {
     //tests.current?.testRectangleColors();
 
     //return;
-    tests.current?.testNonrandomAdaptiveMultiCorridorLayout(
-      Number(widthInput),
-      Number(heightInput),
-      Number(corrInput),
-      Number(minApWidthInput),
-      Number(nInput)
-    );
+
+    if (randomInput) {
+      tests.current?.testAdaptiveMultiCorridorLayout(
+        Number(widthInput),
+        Number(heightInput),
+        Number(corrInput),
+        Number(minApWidthInput),
+        Number(nInput)
+      );
+    } else {
+      tests.current?.testNonrandomAdaptiveMultiCorridorLayout(
+        Number(widthInput),
+        Number(heightInput),
+        Number(corrInput),
+        Number(minApWidthInput),
+        Number(nInput)
+      );
+    }
+
     return;
     tests.current?.testNewHouseConstructor(
       Number(widthInput),
@@ -227,8 +240,31 @@ const ThreeCanvas = (props) => {
       return;
     }
 
+    if (Number(nInput) == 0) {
+      console.log("Can't process 0 apartments");
+      return;
+    }
+
     refreshCanvas();
   }, [nInput]);
+
+  useEffect(() => {
+    console.log("isRandom im Canvas: ", randomInput);
+
+    if (
+      widthInput === "" ||
+      heightInput === "" ||
+      corrInput === "" ||
+      minApWidthInput === "" ||
+      nInput === ""
+    ) {
+      return;
+    }
+
+    refreshCanvas();
+    // TODO: In tests irgendwas abändern.
+    // H
+  }, [randomInput]);
   //Bei canvas den canvasRef reinpacken, damit in canvasRef dieses Element referenziert werden kann
 
   // canvasWrapper dictates the width/heigt of the canvas

@@ -11,6 +11,7 @@ class Tests {
   constructor(rendering) {
     // Type unknown, so no info on rendering
     this.rendering = rendering;
+    this.isRandom = false;
   }
 
   testTests() {
@@ -615,6 +616,9 @@ class Tests {
 
   // TODO: Check Input Datatypes.
   // Den shit hats nämlich seit den InputField-Inputs zerrupft und da stehen Strings drinnen und keine numbers
+  // TODO: Apply "isRandom"-Flag.
+  // if isRandom: normal machen.
+  // if !isRandom: nonRandomAdaptive
   testAdaptiveMultiCorridorLayout(
     houseWidth,
     houseHeight,
@@ -698,6 +702,13 @@ class Tests {
 
     this.rendering.addToScene(house.houseRect.generateShapeMesh());
     console.log("House: ", house);
+  }
+
+  /**
+   * Setter for the "isRandom" Flag
+   */
+  setIsRandom(value) {
+    this.isRandom = value;
   }
 }
 

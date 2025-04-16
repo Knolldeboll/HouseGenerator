@@ -3,6 +3,8 @@ import { useLimitStore } from "./LimitStore";
 import { SettingsTab } from "./SettingsTab";
 import React, { Component, useState } from "react"; // Oben ein Bereich, der mehrere Inputdingers für Settings enthält
 import { useParamStore } from "./ParamStore";
+import { SettingsSliderTab } from "./SettingsSliderTab";
+import { SettingsCheckTab } from "./SettingsCheckTab";
 
 // Oben ein Bereich, der mehrere Inputdingers für Settings enthält
 const Settings = (props) => {
@@ -48,6 +50,8 @@ const Settings = (props) => {
     (state) => state.setMinApartmentWidth
   );
   const setN = useParamStore((state) => state.setN);
+  const currentN = useParamStore((state) => state.n);
+  const setRandom = useParamStore((state) => state.setRandom);
 
   return (
     // div surrounds one setting tab
@@ -82,13 +86,28 @@ const Settings = (props) => {
         limitValue={maxMinApartmentWidth || "x"}
         onDataChange={setMinApartmentWidth}
       />
+
+      <SettingsSliderTab
+        labelText="testslider"
+        limitValue={maxN || 0}
+        currentValue={currentN}
+        onDataChange={setN}
+      ></SettingsSliderTab>
+
+      <SettingsCheckTab
+        labelText="Randomize?"
+        onChange={setRandom}
+      ></SettingsCheckTab>
+    </div>
+  );
+};
+
+/*
       <SettingsTab
         placeHolder={n}
         labelText="Apartments"
         limitValue={maxN || "x"}
         onDataChange={setN}
       />
-    </div>
-  );
-};
+*/
 export default Settings;
