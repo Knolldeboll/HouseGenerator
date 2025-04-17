@@ -24,9 +24,6 @@ export const SettingsCheckTab = (props) => {
             props.onChange(event.target.checked);
           }}
         />
-        <label class="form-check-label" for="flexCheckDefault">
-          Default checkbox
-        </label>
       </div>
     </div>
   );

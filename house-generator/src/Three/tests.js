@@ -704,6 +704,45 @@ class Tests {
     console.log("House: ", house);
   }
 
+  /** Test calc stuff related to providing a max width of apartments  */
+
+  testHouseCalcMaxApWidth() {
+    // Test for the example of 40 x 30, cw 1, min 5, max 10 which has a manually calculated solution
+
+    console.log("pop");
+    let houseWidth = 40;
+    let houseHeight = 30;
+    let corridorWidth = 1;
+    let minApartmentWidth = 5;
+    let maxApartmentWidth = 10;
+
+    let testRect = new Rectangle().fromCoords(houseHeight, houseWidth, 0, 0);
+
+    let houseCalc = HouseCalculator.getInstance();
+
+    // Passt!
+    /*
+    let res = houseCalc.calculateMinCorridorsOriented(
+      testRect.shorterSideLength,
+      corridorWidth,
+      maxApartmentWidth
+    );
+    */
+
+    let thresholds = houseCalc.calculateMinMaxCorridorThresholds(
+      houseWidth,
+      houseHeight,
+      corridorWidth,
+      minApartmentWidth,
+      maxApartmentWidth
+    );
+
+    console.log(">>>> THRESHODELS", thresholds);
+
+    // Test min amount of corridors to keep k small enough so maxwidth fits in
+    //...
+  }
+
   /**
    * Setter for the "isRandom" Flag
    */

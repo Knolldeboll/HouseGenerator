@@ -74,7 +74,8 @@ const ThreeCanvas = (props) => {
 
     //tests.current?.testRectangleColors();
 
-    //return;
+    tests.current?.testHouseCalcMaxApWidth();
+    return;
 
     if (randomInput) {
       tests.current?.testAdaptiveMultiCorridorLayout(

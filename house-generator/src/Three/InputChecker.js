@@ -94,6 +94,8 @@ class InputChecker {
     );
   }
 
+  getMinN(width, height, corridorWidth, maxApartmentWidth) {}
+
   // is called when trying to enter width? macht aber keinen sinn.
   // Lieber ne settermethode, die fehlschlägt wenn man shit eingibt.
   checkCorridorWidth(width, height, corridorWidth) {

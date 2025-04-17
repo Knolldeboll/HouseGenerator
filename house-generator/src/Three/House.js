@@ -1321,7 +1321,7 @@ class House {
       );
     });
 
-    console.log(this.apartmentRects);
+    // console.log(this.apartmentRects);
 
     return this;
   }

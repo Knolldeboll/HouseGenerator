@@ -17,7 +17,7 @@ export const SettingsSliderTab = (props) => {
 
       <input
         type="range"
-        class="form-range"
+        className="form-range"
         min="1"
         max={props.limitValue}
         step="1"
