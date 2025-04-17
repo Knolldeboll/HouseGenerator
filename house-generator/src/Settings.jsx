@@ -41,6 +41,7 @@ const Settings = (props) => {
     (state) => state.maxMinApartmentWidth
   );
   const maxN = useLimitStore((state) => state.maxN);
+  const minN = useLimitStore((state) => state.minN);
 
   // Get the ParamStore setters here and pass them to the SettingsTabs, to be used as a callback function
   const setHouseWidth = useParamStore((state) => state.setHouseWidth);
@@ -101,6 +102,7 @@ const Settings = (props) => {
       <SettingsSliderTab
         labelText="testslider"
         limitValue={maxN || 0}
+        lowerLimitValue={minN || 0}
         currentValue={currentN}
         onDataChange={setN}
       ></SettingsSliderTab>

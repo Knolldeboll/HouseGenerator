@@ -37,10 +37,14 @@ export const SettingsSliderTab = (props) => {
         }}
       >
         <label htmlFor="exampleFormControlInput1" className="form-label">
-          Current: {props.currentValue}
+          Von: {props.lowerLimitValue}
+        </label>
+
+        <label htmlFor="exampleFormControlInput1" className="form-label">
+          =: {props.currentValue}
         </label>
         <label htmlFor="exampleFormControlInput1" className="form-label">
-          Limit: {props.limitValue}
+          Bis: {props.limitValue}
         </label>
       </div>
     </div>

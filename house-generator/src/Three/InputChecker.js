@@ -94,7 +94,43 @@ class InputChecker {
     );
   }
 
-  getMinN(width, height, corridorWidth, maxApartmentWidth) {}
+  getMinN(width, height, corridorWidth, minApartmentWidth, maxApartmentWidth) {
+    // TODO: IWIE kommt hier INFTY zurück!
+    console.log(
+      "getminN",
+      width,
+      height,
+      corridorWidth,
+      minApartmentWidth,
+      maxApartmentWidth
+    );
+
+    // TODO: Da kommen iwie threhsolds mit haufen NULL raus
+    let thresholds = this.houseCalc.calculateMinMaxCorridorThresholds(
+      width,
+      height,
+      corridorWidth,
+      minApartmentWidth,
+      maxApartmentWidth
+    );
+
+    let mins = [];
+
+    // Collect all mins
+    for (let ts of thresholds) {
+      if (ts.shorter != null) {
+        mins.push(ts.shorter.min);
+      }
+      if (ts.longer != null) {
+        mins.push(ts.longer.min);
+      }
+    }
+
+    // get the lowest of mins
+    console.log("Trhesholds from getMinN", thresholds);
+    return Math.min(...mins);
+    // Return the min of both
+  }
 
   // is called when trying to enter width? macht aber keinen sinn.
   // Lieber ne settermethode, die fehlschlägt wenn man shit eingibt.

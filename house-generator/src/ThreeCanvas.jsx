@@ -28,6 +28,7 @@ const ThreeCanvas = (props) => {
   );
 
   const setMaxN = useLimitStore((state) => state.setMaxN);
+  const setMinN = useLimitStore((state) => state.setMinN);
 
   const nLimit = useLimitStore((state) => state.maxN);
 
@@ -201,15 +202,23 @@ const ThreeCanvas = (props) => {
       return;
     }
 
-    let n = inputChecker.getMaxN(
+    let maxN = inputChecker.getMaxN(
       widthInput,
       heightInput,
       corrInput,
       minApWidthInput
     );
+    setMaxN(maxN);
 
+    let minN = inputChecker.getMinN(
+      widthInput,
+      heightInput,
+      corrInput,
+      minApWidthInput,
+      maxApWidthInput
+    );
+    setMinN(minN);
     // set the limit for n
-    setMaxN(n);
   }, [corrInput]);
 
   // on minApartmentWidth Input
@@ -231,6 +240,15 @@ const ThreeCanvas = (props) => {
     );
 
     setMaxN(n);
+
+    let minN = inputChecker.getMinN(
+      widthInput,
+      heightInput,
+      corrInput,
+      minApWidthInput,
+      maxApWidthInput
+    );
+    setMinN(minN);
   }, [minApWidthInput]);
 
   // TODO: recalc n limit on maxapwidth change
@@ -248,16 +266,24 @@ const ThreeCanvas = (props) => {
 
     // Calcs the absolute max value of n
     // TODO: Change getMaxN to handle maxWidth input
-    return;
+
     let n = inputChecker.getMaxN(
       widthInput,
       heightInput,
       corrInput,
       minApWidthInput
     );
-
     setMaxN(n);
-  }, [minApWidthInput]);
+
+    let minN = inputChecker.getMinN(
+      widthInput,
+      heightInput,
+      corrInput,
+      minApWidthInput,
+      maxApWidthInput
+    );
+    setMinN(minN);
+  }, [maxApWidthInput]);
 
   // on nInput changes
   useEffect(() => {
