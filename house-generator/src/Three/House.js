@@ -45,7 +45,7 @@ class House {
     this.i = undefined;
 
     this.corridorWidth = undefined;
-
+    this.corridorThresholds = [];
     //TODO: Add map-type attribute for the swap thresholds for
     // the amount of corridors
     // mapping with (i : maxApartments)
@@ -173,6 +173,8 @@ class House {
       );
       return;
     }
+
+    this.corridorThresholds = [];
 
     this.houseWidth = width;
     this.houseHeight = height;
@@ -1018,6 +1020,23 @@ class House {
   }
 
   /**
+   * Must be executed upon change of these paramsies. But not with every change of n
+   * @param {*} corridorWidth
+   * @param {*} minApWidth
+   * @param {*} maxApWidth
+   */
+  generateThresholds(corridorWidth, minApWidth, maxApWidth) {
+    this.corridorThresholds = this.houseCalc.calculateMinMaxCorridorThresholds(
+      this.houseWidth,
+      this.houseHeight,
+      corridorWidth,
+      minApWidth,
+      maxApWidth
+    );
+    return this;
+  }
+
+  /**
    * Generate 0,1 or multi corridor layout where the amount of corridors adapts to the
    * desired amount of apartments (n) and chooses the minimal amount of corridors
    */
@@ -1032,13 +1051,17 @@ class House {
       return this.multiCorridorLayout(corridorWidth, 0);
     }
 
-    // Achtung: corridorThresholds enthält jetzt sowas wie [1, {vertical:13,horizontal:15}, {vertical:20,horizontal:25},]
-    this.corridorThresholds = this.houseCalc.calculateCorridorThresholds(
-      this.houseWidth,
-      this.houseHeight,
-      corridorWidth,
-      minApartmentWidth
-    );
+    if (this.corridorThresholds == []) {
+      // Only generate if not generated before!
+      // Achtung: corridorThresholds enthält jetzt sowas wie [1, {vertical:13,horizontal:15}, {vertical:20,horizontal:25},]
+      console.error("No thresholds generated beforehand! Do it now!");
+      this.corridorThresholds = this.houseCalc.calculateCorridorThresholds(
+        this.houseWidth,
+        this.houseHeight,
+        corridorWidth,
+        minApartmentWidth
+      );
+    }
 
     console.log("New Thresholds: ", this.corridorThresholds);
 
@@ -1092,11 +1115,126 @@ class House {
       isShorter ? " shorter" : " longer"
     );
 
-    // TODO: Fix properly: When corridors = 1, the placementSide is flipped!
-    // Aktuell wird die einfach nur umgedreht, wenn corridors == 1;
-
     // 2. generate multi corridor layout with the found amount of apartments
     return this.multiCorridorLayout(corridorWidth, corridors, isShorter);
+  }
+
+  /**
+   *  */
+  //  TODO: Irgendwie dumm, hier für jedes neue n neue Thresholds zu berechnen.
+  // Die muss man eig nur bei Änderungen von width/height,corrWidth,min/maxWidth neu berechnen!
+
+  adaptiveMinMaxMultiCorridorLayout(
+    corridorWidth,
+    minApartmentWidth,
+    maxApartmentWidth,
+    n
+  ) {
+    // this.corridorWidth = corridorWidth;
+    // this.minApartmentWidth = minApartmentWidth;
+    this.resetRects();
+    console.log(">adaptiveMultiCorridorLayout");
+    // TODO: Recall saved Thresholds. Can only be done if only n changed and the other stuff is the same!
+
+    if (n == 1) {
+      return this.multiCorridorLayout(corridorWidth, 0);
+    }
+
+    // Achtung: corridorThresholds enthält jetzt sowas wie [1, {vertical:13,horizontal:15}, {vertical:20,horizontal:25},]
+    this.corridorThresholds = this.houseCalc.calculateMinMaxCorridorThresholds(
+      this.houseWidth,
+      this.houseHeight,
+      corridorWidth,
+      minApartmentWidth,
+      maxApartmentWidth
+    );
+
+    console.log("New Thresholds: ", this.corridorThresholds);
+
+    // 1. Calculate the needed amount of corridors for the inputs - iterate through thresholds and find the correct index.
+
+    // fetch the value out of the threshold array's threshold sets, that is either == n or the smallest that is >n
+
+    // TODO: Welches corridorlayout wird präferiert?
+
+    // !! auf jeden Fall das mit weniger Korridoren, da weniger Korridorfläche = mehr platz für Wohnraum.
+    //
+    // bei n = 30 , i =  x und shorter = 38 / longer = 40
+
+    // 1. das präferieren, wo n genauer reinpasst, also shorter 38?
+    // -> genauer reinpassen bedeutet: weniger Random spielraum für Wohnungen!
+    // -> ungenauer reinpassen bedeutet: mehr Random spielraum für Wohnungen!
+    // oder
+    // 2. das präferieren, wo Weniger korridorfläche? als longer
+
+    // Thresholds:
+
+    /*
+    let thresholdSet = {
+        i: i,
+        shorter: null | {min:x , max:y},
+        longer: null | {min:x , max:y}
+      };
+
+      */
+
+    let i = null;
+    let isShorter;
+
+    for (let ts of this.corridorThresholds) {
+      //   if()
+      // Wir gehen frech davon aus dass die Dinger sortiert sind und dass nicht
+      // bei höheren Korridoren nochmal bessere Elemente kommen
+
+      // Achtung: Thesholds jetzt immer so:
+
+      if (ts.longer != null && ts.longer.min <= n && ts.longer.max >= n) {
+        // longer config is feasible and n fits in its limits!
+        isShorter = false;
+        i = ts.i;
+        console.log(
+          "the best threshold is ",
+          ts.longer,
+          " for ",
+          i,
+          " corridors on longer side"
+        );
+
+        break;
+      }
+
+      // Check if the threshold fits perfectly or is the first one that is bigger than n
+      if (ts.shorter != null && ts.shorter.min <= n && ts.shorter.max >= n) {
+        isShorter = true;
+        i = ts.i;
+        console.log(
+          "the best threshold is ",
+          ts.shorter,
+          " for ",
+          i,
+          " corridors on shorter side"
+        );
+        break;
+      }
+    }
+
+    if (i == null) {
+      console.error(
+        "ERROR: no house could be produced for this exact value of n"
+      );
+      return this;
+    }
+    console.log(
+      "adapted to amount of corridors: ",
+      i,
+      " and ",
+      isShorter ? " shorter" : " longer"
+    );
+
+    //return;
+
+    // 2. generate multi corridor layout with the found amount of apartments
+    return this.multiCorridorLayout(corridorWidth, i, isShorter);
   }
 
   /**

@@ -49,6 +49,10 @@ const Settings = (props) => {
   const setMinApartmentWidth = useParamStore(
     (state) => state.setMinApartmentWidth
   );
+  const setMaxApartmentWidth = useParamStore(
+    (state) => state.setMaxApartmentWidth
+  );
+
   const setN = useParamStore((state) => state.setN);
   const currentN = useParamStore((state) => state.n);
   const setRandom = useParamStore((state) => state.setRandom);
@@ -85,6 +89,13 @@ const Settings = (props) => {
         labelText="Min Apartment Width"
         limitValue={maxMinApartmentWidth || "x"}
         onDataChange={setMinApartmentWidth}
+      />
+
+      <SettingsTab
+        placeHolder={n}
+        labelText="Max Apartment Width"
+        limitValue={"notimp"}
+        onDataChange={setMaxApartmentWidth}
       />
 
       <SettingsSliderTab

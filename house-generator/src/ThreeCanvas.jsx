@@ -35,6 +35,7 @@ const ThreeCanvas = (props) => {
   const heightInput = useParamStore((state) => state.houseHeight);
   const corrInput = useParamStore((state) => state.corridorWidth);
   const minApWidthInput = useParamStore((state) => state.minApartmentWidth);
+  const maxApWidthInput = useParamStore((state) => state.maxApartmentWidth);
   const nInput = useParamStore((state) => state.n);
   const randomInput = useParamStore((state) => state.isRandom);
 
@@ -74,7 +75,16 @@ const ThreeCanvas = (props) => {
 
     //tests.current?.testRectangleColors();
 
-    tests.current?.testHouseCalcMaxApWidth();
+    //  tests.current?.testHouseCalcMaxApWidth();
+
+    tests.current?.testMinMaxAdaptiveMultiCorridorLayout(
+      Number(widthInput),
+      Number(heightInput),
+      Number(corrInput),
+      Number(minApWidthInput),
+      Number(maxApWidthInput),
+      Number(nInput)
+    );
     return;
 
     if (randomInput) {
@@ -212,6 +222,33 @@ const ThreeCanvas = (props) => {
     )
       return;
 
+    // Calcs the absolute max value of n
+    let n = inputChecker.getMaxN(
+      widthInput,
+      heightInput,
+      corrInput,
+      minApWidthInput
+    );
+
+    setMaxN(n);
+  }, [minApWidthInput]);
+
+  // TODO: recalc n limit on maxapwidth change
+
+  // on maxApartmentWidth Input
+  useEffect(() => {
+    if (
+      widthInput === "" ||
+      heightInput === "" ||
+      corrInput === "" ||
+      minApWidthInput === "" ||
+      maxApWidthInput === ""
+    )
+      return;
+
+    // Calcs the absolute max value of n
+    // TODO: Change getMaxN to handle maxWidth input
+    return;
     let n = inputChecker.getMaxN(
       widthInput,
       heightInput,

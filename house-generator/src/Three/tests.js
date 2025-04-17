@@ -12,6 +12,9 @@ class Tests {
     // Type unknown, so no info on rendering
     this.rendering = rendering;
     this.isRandom = false;
+
+    // Keep house instance the same!
+    this.testHouse = new House();
   }
 
   testTests() {
@@ -651,6 +654,30 @@ class Tests {
       //...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
       ...house.apartmentRects.flatMap((ar) => ar.generateShapeMesh()),
     ]);
+  }
+
+  // TAHEEHEEE
+  testMinMaxAdaptiveMultiCorridorLayout(
+    houseWidth,
+    houseHeight,
+    corridorWidth,
+    minApWidth,
+    maxApWidth,
+    n
+  ) {
+    // TODO: Keep house instance. Only redo .definedHouse if width/height/ changed
+    // Only redo generateThresholds when cw, minapw, maxapw changed.
+    let house = new House()
+      .definedHouseShape(houseWidth, houseHeight)
+      .generateThresholds(corridorWidth, minApWidth, maxApWidth)
+      .adaptiveMinMaxMultiCorridorLayout(
+        corridorWidth,
+        minApWidth,
+        maxApWidth,
+        n
+      );
+
+    console.log("generated test house", house);
   }
 
   // TODO: Den Shit von hier in ThreeCanvas direkt bringen und ausführen!
