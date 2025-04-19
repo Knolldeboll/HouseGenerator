@@ -170,13 +170,12 @@ class Edge {
    * @param {THREE.Vector2} direction The direction of the rectangle, x = 1: right, x = -1: left, y = 1: up, y = -1: down
    */
   spawnRectangle(height, direction) {
-    /* console.log(
-      "> Spawn Rectangle along Edge with height: ",
-      height,
-      " and direction: ",
-      direction
-    );
-    */
+    /*      console.log(
+        "> Failed to Spawn Rectangle along Edge with height: ",
+        height,
+        " and direction: ",
+        direction );
+     */
     if (this._isHorizontal && direction.x != 0 && direction.y == 0) {
       console.error("Invalid direction for horizontal edge!");
       return undefined;
@@ -184,6 +183,7 @@ class Edge {
 
     if (!this._isHorizontal && direction.x == 0 && direction.y != 0) {
       console.error("Invalid direction for vertical edge!");
+
       return undefined;
     }
 

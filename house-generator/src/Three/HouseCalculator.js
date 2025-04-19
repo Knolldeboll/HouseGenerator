@@ -457,7 +457,9 @@ class HouseCalculator {
    * @param {*} maxApartmentWidth
    */
   calculateMinApartmentsLivingArea(laRect, maxApartmentWidth) {
-    return Math.ceil(laRect.longerSide / maxApartmentWidth);
+    console.log(">calculate min aps for LA ", laRect, maxApartmentWidth);
+
+    return Math.ceil(laRect.longerSideLength / maxApartmentWidth);
   }
 
   // TODO: Handle 1 corridor
@@ -808,6 +810,135 @@ class HouseCalculator {
     return nSplits;
   }
 
+  /**
+   * Returns randomized splitting of n over the apartments while keeping the min and max amount of
+   * aps of the la's
+   * @param {} livingAreaRects
+   * @param {*} n
+   * @param {*} minApartmentWidth
+   * @param {*} maxApartmentWidth
+   */
+  calculateRandomNDivisionsMinMax(
+    livingAreaRects,
+    n,
+    minApartmentWidth,
+    maxApartmentWidth
+  ) {
+    console.log(
+      "> Calc N Divisions for Living Areas inputs",
+      livingAreaRects,
+      n,
+      minApartmentWidth,
+      maxApartmentWidth
+    );
+
+    //  maximum splits per LA to keep the minWidth
+    let nSplitsMax = [];
+    // minimum splits per LA to keep the maxWidth
+    let nSplitsMin = [];
+
+    if (livingAreaRects.length > n) {
+      console.error(
+        "calcNDivisions error: n",
+        n,
+        " too small! each of the ",
+        livingAreaRects.length,
+        " la must at least have one apartment"
+      );
+
+      return [];
+    }
+
+    // TODO: Check if the n given fits into the max amount of apartments per Living area!
+    // So that the inputs are correct!
+    // should be correct if the Limit's are applied properly in the SettingsTabs or InputChecker
+
+    // 1. Fill max AND min splits
+    for (let la of livingAreaRects) {
+      nSplitsMax.push(
+        this.calculateMaxApartmentsLivingArea(la, minApartmentWidth)
+      );
+      nSplitsMin.push(
+        this.calculateMinApartmentsLivingArea(la, maxApartmentWidth)
+      );
+    }
+    console.log("maxsplits: ", nSplitsMax, " minsplits: ", nSplitsMin);
+    // console.log("calcNDivs max nSplits:", nSplits);
+
+    // Sum the full max
+    const summedMax = nSplitsMax.reduce((acc, val) => acc + val, 0);
+    console.log(" total max splits", summedMax);
+
+    // Sum the full min
+    const summedMin = nSplitsMin.reduce((acc, val) => acc + val, 0);
+    console.log("Total min splits: ", summedMin);
+
+    console.log("now you want to split it into n: ", n, " apartments");
+
+    if (n > summedMax) {
+      console.error(" n too high! cant divide in so many apartments");
+      return [];
+    }
+
+    if (n < summedMin) {
+      console.error(" n too low! must divide in more apartments");
+      return [];
+    }
+
+    // If n is maximum, return the maxed out nSplits
+    if (n == summedMax) {
+      return nSplitsMax;
+    }
+
+    // if n is minimum, return the min out nSplits
+    if (n == summedMin) {
+      return nSplitsMin;
+    }
+
+    // If there are less wanted apartments (n) than total max apartments,
+
+    // Remove one apartment per random living area one by one randomly,
+    // but keep at least 1 apartment in each living area
+
+    // Repeat until the remaining number of desired apartments == 0
+
+    // DEADLOCK möglich:
+    // wenn n = livingAreas bekommt jede livingArea genau 1 apartment
+    // wenn n > livingAreas, bekommt jedes livingArea durchschnittlich mehr als 1 apartment
+
+    // wenn n < livingAreas, bekommt jedes LA durchschn. WENIGER als 1 apartment1
+    // Hier läuft die While aber endlos weiter, wenn alle schon 1 haben und noch min. 1 abgezogen werden soll!
+
+    let endlessMitigationCounter = 0;
+
+    // Still start with the max splits and decrement them.
+    while (nSplitsMax.reduce((acc, val) => acc + val, 0) != n) {
+      // Choose random LA to be decremented of one apartment
+      let currentNSplitIndex = Math.floor(Math.random() * nSplitsMax.length);
+      // Keep each la at least at its min apartments!
+
+      // when n = maxAps, every La has its  maxApartments
+      if (nSplitsMax[currentNSplitIndex] > nSplitsMin[currentNSplitIndex]) {
+        nSplitsMax[currentNSplitIndex]--;
+      }
+
+      endlessMitigationCounter++;
+
+      if (endlessMitigationCounter > 100) {
+        console.error("ENDLESSMITIGATION in calculateRandomNDivisions");
+        return [];
+      }
+    }
+
+    console.log("calculateNDivisions produced following splits:", nSplitsMax);
+    console.log(
+      "sums up to: ",
+      nSplitsMax.reduce((acc, val) => acc + val, 0)
+    );
+
+    return nSplitsMax;
+  }
+
   // TODO: Method for Splitting the N apartments Evenly over the Living areas!
   // The amount of the apartments per LA should correspond to the width of the LA!
   // So maybe do this per percentage of the whole width or smth.
@@ -828,8 +959,13 @@ class HouseCalculator {
    * @param {*} minApartmentWidth Wird beim anderen genutzt, um die maximale Anzahl an Aps pro LA zu berechnen.
    * @returns
    */
+
   calculateEvenNDivisions(livingAreaRects, n, minApartmentWidth) {
     console.log("> calculateEvenNDivisions");
+
+    // TODO: Check if every La would even get one ap!
+    // Maybe initialize nSplits with 1's - weil dass das minimum ist!
+
     let nSplits = [];
 
     let maxSplits = [];
@@ -912,6 +1048,182 @@ class HouseCalculator {
       endlessMitigationCounter++;
       if (endlessMitigationCounter > 50) {
         console.log("HURENSOHN");
+        break;
+      }
+    }
+
+    //let nSplitTestSum = nSplits.reduce((acc, split) => acc + split, 0);
+    // console.log("maxSplits ", maxSplits);
+    // console.log("vs Final N-Splits:", nSplits, " sum up to ", nSplitTestSum);
+
+    return nSplits;
+
+    // TODO: Möglicherweise rest auf Ganzzahl runden wegen  float Rechenfehlern
+    while (rest != 0) {}
+
+    return (nSplits = []);
+  }
+
+  /**
+   * Calculates the amount of apartments that shall be given to each Living area, corresponding to their actual size!
+   *
+   * @param {} livingAreaRects
+   * @param {*} n
+   * @param {*} minApartmentWidth Wird beim anderen genutzt, um die maximale Anzahl an Aps pro LA zu berechnen.
+   * @returns
+   */
+  calculateEvenNDivisionsMinMax(
+    livingAreaRects,
+    n,
+    minApartmentWidth,
+    maxApartmentWidth
+  ) {
+    console.log("> calculateEvenNDivisionsMINMAX");
+    let nSplits = [];
+
+    let maxSplits = [];
+    let minSplits = [];
+
+    // 1. Fill max AND min splits
+    for (let la of livingAreaRects) {
+      maxSplits.push(
+        this.calculateMaxApartmentsLivingArea(la, minApartmentWidth)
+      );
+      minSplits.push(
+        this.calculateMinApartmentsLivingArea(la, maxApartmentWidth)
+      );
+    }
+    console.log("maxsplits: ", maxSplits, " minsplits: ", minSplits);
+
+    // console.log("calcNDivs max nSplits:", nSplits);
+    // TODO: Can also k be longerSideLength?
+    // This actually needs the opposite side of the side that is k long!
+    // So the length shared with the corridor.
+
+    let maxSum = maxSplits.reduce((acc, val) => acc + val, 0);
+    let minSum = minSplits.reduce((acc, val) => acc + val, 0);
+
+    if (n > maxSum) {
+      console.error(" n too high! cant divide in so many apartments");
+      return [];
+    }
+
+    if (n < minSum) {
+      console.error(" n too low! must divide in more apartments");
+      return [];
+    }
+
+    // Shortcuts for direct split hits
+    if (maxSum == n) {
+      return maxSplits;
+    }
+    if (minSum == n) {
+      return minSplits;
+    }
+
+    // >>> Nun berechne die Anteile von n pro LA anhand ihrer Größe/Breite
+    // TODO: Es kann auch sein, dass "longerSideLength" nicht die Gangseite ist!
+
+    // Gesamte Länge/"Größe", die für alle LA's zur Verfügung steht
+    // Hier gehen wir davon aus, dass die LivingRects mit der längeren Seite am Korridor liegen
+    const totalLALength = livingAreaRects.reduce(
+      (acc, rect) => acc + rect.longerSideLength,
+      0
+    );
+
+    //console.log("totalLAlength:", totalLALength);
+    const LAPercentages = [];
+
+    for (const laRect of livingAreaRects) {
+      LAPercentages.push(laRect.longerSideLength / totalLALength);
+    }
+
+    //let testSum = LAPercentages.reduce((acc, perc) => acc + perc, 0);
+    //console.log("LApercentages:", LAPercentages, " sum up to ", testSum);
+
+    // Berechne aufgrund der Gewichtungen, wie viele Aps in jedes LA kommen.
+    // Aber abgerundet, damit Ganzzahlige Anzahlen
+
+    // Rest sollte auch immer auf Ganzzahl rauskommen, oder?
+    // Denn wenn man ne beliebige Ganzzahlige Nummer per Prozent in andere, kleinere ganzzahlige Nummern aufteilt
+    // ist die summe dieser nummern auch ne Ganzzahl.
+    // Der Rest somit auch. getestet!
+
+    // TODO: minapartments für alle LA's zusammenrechnen.
+
+    // dann die differenz aller La-MinApartmentcounts zu n herausfinden
+
+    // n abzüglich der schon in minSplits vergebenen Apartments.
+    // alá: la 1 bekommt 0.5 der Restlichen Aps, la2 bekommt 0.2 der restlichen Aps, etc.
+
+    let remainingN = n - minSum;
+    console.log(
+      "Remaining n:",
+      remainingN,
+      " = n (",
+      n,
+      ") minus already divided minAps:",
+      minSum
+    );
+
+    // nun Teile die remaining Ap's anhand der Gewichtungen auf die LA's auf
+
+    let rest = 0;
+    let counter = 0;
+    for (const perc of LAPercentages) {
+      // Berechne float Anzahl an Aps pro LA
+      const apsWhole = perc * remainingN;
+      // Berechne dasselbe Abgerundet
+      const apsRounded = Math.floor(perc * remainingN);
+      // Rest berechnen
+      rest += apsWhole - apsRounded;
+      nSplits.push(minSplits[counter] + apsRounded);
+
+      if (nSplits[counter] > maxSplits[counter]) {
+        console.error("one nSplit is already greater than its maxSplit!");
+        return [];
+      }
+      counter++;
+    }
+
+    console.log("nSplits with minSplits and added percentage splits", nSplits);
+
+    // TODO: Kommt da überhaupt immer N Raus? wtf?
+    // Ja! Denn prinzipiell werden hier Percentages, die zusammen immer 1 ergeben,
+    // mit n multipliziert und abgerundet.
+    // der Rest gibt dann immer ne ganzzahl.
+
+    console.log("unrounded apartment rest:", rest);
+    // weil wenn der Rest
+    rest = Math.round(rest);
+    console.log("rounded apartment rest:", rest);
+    // console.log("Rounded even divisions: ", nSplits, " rounded rest ", rest);
+
+    // Nun die in "rest" definierten Apartments noch irgendwie aufteilen.
+
+    // Das machmer so: jede LA bekommt reihum einen dazu, solange deren max noch nicht erreicht ist.
+    // so ergibt es sich, dass bei einem n mehr einfach das nächste LA mehr gesplittet wird.
+
+    let endlessMitigationCounter = 0;
+    while (rest > 0) {
+      for (let i = 0; i < livingAreaRects.length; i++) {
+        // Wenn aktuelles nSplit sein Limit noch nicht erreicht hat,
+        // addiere eins drauf
+
+        if (nSplits[i] < maxSplits[i]) {
+          nSplits[i]++;
+          rest--;
+          if (rest == 0) {
+            break;
+          }
+        }
+      }
+
+      endlessMitigationCounter++;
+      if (endlessMitigationCounter > 50) {
+        console.log(
+          "HURENSOHN: iwie kann der rest von n nicht aufgeteilt werden."
+        );
         break;
       }
     }

@@ -50,8 +50,9 @@ class Tools {
    */
 
   // TODO: distribution is uneven.
-  // very often the first one is max, the rest is min
-  // Prolly
+  // wahrscheinlich, weil max bisher immer die GANZE länge des
+  // rects war - ein Rect konnte also auch insg so lang sein!
+  // jetzt haben die dinger ja immer ne maximalgröße, abhängig von maxBreite
   divideValueIntoPartsMinMax(value, n, min, max) {
     // console.log("> Tools: divideValueIntoPartsMinMax", value, n, min, max);
 
@@ -130,7 +131,7 @@ class Tools {
       endlessMitigationCounter++;
 
       if (endlessMitigationCounter > 50) {
-        console.error("ENDLESSMITIGATION 50 in calculateRandomNDivisions");
+        console.error("ENDLESSMITIGATION 50 in divideValueIntoPartsMinMax");
         return [];
       }
     }

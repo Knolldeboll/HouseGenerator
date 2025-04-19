@@ -75,9 +75,17 @@ const ThreeCanvas = (props) => {
     */
 
     //tests.current?.testRectangleColors();
+    tests.current?.testNonrandomMinMaxAdaptiveMultiCorridorLayout(
+      Number(widthInput),
+      Number(heightInput),
+      Number(corrInput),
+      Number(minApWidthInput),
+      Number(maxApWidthInput),
+      Number(nInput)
+    );
+    return;
 
     //  tests.current?.testHouseCalcMaxApWidth();
-
     tests.current?.testMinMaxAdaptiveMultiCorridorLayout(
       Number(widthInput),
       Number(heightInput),
@@ -88,6 +96,7 @@ const ThreeCanvas = (props) => {
     );
     return;
 
+    // Alter shit ohne min max
     if (randomInput) {
       tests.current?.testAdaptiveMultiCorridorLayout(
         Number(widthInput),

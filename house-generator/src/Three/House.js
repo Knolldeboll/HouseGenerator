@@ -81,6 +81,7 @@ class House {
       new THREE.Color(0x43a9d1),
       new THREE.Color(0x1e9ed1),
       new THREE.Color(0x008bc2),
+      new THREE.Color(0x00638a),
     ];
 
     // a: upper left
@@ -1415,7 +1416,8 @@ class House {
 
   // TODO: Can this handle one Corridor?!?!?
 
-  fillLivingAreasWithApartments(n, minApWidth) {
+  // TODO: Auch mit max machen.
+  fillLivingAreasWithApartments(n, minApWidth, maxApWidth) {
     // Generate splits  for livingAreaRects
     this.apartmentRects = [];
     console.log("> fillLivingAreasWithRooms");
@@ -1435,15 +1437,28 @@ class House {
     // Does only calculate how many apartments are present for each living Area
 
     //
-    const livingAreaSplits = this.houseCalc.calculateRandomNDivisions(
-      this.livingAreaRects,
-      n,
-      minApWidth
-    );
 
-    // console.log("Living area Splits: ");
+    let livingAreaSplits;
 
-    // Return here to only test if calculateRandomNDivisions works properly!
+    // if maxWidth given, so special N Divisions
+    if (maxApWidth) {
+      console.log("do fillings n-Splitting considering MIN MAX");
+      livingAreaSplits = this.houseCalc.calculateRandomNDivisionsMinMax(
+        this.livingAreaRects,
+        n,
+        minApWidth,
+        maxApWidth
+      );
+    } else {
+      console.log("do fillings n-Splitting only considering MIN");
+      livingAreaSplits = this.houseCalc.calculateRandomNDivisions(
+        this.livingAreaRects,
+        n,
+        minApWidth
+      );
+    }
+
+    console.log("Living area Splits: ", livingAreaSplits);
 
     //return this;
     this.livingAreaRects.forEach((laRect, index) => {
@@ -1451,23 +1466,26 @@ class House {
       // push to apartments
       // console.log("split ", laRect, " into ", livingAreaSplits[index]);
 
+      // Hier maxapwidht rein, früher war das nicht nötig!
       this.apartmentRects.push(
         ...laRect.splitRandomlyMinMaxWidthOriented(
           livingAreaSplits[index],
-          minApWidth
+          minApWidth,
+          maxApWidth
         )
       );
     });
 
+    this.recolorApartments();
     // console.log(this.apartmentRects);
 
     return this;
   }
 
-  fillLivingAreasWithApartmentsEvenly(n, minApWidth) {
+  fillLivingAreasWithApartmentsEvenly(n, minApWidth, maxApWidth) {
     // Generate splits  for livingAreaRects
     this.apartmentRects = [];
-    console.log("> fillLivingAreasWithRooms");
+    console.log("> fillLivingAreasWithRooms evenly");
 
     if (this.livingAreaRects == undefined) {
       console.error("fillLivingAreasWithRooms error: no living areas present!");
@@ -1484,29 +1502,31 @@ class House {
     // Does only calculate how many apartments are present for each living Area
 
     //TODO: implement Even N Divisions
-    const livingAreaSplits = this.houseCalc.calculateEvenNDivisions(
-      this.livingAreaRects,
-      n,
-      minApWidth
-    );
 
-    // console.log("Living area Splits: ");
+    let livingAreaSplits;
+    if (maxApWidth) {
+      console.log(" split n evenly mINMAX");
+      livingAreaSplits = this.houseCalc.calculateEvenNDivisionsMinMax(
+        this.livingAreaRects,
+        n,
+        minApWidth,
+        maxApWidth
+      );
+    } else {
+      console.log(" split n evenly regular");
+      livingAreaSplits = this.houseCalc.calculateEvenNDivisions(
+        this.livingAreaRects,
+        n,
+        minApWidth
+      );
+    }
 
-    // Return here to only test if calculateRandomNDivisions works properly!
+    console.log("Living area Splits: ", livingAreaSplits);
+
+    // Return here to only test if calculateEvenNDivisionsMinMax works properly!
 
     //return this;
     this.livingAreaRects.forEach((laRect, index) => {
-      // split each LA randomly min max WIDTH oriented into corresponding n apartments
-      // push to apartments
-      // console.log("split ", laRect, " into ", livingAreaSplits[index]);
-
-      /*
-        ...laRect.splitRandomlyMinMaxWidthOriented(
-          livingAreaSplits[index],
-          minApWidth
-        )
-      */
-
       this.apartmentRects.push(
         ...laRect.splitEvenlyOriented(livingAreaSplits[index])
       );
@@ -1514,17 +1534,21 @@ class House {
 
     // Recolor for better visibility!
 
+    this.recolorApartments();
+
+    //console.log(this.apartmentRects);
+
+    return this;
+  }
+
+  recolorApartments() {
     let i = 0;
     for (let rect of this.apartmentRects) {
       rect.changeColor(this.apartmentColors[i]);
       i++;
 
-      if (i > 3) i = 0;
+      if (i > this.apartmentColors.length - 1) i = 0;
     }
-
-    //console.log(this.apartmentRects);
-
-    return this;
   }
 
   /**

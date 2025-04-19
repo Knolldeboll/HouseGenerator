@@ -268,6 +268,7 @@ class Rectangle {
 
   /**
    *  Divide into n Rectangles of the same size, along the longer side
+   *  will not check if the parts are in bounds of any min/max size. has to be calced beforehand
    * @param {*} n
    * @returns
    */
@@ -386,13 +387,22 @@ class Rectangle {
   // TODO: Implement
   /// TODO: Max values is currently this.longerSideLength,
   // should be parametrisable
-  splitRandomlyMinMaxWidthOriented(n, min) {
+  splitRandomlyMinMaxWidthOriented(n, min, max) {
     // Split longer side into n random parts of min width
+
+    console.log(
+      "> split LA of width ",
+      this.longerSideLength,
+      " into ",
+      n,
+      " parts "
+    );
+    // problem: NaN
     const parts = Tools.getInstance().divideValueIntoPartsMinMax(
       this.longerSideLength,
       n,
       min,
-      this.longerSideLength
+      max
     );
 
     // generate subrects from these parts
@@ -1012,7 +1022,7 @@ class Rectangle {
   generateSubRectsFromEdgePartsOriented(parts) {
     let subRects = [];
     // Split one longer edge into subedges
-
+    console.log(">generateSubRectsFromEdgePartsOriented", parts);
     if (this.isHorizontal) {
       // lower edge, then up
       const edgeParts = this.edges.lowerEdge.splitIntoParts(parts);

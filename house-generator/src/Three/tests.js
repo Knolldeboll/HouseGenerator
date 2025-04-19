@@ -675,11 +675,67 @@ class Tests {
         minApWidth,
         maxApWidth,
         n
-      );
+      )
+      .generateLivingAreaRects()
+      // unevenly!
+      .fillLivingAreasWithApartments(n, minApWidth, maxApWidth);
 
     console.log("generated test house", house);
+    this.rendering.clearScene();
+    //return;
+    this.rendering.addAllToScene([
+      //house.houseRect.generateShapeMesh(),
+      ...house.mainCorridorRects.flatMap((mcr) => mcr.generateShapeMesh()),
+      ...house.connectorRects.flatMap((cr) => cr.generateShapeMesh()),
+      /* ...house.livingAreaRects.flatMap((la) =>
+          la.shapeAndVerticesPointHelperMesh()
+        ),
+        */
+      //
+      ...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
+      ...house.apartmentRects.flatMap((ar) => ar.generateShapeMesh()),
+    ]);
   }
 
+  testNonrandomMinMaxAdaptiveMultiCorridorLayout(
+    houseWidth,
+    houseHeight,
+    corridorWidth,
+    minApWidth,
+    maxApWidth,
+    n
+  ) {
+    // TODO: Keep house instance. Only redo .definedHouse if width/height/ changed
+    // Only redo generateThresholds when cw, minapw, maxapw changed.
+    let house = new House()
+      .definedHouseShape(houseWidth, houseHeight)
+      .generateThresholds(corridorWidth, minApWidth, maxApWidth)
+      .adaptiveMinMaxMultiCorridorLayout(
+        corridorWidth,
+        minApWidth,
+        maxApWidth,
+        n
+      )
+      .generateLivingAreaRects()
+      // evenly!
+      .fillLivingAreasWithApartmentsEvenly(n, minApWidth, maxApWidth);
+
+    console.log("generated test house", house);
+    this.rendering.clearScene();
+
+    this.rendering.addAllToScene([
+      //house.houseRect.generateShapeMesh(),
+      ...house.mainCorridorRects.flatMap((mcr) => mcr.generateShapeMesh()),
+      ...house.connectorRects.flatMap((cr) => cr.generateShapeMesh()),
+      /* ...house.livingAreaRects.flatMap((la) =>
+            la.shapeAndVerticesPointHelperMesh()
+          ),
+          */
+      //
+      ...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
+      ...house.apartmentRects.flatMap((ar) => ar.generateShapeMesh()),
+    ]);
+  }
   // TODO: Den Shit von hier in ThreeCanvas direkt bringen und ausführen!
   // Der kann dann z.B. auch das House behalten und bei Änderungen von n nur die Corridors/Apartments neu generieren!
 
