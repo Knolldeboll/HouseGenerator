@@ -125,14 +125,12 @@ class Rectangle {
 
     // Generate Edges
     this.generateEdges();
-    // Irgendwas saugt hier Arsch
     this.calculateOrientation();
 
     return this;
   }
 
   fromCoords(width, height, x, y) {
-    //console.log("> Rectangle from verts");
     this._width = width;
     this._height = height;
     this._area = this._width * this._height;
@@ -270,9 +268,12 @@ class Rectangle {
    *  Divide into n Rectangles of the same size, along the longer side
    *  will not check if the parts are in bounds of any min/max size. has to be calced beforehand
    * @param {*} n
+   * @param {*} splitHorizontally if the Rect should be split along x axis
    * @returns
    */
-  splitEvenlyOriented(n) {
+
+  // Müsste Oriented passen
+  splitEvenlyOriented(n, splitHorizontally) {
     let newRects = [];
 
     console.log("> Split Rectangle evenly oriented along the longer side");
@@ -281,7 +282,7 @@ class Rectangle {
     // TODO: Kleines Problem bei width = height, da ist dann undefiniertes Verhalten.
     // Kann auch sein, dass die LA dann nicht entlang des Korridors gesplittet wird.
 
-    if (this._width > this._height) {
+    if (splitHorizontally) {
       // Horizontally
 
       // Divide along width
@@ -333,6 +334,7 @@ class Rectangle {
 
   //TODO: Apply random splitting to both orientations
   /**
+   * OBSOLETE: Now use ...widthOriented version
    * Split into n randomly sized parts, each part with size between min and max
    * Oriented along the longer side
    * Can be used to keep AR intact by calculating the maxArea and minArea beforehand!
@@ -378,35 +380,38 @@ class Rectangle {
   }
 
   /**
-   * Splits this rect into n parts along the longer edge, which are between min and max wide
-   * @param {*} n  Parts to be split into
-   * @param {*} min Min width of the subrects
-   * @param {*} max Max width of the subrects
+   * Splits this Rectangle into n randomly sized parts with width along the splitting edge between min and max
+   * @param {*} n
+   * @param {*} min
+   * @param {*} max
+   * @param {*} splitHorizontally if the Rect should be split along x axis
+   * @returns
    */
-
-  // TODO: Implement
-  /// TODO: Max values is currently this.longerSideLength,
-  // should be parametrisable
-  splitRandomlyMinMaxWidthOriented(n, min, max) {
+  splitRandomlyMinMaxWidthOriented(n, min, max, splitHorizontally) {
     // Split longer side into n random parts of min width
 
+    let splittingEdgeLength = splitHorizontally
+      ? this.edges.lowerEdge.length
+      : this.edges.rightEdge.length;
+
     console.log(
-      "> split LA of width ",
-      this.longerSideLength,
+      "> split LA of splitting edge width ",
+      splittingEdgeLength,
       " into ",
       n,
       " parts "
     );
-    // problem: NaN
+    // problem: longerSideLength is not always the splitting side!
+
     const parts = Tools.getInstance().divideValueIntoPartsMinMax(
-      this.longerSideLength,
+      splittingEdgeLength,
       n,
       min,
       max
     );
 
     // generate subrects from these parts
-    return this.generateSubRectsFromEdgePartsOriented(parts);
+    return this.generateSubRectsFromEdgePartsOriented(parts, splitHorizontally);
   }
 
   // TODO: Hier wird anscheinend jedes fertige STM Rectangle an dieselbe Position gepackt
@@ -920,7 +925,7 @@ class Rectangle {
     return returnRects;
   }
 
-  /**
+  /**OBSOLETE: Use ..fromEdgeParts
    * Generate Subrectangles from a given set of parts of the longer one of it's edges
    * @param {List} parts List of areas of the individual parts, given as concrete Areas, not percentages
    * @returns Rectangles generated from the given area parts
@@ -1019,17 +1024,26 @@ class Rectangle {
    * Generate Subrects based on parts of one of this.edges
    * @param {List} parts Edge parts of concrete length
    */
-  generateSubRectsFromEdgePartsOriented(parts) {
+
+  generateSubRectsFromEdgePartsOriented(parts, splitHorizontally) {
     let subRects = [];
     // Split one longer edge into subedges
-    console.log(">generateSubRectsFromEdgePartsOriented", parts);
-    if (this.isHorizontal) {
+    console.log(
+      ">generateSubRectsFromEdgePartsOriented",
+      parts,
+      " horizontally? ",
+      splitHorizontally
+    );
+
+    // TODO: SpawnRectangle with
+
+    if (splitHorizontally) {
       // lower edge, then up
       const edgeParts = this.edges.lowerEdge.splitIntoParts(parts);
 
       for (const e of edgeParts) {
         subRects.push(
-          e.spawnRectangle(this.shorterSideLength, new Vector2(0, 1))
+          e.spawnRectangle(this.edges.rightEdge.length, new Vector2(0, 1))
         );
       }
     } else {
@@ -1037,8 +1051,10 @@ class Rectangle {
       const edgeParts = this.edges.rightEdge.splitIntoParts(parts);
 
       for (const e of edgeParts) {
+        // Height of the spawned rect, as seen from the edge part, is the length of one of the edges perpendicular to the
+        // splitting edge
         subRects.push(
-          e.spawnRectangle(this.shorterSideLength, new Vector2(-1, 0))
+          e.spawnRectangle(this.edges.lowerEdge.length, new Vector2(-1, 0))
         );
       }
     }
@@ -1047,22 +1063,10 @@ class Rectangle {
 
     return subRects;
   }
-  // TODO: Outsource the "generate vertices" part into separate
-  generateHorizontalRectangles(parts) {
-    // Kann man nicht vereinen, da bei SplitEven mit den Edges gearbeitet wird
-    // und bei
-  }
-
-  generateVerticalRectangles(parts) {}
-
-  // Split into n randomly sized parts, with each part not exceeding a specified aspect ratio
-  splitRandomlyAspectRatioOriented(n, maxAspectRatio) {
-    // Calculate min and max from the given aspect Ratio, then same as above
-  }
 
   // JS Optional Parameters:
   // c ist optional und per default mit null belegt
-  // wenn beim function call für c "unefined" angegeben wird, wird der default-Wert verwendet!
+  // wenn beim function call für c "unefined" oder eben nix angegeben wird, wird der default-Wert verwendet!
   //
   // func(a,b,c = null)
 

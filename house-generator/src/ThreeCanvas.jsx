@@ -74,27 +74,30 @@ const ThreeCanvas = (props) => {
     );
     */
 
-    //tests.current?.testRectangleColors();
-    tests.current?.testNonrandomMinMaxAdaptiveMultiCorridorLayout(
-      Number(widthInput),
-      Number(heightInput),
-      Number(corrInput),
-      Number(minApWidthInput),
-      Number(maxApWidthInput),
-      Number(nInput)
-    );
-    return;
+    if (randomInput) {
+      tests.current?.testMinMaxAdaptiveMultiCorridorLayout(
+        Number(widthInput),
+        Number(heightInput),
+        Number(corrInput),
+        Number(minApWidthInput),
+        Number(maxApWidthInput),
+        Number(nInput)
+      );
+      return;
+    } else {
+      //tests.current?.testRectangleColors();
+      tests.current?.testNonrandomMinMaxAdaptiveMultiCorridorLayout(
+        Number(widthInput),
+        Number(heightInput),
+        Number(corrInput),
+        Number(minApWidthInput),
+        Number(maxApWidthInput),
+        Number(nInput)
+      );
+      return;
+    }
 
     //  tests.current?.testHouseCalcMaxApWidth();
-    tests.current?.testMinMaxAdaptiveMultiCorridorLayout(
-      Number(widthInput),
-      Number(heightInput),
-      Number(corrInput),
-      Number(minApWidthInput),
-      Number(maxApWidthInput),
-      Number(nInput)
-    );
-    return;
 
     // Alter shit ohne min max
     if (randomInput) {

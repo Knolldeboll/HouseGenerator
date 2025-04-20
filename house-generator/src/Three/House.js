@@ -46,20 +46,8 @@ class House {
 
     this.corridorWidth = undefined;
     this.corridorThresholds = [];
-    //TODO: Add map-type attribute for the swap thresholds for
-    // the amount of corridors
-    // mapping with (i : maxApartments)
-    // so for example:
 
-    /**
-     * 1 corridor: 6 maxApartments
-     * 2 corridor: 14 max Apartments
-     * 3 corridor: 20 max apartments
-     *
-     *
-     */
-
-    // this list can be dynamic to save the max amount of corridors as well
+    this.corridorsHorizontal = undefined;
 
     /**
      * The rects from the Apartments, corridor and rooms
@@ -805,11 +793,11 @@ class House {
   // "generate corridors for the specified amount of corridors according to the specified n"
 
   /**
-   * Places multiple corridors along the specified side of the house
+   * Places multiple corridors along the specified side (shorter/longer, which ever this may be) of the house
    * corridorCount and orientation must be calculated before and can be anything
    * @param {*} corridorWidth
    * @param {*} corridorCount
-   * @param {*} orientation If true:
+   * @param {*} onShorterSide If true:
    * @returns
    */
   multiCorridorLayout(corridorWidth, corridorCount, onShorterSide) {
@@ -1232,6 +1220,7 @@ class House {
       isShorter ? " shorter" : " longer"
     );
 
+    // TODO: Save if corridors are placed horizontally (along x) or vertically (along y)
     //return;
 
     // 2. generate multi corridor layout with the found amount of apartments
@@ -1441,13 +1430,23 @@ class House {
     let livingAreaSplits;
 
     // if maxWidth given, so special N Divisions
+
+    // Split LA's horizontally, if corridors are horizontally
+    // Split LA's vertically, if corridors are vertically
+
+    // If Corridors are aligned horizontally, split the LAs horizontally
+    let splitHorizontally = this.mainCorridorRects[0].isHorizontal;
     if (maxApWidth) {
       console.log("do fillings n-Splitting considering MIN MAX");
+
+      // Wenn Korridor horizontal, ist corridorPlacement vertikal!
+      // Dann müssen die LA's horizontal gesplittet werden. - Also entlang der Lowerside
       livingAreaSplits = this.houseCalc.calculateRandomNDivisionsMinMax(
         this.livingAreaRects,
         n,
         minApWidth,
-        maxApWidth
+        maxApWidth,
+        splitHorizontally
       );
     } else {
       console.log("do fillings n-Splitting only considering MIN");
@@ -1458,20 +1457,24 @@ class House {
       );
     }
 
-    console.log("Living area Splits: ", livingAreaSplits);
+    console.log("Random Living area Splits: ", livingAreaSplits);
+    console.log(
+      "sum: ",
+      livingAreaSplits.reduce((acc, val) => acc + val, 0)
+    );
 
-    //return this;
     this.livingAreaRects.forEach((laRect, index) => {
       // split each LA randomly min max WIDTH oriented into corresponding n apartments
       // push to apartments
       // console.log("split ", laRect, " into ", livingAreaSplits[index]);
 
-      // Hier maxapwidht rein, früher war das nicht nötig!
+      // Hier die Orientation rein, in die die LAs gesplittet werden sollen.
       this.apartmentRects.push(
         ...laRect.splitRandomlyMinMaxWidthOriented(
           livingAreaSplits[index],
           minApWidth,
-          maxApWidth
+          maxApWidth,
+          splitHorizontally
         )
       );
     });
@@ -1485,7 +1488,7 @@ class House {
   fillLivingAreasWithApartmentsEvenly(n, minApWidth, maxApWidth) {
     // Generate splits  for livingAreaRects
     this.apartmentRects = [];
-    console.log("> fillLivingAreasWithRooms evenly");
+    console.log("> fillLivingAreasWithAps evenly");
 
     if (this.livingAreaRects == undefined) {
       console.error("fillLivingAreasWithRooms error: no living areas present!");
@@ -1503,14 +1506,18 @@ class House {
 
     //TODO: implement Even N Divisions
 
+    let splitHorizontally = this.mainCorridorRects[0].isHorizontal;
+
+    // Calculate the Splits for each living area
     let livingAreaSplits;
     if (maxApWidth) {
-      console.log(" split n evenly mINMAX");
+      console.log(" split n evenly MINMAX");
       livingAreaSplits = this.houseCalc.calculateEvenNDivisionsMinMax(
         this.livingAreaRects,
         n,
         minApWidth,
-        maxApWidth
+        maxApWidth,
+        splitHorizontally
       );
     } else {
       console.log(" split n evenly regular");
@@ -1521,14 +1528,18 @@ class House {
       );
     }
 
-    console.log("Living area Splits: ", livingAreaSplits);
+    console.log("Even Living area Splits: ", livingAreaSplits);
+    console.log(
+      "sum: ",
+      livingAreaSplits.reduce((acc, val) => acc + val, 0)
+    );
 
-    // Return here to only test if calculateEvenNDivisionsMinMax works properly!
-
-    //return this;
     this.livingAreaRects.forEach((laRect, index) => {
       this.apartmentRects.push(
-        ...laRect.splitEvenlyOriented(livingAreaSplits[index])
+        ...laRect.splitEvenlyOriented(
+          livingAreaSplits[index],
+          splitHorizontally
+        )
       );
     });
 

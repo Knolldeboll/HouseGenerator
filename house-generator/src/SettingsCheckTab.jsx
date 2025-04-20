@@ -14,7 +14,7 @@ export const SettingsCheckTab = (props) => {
       <label htmlFor="exampleFormControlInput1" className="form-label">
         {props.labelText}
       </label>
-      <div class="form-check">
+      <div className="form-check">
         <input
           className="form-check-input"
           type="checkbox"

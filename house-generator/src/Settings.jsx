@@ -100,7 +100,7 @@ const Settings = (props) => {
       />
 
       <SettingsSliderTab
-        labelText="testslider"
+        labelText="Apartments"
         limitValue={maxN || 0}
         lowerLimitValue={minN || 0}
         currentValue={currentN}
