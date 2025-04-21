@@ -1234,9 +1234,9 @@ class House {
 
   // TODO: Handle i = 0 as one living area
   // TODO: Handle i = 1 as two big living areas
-  generateLivingAreaRects() {
-    // TODO: k kommt falsch an.
 
+  // TODO: Orientation
+  generateLivingAreaRects() {
     // i is given from this.corridorRects.length
     // NO! denn da sind alle Rects drinnen!
 
@@ -1253,8 +1253,6 @@ class House {
       console.error(">LA Generation error: corridor generation was skipped!");
       return this;
     }
-
-    // TODO: L.A. Color from params, not hardcoded
 
     // 1. Take the first two corridor rects, which are the first two in the corridor list
     // Exception: if corridor is only one
@@ -1306,6 +1304,7 @@ class House {
 
     if (horizontal) {
       // Outer up
+      console.log("LArects: horizontal corridors");
       const lowerFullLivingArea = this.mainCorridorRects[0].edges.lowerEdge
         .spawnRectangle(this.k, new Vector2(0, -1))
         .setColor(livingAreaColor);
@@ -1318,6 +1317,7 @@ class House {
 
       this.livingAreaRects.push(upperFullLivingArea, lowerFullLivingArea);
     } else {
+      console.log("LArects: vertical corridors");
       // Outer left
       const leftFullLivingArea = this.mainCorridorRects[0].edges.leftEdge
         .spawnRectangle(this.k, new Vector2(-1, 0))
@@ -1331,14 +1331,19 @@ class House {
       this.livingAreaRects.push(leftFullLivingArea, rightFullLivingArea);
     }
 
-    // return this;
-    // then the half sized inner living areas
     // Generate half living areas next to connectors
-    const connectorHorizontal = this.connectorRects[0].isHorizontal;
+
+    // TODO: Longersidelength vs lower/rightsidelength
+    // Das ist der Fehler!
+    // hier muss man einfach die LAs nicht an der längeren Seite platzieren, sondern
+    // wenn vertikal: an der oberen/unteren seite
+
+    //const connectorHorizontal = this.connectorRects[0].isHorizontal;
     const laLength =
       (this.mainCorridorRects[0].longerSideLength - this.corridorWidth) / 2;
 
-    if (connectorHorizontal) {
+    // wenn mainCorridor vertikal, platziere an ober/unterEdge
+    if (!horizontal) {
       // Collect all upper/lower Edges
       const upperEdges = this.connectorRects.flatMap((con) =>
         con.edges.upperEdge.splitEvenly(2)
@@ -1362,6 +1367,7 @@ class House {
         );
       }
     } else {
+      // wenn mainCorridor horiziontal, platzieren an left/rightedge
       // Collect all left/right edges
       const leftEdges = this.connectorRects.flatMap((con) =>
         con.edges.leftEdge.splitEvenly(2)
