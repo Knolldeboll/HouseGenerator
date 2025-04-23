@@ -92,7 +92,7 @@ class InputChecker {
    * @param {*} corridorWidth
    * @returns
    */
-  getMinMaxApWidth(width, height, corridorWidth) {
+  getMaxApWidthUpperLimit(width, height, corridorWidth) {
     this.houseWidth = width;
     this.houseHeight = height;
     this.calculateSides(width, height);
@@ -111,6 +111,11 @@ class InputChecker {
     // TODO: Anpassen, denn hier hat sich was verändert!
 
     // Es soll eigentlich der höchste Wert aus Thresholds kommen.
+
+    if (thresholds.length == 1 && thresholds[0].i == 0) {
+      // nur ein Element drin, und zwar "i = 0 Korridore"
+      return 1;
+    }
 
     let maxs = [];
 
@@ -136,6 +141,12 @@ class InputChecker {
    */
   getMinN(thresholds) {
     console.log("getMinN threshold input:", thresholds);
+
+    if (thresholds.length == 1 && thresholds[0].i == 0) {
+      // nur ein Element drin, und zwar "i = 0 Korridore"
+      return 1;
+    }
+
     let mins = [];
 
     // Collect all mins

@@ -37,12 +37,22 @@ const Settings = (props) => {
 
   // Limit getters
   const maxCorridorWidth = useLimitStore((state) => state.maxCorridorWidth);
-  const maxApartmentWidthLimit = useLimitStore(
-    (state) => state.maxApartmentWidthLimit
+
+  const minApartmentWidthLowerLimit = useLimitStore(
+    (state) => state.minApartmentWidthLowerLimit
   );
+
   const minApartmentWidthLimit = useLimitStore(
     (state) => state.minApartmentWidthLimit
   );
+
+  const maxApartmentWidthLowerLimit = useLimitStore(
+    (state) => state.maxApartmentWidthLowerLimit
+  );
+  const maxApartmentWidthLimit = useLimitStore(
+    (state) => state.maxApartmentWidthLimit
+  );
+
   const maxN = useLimitStore((state) => state.maxN);
   const minN = useLimitStore((state) => state.minN);
 
@@ -61,6 +71,14 @@ const Settings = (props) => {
 
   // Param getters
   const currentN = useParamStore((state) => state.n);
+  const currentMinWidth = useParamStore((state) => state.minApartmentWidth);
+  const currentMaxWidth = useParamStore((state) => state.maxApartmentWidth);
+
+  // da unten bei minWidth bei limitValue rein (minApartmentWidthLimit != "")?(): "x"
+  //
+  // da sollen jeweils nur werte rein, wenn minApartmentWidthLimit (=shorterSide) gegeben ist, ansonsten X
+  // bei min soll auch nur das geprüfte currentMax rein, wenn daas != "" ist. Ansonsten minApartmentWidthLimit
+  //
 
   return (
     // div surrounds one setting tab
@@ -89,16 +107,18 @@ const Settings = (props) => {
         limitValue={maxCorridorWidth || "x"}
         onDataChange={setCorridorWidth}
       />
-      <SettingsTab
-        placeHolder={n}
+      <SettingsSliderTab
         labelText="Min Apartment Width"
-        limitValue={minApartmentWidthLimit || "x"}
+        lowerLimitValue={minApartmentWidthLowerLimit}
+        currentValue={currentMinWidth}
+        limitValue={minApartmentWidthLimit != "" ? minApartmentWidthLimit : "x"}
         onDataChange={setMinApartmentWidth}
       />
 
-      <SettingsTab
-        placeHolder={n}
+      <SettingsSliderTab
         labelText="Max Apartment Width"
+        lowerLimitValue={maxApartmentWidthLowerLimit || "x"}
+        currentValue={currentMaxWidth}
         limitValue={maxApartmentWidthLimit || "x"}
         onDataChange={setMaxApartmentWidth}
       />

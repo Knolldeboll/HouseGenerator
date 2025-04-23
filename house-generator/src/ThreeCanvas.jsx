@@ -25,8 +25,21 @@ const ThreeCanvas = (props) => {
   const setMaxCorridorWidth = useLimitStore(
     (state) => state.setMaxCorridorWidth
   );
+
+  // TODO: set to 1
+  const setMinApartmentWidthLowerLimit = useLimitStore(
+    (state) => state.setMinApartmentWidthLowerLimit
+  );
+
   const setMinApartmentWidthLimit = useLimitStore(
     (state) => state.setMinApartmentWidthLimit
+  );
+
+  // TODO: set to minApWidthInput, AUSSER in Spezialfällen wo
+  // minApWidth so hoch ist, dass kein Korridor mehr gemacht werden kann!
+  // denn dann ist dies hier = longerSide
+  const setMaxApartmentWidthLowerLimit = useLimitStore(
+    (state) => state.setMaxApartmentWidthLimit
   );
 
   const setMaxApartmentWidthLimit = useLimitStore(
@@ -75,7 +88,7 @@ const ThreeCanvas = (props) => {
 
   /** Call this if inputs have been changed to rerender stuff in the canvas, for example to rerender corridors! */
   // Currently called only on n change
-  let refreshCanvas = () => {
+  let refreshCanvas = (fixedN) => {
     /*
     tests.current?.testLivingAreaApartmentFilling(
       Number(widthInput),
@@ -96,6 +109,21 @@ const ThreeCanvas = (props) => {
     );
     */
 
+    // Fixed n is for the case that bad inputs are given that would result in
+    // say minN = 3 and maxN = 3
+    // or minN = 1 and maxN = 1
+
+    let n = fixedN ? fixedN : Number(nInput);
+    console.log(
+      "------------------>Refresh Canvas with inputs ",
+      Number(widthInput),
+      Number(heightInput),
+      Number(corrInput),
+      Number(minApWidthInput),
+      Number(maxApWidthInput),
+      n
+    );
+
     if (randomInput) {
       tests.current?.testMinMaxAdaptiveMultiCorridorLayout(
         Number(widthInput),
@@ -114,7 +142,7 @@ const ThreeCanvas = (props) => {
         Number(corrInput),
         Number(minApWidthInput),
         Number(maxApWidthInput),
-        Number(nInput)
+        n
       );
       return;
     }
@@ -217,6 +245,9 @@ const ThreeCanvas = (props) => {
 
     // delete other inputs
 
+    // set minApWidth lower Limit
+    setMinApartmentWidthLowerLimit(1);
+
     // set minApWidth upper limit
     let maxminApLimit = inputChecker.getMaxMinApWidth(widthInput, heightInput);
     console.log(
@@ -225,9 +256,15 @@ const ThreeCanvas = (props) => {
     );
     setMinApartmentWidthLimit(maxminApLimit);
 
-    // set maxApwidth lower limit
-    let minmaxApLimit = inputChecker.getMinMaxApWidth(widthInput, heightInput);
-    setMaxApartmentWidthLimit(minmaxApLimit);
+    // set maxApwidth LOWER limit = initial X. Wird gesetzt, wenn sich der regler von minWidth bewegt!
+    /*let minmaxApLimit = inputChecker.getMinMaxApWidth(widthInput, heightInput);
+    setMaxApartmentWidthLimit(minmaxApLimit);*/
+
+    // set maxApWidth UPPER limit = longerside
+    let maxApWidthUpperLimit = inputChecker.getMaxApWidthUpperLimit(
+      widthInput,
+      heightInput
+    );
 
     // set corridorWidth upper limit
     let maxCorrWidth = inputChecker.getMaxCorridorWidth(
@@ -321,15 +358,51 @@ const ThreeCanvas = (props) => {
     );
 
     setNInput("");
+    setMaxApartmentWidthInput("");
     // Calcs the absolute max value of n
     let maxN = inputChecker.getMaxN(thresholds);
-
     setMaxN(maxN);
-
     let minN = inputChecker.getMinN(thresholds);
     setMinN(minN);
 
+    // Wenn nur 1 Apartment möglich, mach das rein.
+    // TODO: wenn das der Fall ist, muss auch maxWidth maximiert sein! denn eine Einzelwohnung kann
+    // nur existieren, wenn die maxBreite auch die longerside ist!
+    // Beispiel: Einzelwohnung = 30 x 40.
+    // MaxBreite darf da nicht unter 40 sein. ABER:
+    // MinBreite darf da auch nicht über 30 sein!
+
+    // aber wenn das der Fall ist, werden die Slider auf 30/30 bzw 40/40 feststecken! dann kann man ja gar nix mehr machen!
+
     console.log("-> maxN:", maxN, " minN ", minN);
+
+    // z.B. wenn minN = 2 und maxN = 2, gibts genau 2 Aps. Refresh also.
+    // aber auch, wenn minN = 1 und maxN = 1.
+    // mal schauen ob der canvas das handeln kann.
+    /* if (maxN != -Infinity && minN != -Infinity && maxN == minN) {
+      console.log("fixedNInput is", maxN);
+      refreshCanvas(maxN);
+    }
+*/
+
+    // TODO: wenn die minApWidth schon so groß ist, dass KEIN KORRIDOR mehr gemacht werden kann, dann male automatisch ein
+    // House mit 1 Apartment!
+    // gib dann nen fick auf maxWidth, denn das muss dann 40 sein!
+
+    if (maxN == 1 && minN == 1) {
+      setMaxApartmentWidthLimit();
+    }
+
+    if (maxN != -Infinity && minN != -Infinity) {
+      console.log("fixedNInput is", minN);
+      refreshCanvas(minN);
+      return;
+    }
+
+    // TODO: wenn maxN = minN kann nur eine bestimmte Zahl an Apartments rein!
+    // Refreshe dann sofort mit dem entsprechenden n
+
+    // TODO: wenn maxN = 1 und minN = 1, dann mach auch nur 1 Apartment rein!
   }, [minApWidthInput]);
 
   // TODO: recalc n limit on maxapwidth change
@@ -358,6 +431,7 @@ const ThreeCanvas = (props) => {
       maxApWidthInput
     );
 
+    //Die min/maxWidth beeinflussen direkt das minN/maxN, also update das!
     let maxN = inputChecker.getMaxN(thresholds);
     setMaxN(maxN);
 
@@ -365,6 +439,24 @@ const ThreeCanvas = (props) => {
     setMinN(minN);
 
     console.log("-> maxApWidth input, maxN:", maxN, " minN ", minN);
+
+    // z.B. wenn minN = 2 und maxN = 2, gibts genau 2 Aps. Refresh also.
+    // aber auch, wenn minN = 1 und maxN = 1.
+    // mal schauen ob der canvas das handeln kann.
+    /*
+    if (maxN != -Infinity && minN != -Infinity && maxN == minN) {
+      console.log("fixedNInput is", maxN);
+      refreshCanvas(maxN);
+      return;
+    }
+*/
+
+    if (maxN != -Infinity && minN != -Infinity) {
+      console.log("fixedNInput is", minN);
+      refreshCanvas(minN);
+      return;
+    }
+    // Mach das mit fixed n zum einmaligen machen vom mindest-N-Apartment bei änderung von maxApInput
   }, [maxApWidthInput]);
 
   // on nInput changes

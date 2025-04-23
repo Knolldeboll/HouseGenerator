@@ -805,7 +805,10 @@ class House {
 
     this.k = undefined;
 
-    console.log(">multiCorridorLayout on shorterside: ", onShorterSide);
+    console.log(
+      "------------------>multiCorridorLayout on shorterside: ",
+      onShorterSide
+    );
     this.corridorWidth = corridorWidth;
     let longerSide =
       this.houseWidth > this.houseHeight ? this.houseWidth : this.houseHeight;
@@ -1033,7 +1036,7 @@ class House {
     // this.corridorWidth = corridorWidth;
     // this.minApartmentWidth = minApartmentWidth;
     this.resetRects();
-    console.log(">adaptiveMultiCorridorLayout");
+    console.log("------------------>adaptiveMultiCorridorLayout");
     // TODO: Recall saved Thresholds. Can only be done if only n changed and the other stuff is the same!
 
     if (n == 1) {
@@ -1122,7 +1125,16 @@ class House {
     // this.corridorWidth = corridorWidth;
     // this.minApartmentWidth = minApartmentWidth;
     this.resetRects();
-    console.log(">adaptiveMultiCorridorLayout");
+    console.log(
+      "------------------>adaptiveMultiCorridorLayout with cw",
+      corridorWidth,
+      "minWidth",
+      minApartmentWidth,
+      "maxWidth",
+      maxApartmentWidth,
+      " and n ",
+      n
+    );
     // TODO: Recall saved Thresholds. Can only be done if only n changed and the other stuff is the same!
 
     if (n == 1) {
@@ -1175,7 +1187,10 @@ class House {
       // Wir gehen frech davon aus dass die Dinger sortiert sind und dass nicht
       // bei höheren Korridoren nochmal bessere Elemente kommen
 
-      // Achtung: Thesholds jetzt immer so:
+      // Einfach von wenig i und kürzerem Korridor (an der longer side platziert)
+      // weiter nach short und mehr i arbeiten, bis ein Korridorlayout gefunden wurde das passt!
+
+      // Wenn das einzige i = 0, d
 
       if (ts.longer != null && ts.longer.min <= n && ts.longer.max >= n) {
         // longer config is feasible and n fits in its limits!
@@ -1243,7 +1258,7 @@ class House {
     // Reset LA rects only.
     // Corridors are generated before and in these methods, every other rect array is reset
 
-    console.log(">generateLivingAreaRects");
+    console.log("------------------>generateLivingAreaRects");
 
     let livingAreaColor = this.livingAreaColor;
     this.livingAreaRects = [];
@@ -1415,7 +1430,9 @@ class House {
   fillLivingAreasWithApartments(n, minApWidth, maxApWidth) {
     // Generate splits  for livingAreaRects
     this.apartmentRects = [];
-    console.log("> fillLivingAreasWithRooms");
+    console.log(
+      "------------------>fillLivingAreasWithApartments normal/Random"
+    );
 
     if (this.livingAreaRects == undefined) {
       console.error("fillLivingAreasWithRooms error: no living areas present!");
@@ -1494,7 +1511,7 @@ class House {
   fillLivingAreasWithApartmentsEvenly(n, minApWidth, maxApWidth) {
     // Generate splits  for livingAreaRects
     this.apartmentRects = [];
-    console.log("> fillLivingAreasWithAps evenly");
+    console.log("------------------> fillLivingAreasWithAps evenly");
 
     if (this.livingAreaRects == undefined) {
       console.error("fillLivingAreasWithRooms error: no living areas present!");

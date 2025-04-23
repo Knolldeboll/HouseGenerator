@@ -62,11 +62,24 @@ class HouseCalculator {
 
   // Da war was mit geprüfter Eingabe "101", da hat der irgendwie falsch aufgeteilt oder so.
   calculateMaxCorridorsOriented(length, corridorWidth, minApartmentWidth) {
-    console.log(">calculateMaxCorridors");
+    console.log(
+      ">calculateMaxCorridorsOriented with placmentside length",
+      length,
+      " cw",
+      corridorWidth,
+      "minapWidth",
+      minApartmentWidth
+    );
 
-    // wenn mit 1 nicht geht, return 0
-    if (this.calculateK(length, 1, corridorWidth) <= minApartmentWidth) {
-      console.log("Max Corridors: 0");
+    // wenn mit 1 Korridor nicht geht, return 0
+    let k = this.calculateK(length, 1, corridorWidth);
+    if (k <= minApartmentWidth) {
+      console.log(
+        "Max Corridors: 0, because  k is ",
+        k,
+        " and minapWidth is ",
+        minApartmentWidth
+      );
       return 0;
     }
 
@@ -82,7 +95,6 @@ class HouseCalculator {
       maxI++;
     }
 
-    /*
     console.log(
       "Max Corridors: ",
       maxI,
@@ -95,7 +107,6 @@ class HouseCalculator {
       "final k: ",
       this.calculateK(length, maxI, corridorWidth)
     );
-    */
 
     return maxI;
   }
@@ -108,6 +119,15 @@ class HouseCalculator {
   // TODO: Test
   // BRBRBRBRBRBRBRB
   calculateMinCorridorsOriented(length, corridorWidth, maxApartmentWidth) {
+    console.log(
+      ">calculateMinCorridorsOriented with placementside length",
+      length,
+      " cw",
+      corridorWidth,
+      "maxApartmentWidth",
+      maxApartmentWidth
+    );
+
     // TODO: bei maxCors gibts irgend ne abbruchbedingung am Anfang schonmal.
     //
     // Checken, ob k mit 0 Corrs klein genug ist!
@@ -115,7 +135,12 @@ class HouseCalculator {
 
     // Kann mit 0 Korridoren ein maxAp entlang der length-Seite platziert werden?
     if (length <= maxApartmentWidth) {
-      console.log("no cor needed!");
+      console.log(
+        "no corr needed! because maxApartmentWidth is ",
+        maxApartmentWidth,
+        "which already fits into the placement side of length ",
+        length
+      );
       return 0;
     }
 
