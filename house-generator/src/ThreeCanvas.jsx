@@ -39,7 +39,7 @@ const ThreeCanvas = (props) => {
   // minApWidth so hoch ist, dass kein Korridor mehr gemacht werden kann!
   // denn dann ist dies hier = longerSide
   const setMaxApartmentWidthLowerLimit = useLimitStore(
-    (state) => state.setMaxApartmentWidthLimit
+    (state) => state.setMaxApartmentWidthLowerLimit
   );
 
   const setMaxApartmentWidthLimit = useLimitStore(
@@ -49,6 +49,12 @@ const ThreeCanvas = (props) => {
   const setMinN = useLimitStore((state) => state.setMinN);
 
   // Limit getters, for checking inputs against limits!
+  const maxApartmentWidthLowerLimit = useLimitStore(
+    (state) => state.maxApartmentWidthLowerLimit
+  );
+  const maxApartmentWidthLimit = useLimitStore(
+    (state) => state.maxApartmentWidthLimit
+  );
   const maxNLimit = useLimitStore((state) => state.maxN);
   const minNLimit = useLimitStore((state) => state.minN);
 
@@ -265,6 +271,7 @@ const ThreeCanvas = (props) => {
       widthInput,
       heightInput
     );
+    setMaxApartmentWidthLimit(maxApWidthUpperLimit);
 
     // set corridorWidth upper limit
     let maxCorrWidth = inputChecker.getMaxCorridorWidth(
@@ -337,44 +344,90 @@ const ThreeCanvas = (props) => {
   }, [corrInput]);
 
   // on minApartmentWidth Input
+  // TODO: ABCD
+  // Ab nem bestimmten Wert für minWidth wird nur EIN Apartment generiert, da hier
+  // kein Korridor mehr gemacht werden kann, weil die minWidth dann zu fett ist.
+  // dann werden die lower/upper Limits von maxWidth auf fix longerside gesetzt, d.h. maxWidth ist dann longerside.
+
+  // wenn man jetzt ein anderes minWidth festgelegt, wäre ja ein Korridor OK
+  // es gibt aber einen wert von maxWidth, den man unterschreiten kann. Ab diesem sind irgendwie keine
+  // Apartments mehr möglich.
+  // 1. Warum?  -> kleineres maxWidth bedeutet: die Apartments können je weniger Breit sein.
+  //            -> die LivingAreas müssen in eine mindestanzahl von Splits geteilt werden, die je kleiner als die maxWidth sind
+  //            -> es muss insgesamt so sein, dass es
+  // 2. was ist dieser Wert? und sollte der das eigentliche lower limit von maxWidth sein? -> ja.
   useEffect(() => {
     if (
       widthInput === "" ||
       heightInput === "" ||
       corrInput === "" ||
-      minApWidthInput === "" ||
-      maxApWidthInput === ""
+      minApWidthInput === ""
     )
       return;
 
     console.log("INPUT: on minApWidth input");
-    console.log("-> calculating thresholds: ");
-    let thresholds = houseCalc.calculateMinMaxCorridorThresholds(
-      widthInput,
-      heightInput,
-      corrInput,
-      minApWidthInput,
-      maxApWidthInput
+    // Already refresh the lower limit of maxWidth, as minWidth input has been made!
+
+    // TODO: irgendwie kommt hier scheiße rein. der maxApartmentWidthLowerLimit wird tatsächlich zum UPPER LIMIT umgesetzt..
+    // aber andersrum irgendwie nix?
+    setMaxApartmentWidthLowerLimit(minApWidthInput);
+
+    console.log(
+      " ONLY FOR DEBUG: WHAT IS MAXWITH LIMITS?  ",
+      maxApartmentWidthLowerLimit,
+      " / ",
+      maxApartmentWidthLimit
     );
 
+    console.log(
+      "Sollte aber sein: minWidthInput ",
+      minApWidthInput,
+      " und longerside: ",
+      inputChecker.getMaxApWidthUpperLimit(widthInput, heightInput)
+    );
+
+    //if (maxApWidthInput === "") return;
+
+    // TODO: die thresholds sollen ja berechnet werden, wenn
+    // sowohl minWidth als auch maxWidth feststehen.
+    // Aber: um fehler aus alten Werten für maxWidth zu vermeiden, wird dieser Wert hier noch zurückgesetzt!
+    // die thresholds werden aber trotzdem noch mit dem Alten Wert gemacht!
+    //
+    // Alte Werte wären auch kein Problem, wenn man sicherstellen kann, dass minWidth NICHT über maxWidth rutscht!
+    // dann müsste man aber das Limit von minWidth konstant anpassen, und das sieht dumm aus.
+    // denn dann ergibt sich so ein dummer Loop aus minWidthUpperLimit = maxWidthCurrent, maxWidthLowerLimit = minWidthCurrent
+
+    //-> Vielleicht nur threshold berechnung, wenn BEIDES (max/minWidth) NEU eingegeben wurde!
+    // Reihenfolge wäre dann: erst minWidth eingeben, dann maxWidth eingeben!
+
+    // AUSNAHME: minWidth wird so hoch gesetzt, dass GAR KEIN Korridor generiert werden kann!
+    // -> K ist in beiden fällen mit 1 Korridor KLEINER als minWidth
+    // Dann generiere automatisch nen 1:1er.
+    // den 1:1er-Fall kann man aber nicht mit Thresholds erfassen! denn diese werden erst berechnet, wenn
+    // ein neuer maxWidth input kommt!
+
+    // Wenn mit minWidth gespielt wird, muss alles weiter rechts zurückgesetzt werden.
+    // ausser maxWidthLowerLimit
+
     setNInput("");
+
+    // MaxN/minN basieren immer auf Thresholds! Ausser bei 1:1 fällen...
+    setMaxN("");
+    setMinN("");
+    // Dieser muss nach Eingabe von minWidth neu eingegeben werden!
     setMaxApartmentWidthInput("");
-    // Calcs the absolute max value of n
+
+    /*
     let maxN = inputChecker.getMaxN(thresholds);
     setMaxN(maxN);
     let minN = inputChecker.getMinN(thresholds);
     setMinN(minN);
 
-    // Wenn nur 1 Apartment möglich, mach das rein.
-    // TODO: wenn das der Fall ist, muss auch maxWidth maximiert sein! denn eine Einzelwohnung kann
-    // nur existieren, wenn die maxBreite auch die longerside ist!
-    // Beispiel: Einzelwohnung = 30 x 40.
-    // MaxBreite darf da nicht unter 40 sein. ABER:
-    // MinBreite darf da auch nicht über 30 sein!
+    */
 
-    // aber wenn das der Fall ist, werden die Slider auf 30/30 bzw 40/40 feststecken! dann kann man ja gar nix mehr machen!
+    // lower limit von maxApartmentWidth ist normalerweise der input vom minWidth!
 
-    console.log("-> maxN:", maxN, " minN ", minN);
+    // console.log("-> maxN:", maxN, " minN ", minN);
 
     // z.B. wenn minN = 2 und maxN = 2, gibts genau 2 Aps. Refresh also.
     // aber auch, wenn minN = 1 und maxN = 1.
@@ -385,27 +438,84 @@ const ThreeCanvas = (props) => {
     }
 */
 
-    // TODO: wenn die minApWidth schon so groß ist, dass KEIN KORRIDOR mehr gemacht werden kann, dann male automatisch ein
+    // TODO: AUSSER: wenn die minApWidth schon so groß ist, dass KEIN KORRIDOR mehr gemacht werden kann, dann male automatisch ein
     // House mit 1 Apartment!
     // gib dann nen fick auf maxWidth, denn das muss dann 40 sein!
 
-    if (maxN == 1 && minN == 1) {
-      setMaxApartmentWidthLimit();
+    // TODO: ist wirklich bei JEDEM 1:1er Fall so, dass das minWidth zu groß ist für nen Korridor?
+
+    // TODO: Nochmal separat Checken, (inputChecker), ob minWidh zu groß für nen Korridor ist!
+    // also bei i = 1: bei beiden seiten schauen ob k < minWidth wäre
+
+    // Hier wird geprüft, ob der minWidth zu groß für überhaupt nen Korridor wäre!
+    // Dann wäre automatisch single apartment!
+    // das ist dann auch Konsistent mit den Thresholds, die dann aber nicht hier berechnet werden.
+    // Denn die sollen erst nach freshem Eingeben von beiden width-Werten berechnet und in minN/maxN umgesetzt werden.
+
+    if (
+      inputChecker.isMinWidthTooBigForCorridor(
+        widthInput,
+        heightInput,
+        corrInput,
+        minApWidthInput
+      )
+    ) {
+      setMaxN(1);
+      setMinN(1);
+      console.log(
+        "     single apartment Case detected! on minApartmentWidth input is too big for even one corridor"
+      );
+      setMaxApartmentWidthLowerLimit(
+        inputChecker.getMaxApWidthUpperLimit(widthInput, heightInput)
+      );
+
+      // max ap widht input und lowerLimit = longerside!
+      // den Input und beide limits auf max setzen, damit da nichts mehr kaputt gemacht werden kann.
+      // weil: wenn der minInput so groß ist, dass kein Korridor mehr möglich ist, dann gibts ein einzelnes Apartment
+      // dieses ist dann shorterside x longerside.
+      // minWidth muss dann <= shorter sein (ists eh wegen limit), kann aber auch kleiner sein. Das Ap überschreitet
+      // dann aber eh die mindestbreite, denn die echte minimalbreite = shorterside!
+      // maxWidth muss dann genau longerside sein! denn das einzelApartment ist dann auf einer Seite GENAU longerside
+      // dh, zu sagen "maximalBreite" < longerside soll dann verboten werden!
+      //
+
+      // Achtung: das hier sollte den maxWidth useEffect Triggern!
+      // in dem werden dann thresholds mit minWidth/ maxWidth berechnet,
+      // Wo auf jeden Fall ein 1:1 case rauskommen sollte!
+
+      // das setzen triggert ein Refresh. Das sorgt fürs schlussendliche Rendern des single apartments.
+      // ansonsten, also bei möglicherweise >=1 Korridor Fällen, wird NUR bei Änderung von maxWidth gerendert!
+      setMaxApartmentWidthInput(
+        inputChecker.getMaxApWidthUpperLimit(widthInput, heightInput)
+      );
     }
 
+    /*
+    if (maxN == 1 && minN == 1) {
+      // max Ap width lower limit = longerside
+
+      // max ap widht upper limit = longerside (ist eh)
+
+ 
+
+      refreshCanvas(minN);
+      return;
+    }
+
+    // Jedes Mal N auf den Minimalwert für n setzen, damit überhaupt was angezeigt wird!
     if (maxN != -Infinity && minN != -Infinity) {
       console.log("fixedNInput is", minN);
       refreshCanvas(minN);
       return;
     }
 
+    */
+
     // TODO: wenn maxN = minN kann nur eine bestimmte Zahl an Apartments rein!
     // Refreshe dann sofort mit dem entsprechenden n
 
     // TODO: wenn maxN = 1 und minN = 1, dann mach auch nur 1 Apartment rein!
   }, [minApWidthInput]);
-
-  // TODO: recalc n limit on maxapwidth change
 
   // on maxApartmentWidth Input
   useEffect(() => {
@@ -423,12 +533,20 @@ const ThreeCanvas = (props) => {
 
     console.log("INPUT: on maxApWidth input");
     console.log("-> calculating thresholds: ");
+
+    // Hier MÜSSEN schon alle vorigen inputs gemacht worden sein.
+
     let thresholds = houseCalc.calculateMinMaxCorridorThresholds(
       widthInput,
       heightInput,
       corrInput,
       minApWidthInput,
       maxApWidthInput
+    );
+
+    console.log(
+      "DEBUG: setting maxWidth Input generates following Thresholds: ",
+      thresholds
     );
 
     //Die min/maxWidth beeinflussen direkt das minN/maxN, also update das!
@@ -439,6 +557,15 @@ const ThreeCanvas = (props) => {
     setMinN(minN);
 
     console.log("-> maxApWidth input, maxN:", maxN, " minN ", minN);
+
+    return;
+
+    //
+
+    // TODO: Sicherstellen, dass nun die richtige anzahl an Corridoren/apartments gerendert wird.
+    // Also auch nochmal auf von Thresholds hervorgerufene 1:1 oder n:n fälle prüfen und dann direkt
+    // mit refresh(fixedN) rendern,
+    // oder sonst auch einfach mit dem neuen minN rendern!
 
     // z.B. wenn minN = 2 und maxN = 2, gibts genau 2 Aps. Refresh also.
     // aber auch, wenn minN = 1 und maxN = 1.

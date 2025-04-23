@@ -98,6 +98,32 @@ class InputChecker {
     this.calculateSides(width, height);
     return this.longerSide;
   }
+
+  /**
+   * Calculate if the given minWidth is too big to fit in one of the 1-corridor layouts, meaninng that only a Single Apartment
+   * can be generated!
+   * @param {*} width
+   * @param {*} height
+   * @param {*} corridorWidth
+   * @param {*} minWidth
+   */
+  isMinWidthTooBigForCorridor(width, height, corridorWidth, minWidth) {
+    let k1 = this.houseCalc.calculateK(width, 1, corridorWidth);
+    let k2 = this.houseCalc.calculateK(height, 1, corridorWidth);
+
+    if (k1 < minWidth && k2 < minWidth) {
+      console.log(
+        "> minWidth ",
+        minWidth,
+        "is too big for corridor, because k1: ",
+        k1,
+        " k2:",
+        k2
+      );
+      return true;
+    }
+    return false;
+  }
   /**
    * Calculates the absolute max of apartments that fit.
    * @param {} width
