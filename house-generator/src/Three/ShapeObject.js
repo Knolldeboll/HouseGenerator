@@ -15,7 +15,7 @@ class ShapeObject {
     // Set vertices later via method, as they are not known before generating the floor plan
     this.vertices = vertices;
 
-    console.log("new ShapeObject, vertices ", vertices[0]);
+    // console.log("new ShapeObject, vertices ", vertices[0]);
 
     // Auto-calculate on vertice setting
     this.width = null;

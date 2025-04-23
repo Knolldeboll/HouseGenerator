@@ -6,7 +6,8 @@ import Tests from "./Three/tests.js";
 import { useLimitStore } from "./LimitStore.js";
 import InputChecker from "./Three/InputChecker.js";
 import { useParamStore } from "./ParamStore.js";
-import { cos } from "three/tsl";
+import { cos, max } from "three/tsl";
+import HouseCalculator from "./Three/HouseCalculator.js";
 
 const ThreeCanvas = (props) => {
   //console.log("ThreeCanvas Component requested!");
@@ -20,18 +21,37 @@ const ThreeCanvas = (props) => {
   // CanvasRef ist nur zum Referenzieren des hier erzeugten canvas-Element in Rendering.js da!
   const canvasRef = useRef();
 
+  // Limit setters
   const setMaxCorridorWidth = useLimitStore(
     (state) => state.setMaxCorridorWidth
   );
-  const setMaxMinApartmentWidth = useLimitStore(
-    (state) => state.setMaxMinApartmentWidth
+  const setMinApartmentWidthLimit = useLimitStore(
+    (state) => state.setMinApartmentWidthLimit
   );
 
+  const setMaxApartmentWidthLimit = useLimitStore(
+    (state) => state.setMaxApartmentWidthLimit
+  );
   const setMaxN = useLimitStore((state) => state.setMaxN);
   const setMinN = useLimitStore((state) => state.setMinN);
 
-  const nLimit = useLimitStore((state) => state.maxN);
+  // Limit getters, for checking inputs against limits!
+  const maxNLimit = useLimitStore((state) => state.maxN);
+  const minNLimit = useLimitStore((state) => state.minN);
 
+  // Input setters, for deleting
+  const setCorridorWidthInput = useParamStore(
+    (state) => state.setCorridorWidth
+  );
+  const setMinApartmentWidthInput = useParamStore(
+    (state) => state.setMinApartmentWidth
+  );
+  const setMaxApartmentWidthInput = useParamStore(
+    (state) => state.setMaxApartmentWidth
+  );
+  const setNInput = useParamStore((state) => state.setN);
+
+  // Input getters
   const widthInput = useParamStore((state) => state.houseWidth);
   const heightInput = useParamStore((state) => state.houseHeight);
   const corrInput = useParamStore((state) => state.corridorWidth);
@@ -40,7 +60,9 @@ const ThreeCanvas = (props) => {
   const nInput = useParamStore((state) => state.n);
   const randomInput = useParamStore((state) => state.isRandom);
 
+  // Helper stuff
   const inputChecker = new InputChecker(30, 20, 3, 3);
+  const houseCalc = HouseCalculator.getInstance();
 
   // TODO: Problem. ThreeCanvas component gets rerendered on every input, which fucks up rendering and tests, as they only
   // get initialized on mount. mount however is not redone on every rerender!
@@ -178,24 +200,52 @@ const ThreeCanvas = (props) => {
     // Das hier soll eig nur ausgeführt werden, wenn ein Input geändert wurde
     // und die Inputs werden in SettingsTab geändert
     //setMaxMinApartmentWidth(inputChecker.getMinApWidthRange()[1]);
+
+    //tests.current?.unitTests();
   }, []);
 
   // useEffect mit Dependency auf width values aus dem Store!
+
+  // TODO: Thresholds updaten, wenn alle inputs vorhanden und in limits sind!
+  //      die anderen Sachen, die nur width height benötigen, auch so updaten!
+  //      alternativ die anderen Inputs löschen, wenn hier was geändert wird!
 
   // on width / height input change
   useEffect(() => {
     //only update maxminApLimit/corrLimit if width and height is given
     if (widthInput === "" || heightInput === "") return;
 
-    let maxminApLimit = inputChecker.getMaxMinApWidth(widthInput, heightInput);
-    console.log();
-    setMaxMinApartmentWidth(maxminApLimit);
+    // delete other inputs
 
+    // set minApWidth upper limit
+    let maxminApLimit = inputChecker.getMaxMinApWidth(widthInput, heightInput);
+    console.log(
+      " INPUT:  on width/height input: maxminapwidth limit ",
+      maxminApLimit
+    );
+    setMinApartmentWidthLimit(maxminApLimit);
+
+    // set maxApwidth lower limit
+    let minmaxApLimit = inputChecker.getMinMaxApWidth(widthInput, heightInput);
+    setMaxApartmentWidthLimit(minmaxApLimit);
+
+    // set corridorWidth upper limit
     let maxCorrWidth = inputChecker.getMaxCorridorWidth(
       widthInput,
       heightInput
     );
     setMaxCorridorWidth(maxCorrWidth);
+
+    // TODO: Reset inputs for the values that the limits were changed!
+    setCorridorWidthInput("");
+    setMaxApartmentWidthInput("");
+    setMinApartmentWidthInput("");
+    setNInput("");
+
+    console.log(
+      " INPUT: on width/height input: maxCorrwidth limit ",
+      maxCorrWidth
+    );
 
     //TODO: update n limit if apWidth and corr are also given
   }, [widthInput, heightInput]);
@@ -205,30 +255,46 @@ const ThreeCanvas = (props) => {
   // on corridorInput changes
   useEffect(() => {
     //console.log("corrInput changed!")
+
+    // Wenn corrInput anders, aber alle anderen da, NUR dann neue Limits für n berechnen!
+
+    // TODO: wenn width height corr da ist, mach immerhin die limits
     if (
       widthInput === "" ||
       heightInput === "" ||
       minApWidthInput === "" ||
+      maxApWidthInput === "" ||
       corrInput === ""
     ) {
       return;
     }
 
-    let maxN = inputChecker.getMaxN(
-      widthInput,
-      heightInput,
-      corrInput,
-      minApWidthInput
-    );
-    setMaxN(maxN);
+    // TODO: Problem: wenn man hier die inputs löscht, werden die Limits bei Änderung von anderen Inputs nicht mehr
+    // berechnet!
+    setMaxApartmentWidthInput("");
+    setMinApartmentWidthInput("");
+    setNInput("");
 
-    let minN = inputChecker.getMinN(
+    //
+
+    // thresholds neu berechnen, da corr anders, aber nur wenn
+    console.log("INPUT: on corr widht input");
+    console.log("calc thresholds");
+    let thresholds = houseCalc.calculateMinMaxCorridorThresholds(
       widthInput,
       heightInput,
       corrInput,
       minApWidthInput,
       maxApWidthInput
     );
+
+    // Wenn Korridor sich ändert, ändern sich thresholds, also auch die limits für N
+    let maxN = inputChecker.getMaxN(thresholds);
+    setMaxN(maxN);
+
+    let minN = inputChecker.getMinN(thresholds);
+
+    console.log("-> maxN:", maxN, " minN: ", minN);
     setMinN(minN);
     // set the limit for n
   }, [corrInput]);
@@ -239,28 +305,31 @@ const ThreeCanvas = (props) => {
       widthInput === "" ||
       heightInput === "" ||
       corrInput === "" ||
-      minApWidthInput === ""
+      minApWidthInput === "" ||
+      maxApWidthInput === ""
     )
       return;
 
-    // Calcs the absolute max value of n
-    let n = inputChecker.getMaxN(
-      widthInput,
-      heightInput,
-      corrInput,
-      minApWidthInput
-    );
-
-    setMaxN(n);
-
-    let minN = inputChecker.getMinN(
+    console.log("INPUT: on minApWidth input");
+    console.log("-> calculating thresholds: ");
+    let thresholds = houseCalc.calculateMinMaxCorridorThresholds(
       widthInput,
       heightInput,
       corrInput,
       minApWidthInput,
       maxApWidthInput
     );
+
+    setNInput("");
+    // Calcs the absolute max value of n
+    let maxN = inputChecker.getMaxN(thresholds);
+
+    setMaxN(maxN);
+
+    let minN = inputChecker.getMinN(thresholds);
     setMinN(minN);
+
+    console.log("-> maxN:", maxN, " minN ", minN);
   }, [minApWidthInput]);
 
   // TODO: recalc n limit on maxapwidth change
@@ -279,40 +348,54 @@ const ThreeCanvas = (props) => {
     // Calcs the absolute max value of n
     // TODO: Change getMaxN to handle maxWidth input
 
-    let n = inputChecker.getMaxN(
-      widthInput,
-      heightInput,
-      corrInput,
-      minApWidthInput
-    );
-    setMaxN(n);
-
-    let minN = inputChecker.getMinN(
+    console.log("INPUT: on maxApWidth input");
+    console.log("-> calculating thresholds: ");
+    let thresholds = houseCalc.calculateMinMaxCorridorThresholds(
       widthInput,
       heightInput,
       corrInput,
       minApWidthInput,
       maxApWidthInput
     );
+
+    let maxN = inputChecker.getMaxN(thresholds);
+    setMaxN(maxN);
+
+    let minN = inputChecker.getMinN(thresholds);
     setMinN(minN);
+
+    console.log("-> maxApWidth input, maxN:", maxN, " minN ", minN);
   }, [maxApWidthInput]);
 
   // on nInput changes
   useEffect(() => {
     console.log("nInput Changed to ", nInput);
+
+    // Hier muss alles drin sein!
     if (
       widthInput === "" ||
       heightInput === "" ||
       corrInput === "" ||
       minApWidthInput === "" ||
+      maxApWidthInput === "" ||
       nInput === ""
     ) {
       console.log("but returned!");
       return;
     }
 
-    if (Number(nInput) > Number(nLimit)) {
-      console.log("Entered n is too big!");
+    if (Number(nInput) > Number(maxNLimit)) {
+      console.log("Entered n", nInput, " is too big! maxNLimit is ", maxNLimit);
+      return;
+    }
+
+    if (Number(nInput) < Number(minNLimit)) {
+      console.log(
+        "Entered n",
+        nInput,
+        " is too small! minNLimit is ",
+        minNLimit
+      );
       return;
     }
 

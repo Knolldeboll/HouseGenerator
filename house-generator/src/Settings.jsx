@@ -35,15 +35,18 @@ const Settings = (props) => {
   );
   */
 
-  // Limit Store access, here only reading!
+  // Limit getters
   const maxCorridorWidth = useLimitStore((state) => state.maxCorridorWidth);
-  const maxMinApartmentWidth = useLimitStore(
-    (state) => state.maxMinApartmentWidth
+  const maxApartmentWidthLimit = useLimitStore(
+    (state) => state.maxApartmentWidthLimit
+  );
+  const minApartmentWidthLimit = useLimitStore(
+    (state) => state.minApartmentWidthLimit
   );
   const maxN = useLimitStore((state) => state.maxN);
   const minN = useLimitStore((state) => state.minN);
 
-  // Get the ParamStore setters here and pass them to the SettingsTabs, to be used as a callback function
+  // Param Setters, for passing the inputs from the settings tabs
   const setHouseWidth = useParamStore((state) => state.setHouseWidth);
   const setHouseHeight = useParamStore((state) => state.setHouseHeight);
   const setCorridorWidth = useParamStore((state) => state.setCorridorWidth);
@@ -53,10 +56,11 @@ const Settings = (props) => {
   const setMaxApartmentWidth = useParamStore(
     (state) => state.setMaxApartmentWidth
   );
-
   const setN = useParamStore((state) => state.setN);
-  const currentN = useParamStore((state) => state.n);
   const setRandom = useParamStore((state) => state.setRandom);
+
+  // Param getters
+  const currentN = useParamStore((state) => state.n);
 
   return (
     // div surrounds one setting tab
@@ -88,14 +92,14 @@ const Settings = (props) => {
       <SettingsTab
         placeHolder={n}
         labelText="Min Apartment Width"
-        limitValue={maxMinApartmentWidth || "x"}
+        limitValue={minApartmentWidthLimit || "x"}
         onDataChange={setMinApartmentWidth}
       />
 
       <SettingsTab
         placeHolder={n}
         labelText="Max Apartment Width"
-        limitValue={"notimp"}
+        limitValue={maxApartmentWidthLimit || "x"}
         onDataChange={setMaxApartmentWidth}
       />
 

@@ -285,6 +285,8 @@ class HouseCalculator {
 
     console.log(">calculateCorridorThresholds");
 
+    // TODO: Kann der das handeln, dass wenn keine kaka kommt da
+
     let longerSide = houseWidth > houseHeight ? houseWidth : houseHeight;
     let shorterSide = houseWidth < houseHeight ? houseWidth : houseHeight;
 
@@ -510,6 +512,7 @@ class HouseCalculator {
       minApartmentWidth
     );
 
+    // TODO: was,
     // max aps für beide Höchstanzahlen an Korridoren verwenden
     // denn wenn maxcorrs1 < maxcorrs2, dann hat maxcorrs2 wahrsch. mehr aps.
     // aber wenn maxcorrs1 = maxcorrs2, dann kann mans nicht sagen!

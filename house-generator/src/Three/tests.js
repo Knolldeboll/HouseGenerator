@@ -6,6 +6,7 @@ import Apartment from "./Apartment";
 import House from "./House";
 import HouseCalculator from "./HouseCalculator";
 import { render } from "react-dom";
+import InputChecker from "./InputChecker";
 
 class Tests {
   constructor(rendering) {
@@ -825,6 +826,90 @@ class Tests {
     // Test min amount of corridors to keep k small enough so maxwidth fits in
     //...
   }
+
+  unitTests() {
+    // Test multiple times with random parameters if those are sufficiently processed.
+
+    // Test for:
+    // width/height
+    // corridorWidth
+    // min/maxApWidth
+    // n
+
+    let inputChecker = new InputChecker();
+
+    // 1. Create new House with completely random w/h, boundary random cW, boundary random minWidth/maxWidth, boundary random N
+
+    // do Random w/h, at least 1
+    let width = Math.ceil(Math.random() * 40);
+    let height = Math.ceil(Math.random() * 40);
+
+    // do Random corridorWidth based on width/height
+    // at least 1
+    // ist die kleinere Seite des houseRects und
+    // NICHT die kleinere Seite eines LA Rects bei nem singleCorridor
+
+    // TODO: Kann der Algo das handeln, wenn keine Thresholds kommen?
+    let corridorLimit = inputChecker.getMaxCorridorWidth(width, height);
+
+    let corridorWidth = Math.ceil(Math.random() * corridorLimit);
+  }
+
+  // TODO: unit tests that generate a whole house and tests it's properties, not just single methods!
+
+  widthHeightUnitTest() {
+    console.log(">>>>>>>>>> Width / Height unit test");
+    let house = new House();
+
+    let tests = 100;
+
+    // Array of results: 0 if fail, 1 if ok!
+    let results = [];
+    // create "tests" * houses and check if the width/height is ok
+    for (let i = 0; i < tests; i++) {
+      // do Random w/h
+
+      let width = Math.round(Math.random() * 40);
+      let height = Math.round(Math.random() * 40);
+      // get houseRect
+      let houseRect = house.definedHouseShape(width, height).houseRect;
+
+      if (houseRect._width == width && houseRect._height == height) {
+        results.push(1);
+      } else {
+        console.log(
+          "w h unit test Failed for houseRect ",
+          houseRect,
+          " and w/h ",
+          width,
+          height
+        );
+        results.push(0);
+      }
+    }
+
+    let resultSum = results.reduce((acc, val) => acc + val, 0);
+    console.log("Tests successful: ", resultSum, " / ", tests);
+  }
+
+  corridorWidthUnitTest() {
+    let tests = 100;
+
+    // Array of results: 0 if fail, 1 if ok!
+    let results = [];
+    // create "tests" * houses and check if the width/height is ok
+    for (let i = 0; i < tests; i++) {
+      // do Random w/h
+      let width = Math.round(Math.random() * 40);
+      let height = Math.round(Math.random() * 40);
+
+      // do Random corridorWidh within
+    }
+  }
+
+  apartmentWidthUnitTest() {}
+
+  nUnitTest() {}
 
   /**
    * Setter for the "isRandom" Flag

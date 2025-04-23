@@ -50,7 +50,7 @@ class InputChecker {
     this.houseHeight = height;
     this.calculateSides(width, height);
 
-    return this.longerSide;
+    return this.longerSide - 1;
   }
 
   /**
@@ -64,7 +64,18 @@ class InputChecker {
   // TODO: somehow also respond to the current corridorWidth,
   // return Math.min (k for corridorWidth and min # of corrs, shorterSide)
   // -> Width of biggest square that can fit into the living area
-  getMaxMinApWidth(width, height) {
+
+  // Quadrat, welches in ne Living Area von nem singleCorridor passt?
+  // oder Quadrat, welches in LA von 0 corridors passt? (= houseRect)
+
+  /**
+   * Return the upper limit for "minApWidth"
+   * @param {*} width
+   * @param {*} height
+   * @param {*} corridorWidth
+   * @returns
+   */
+  getMaxMinApWidth(width, height, corridorWidth) {
     this.houseWidth = width;
     this.houseHeight = height;
     this.calculateSides(width, height);
@@ -75,6 +86,19 @@ class InputChecker {
   }
 
   /**
+   * Return the lower limit for "maxApWidth"
+   * @param {*} width
+   * @param {*} height
+   * @param {*} corridorWidth
+   * @returns
+   */
+  getMinMaxApWidth(width, height, corridorWidth) {
+    this.houseWidth = width;
+    this.houseHeight = height;
+    this.calculateSides(width, height);
+    return this.longerSide;
+  }
+  /**
    * Calculates the absolute max of apartments that fit.
    * @param {} width
    * @param {*} height
@@ -82,38 +106,36 @@ class InputChecker {
    * @param {*} minApartmentWidth
    * @returns
    */
-  getMaxN(width, height, corridorWidth, minApartmentWidth) {
+  getMaxN(thresholds) {
+    console.log("getMaxN threshold input:", thresholds);
     // TODO: Anpassen, denn hier hat sich was verändert!
 
     // Es soll eigentlich der höchste Wert aus Thresholds kommen.
-    return this.houseCalc.calculateMaxAparmentsAbsolute(
-      width,
-      height,
-      corridorWidth,
-      minApartmentWidth
-    );
+
+    let maxs = [];
+
+    // Collect all mins
+    for (let ts of thresholds) {
+      if (ts.shorter != null) {
+        maxs.push(ts.shorter.max);
+      }
+      if (ts.longer != null) {
+        maxs.push(ts.longer.max);
+      }
+    }
+
+    // get the lowest of mins
+    console.log("Trhesholds from getMaxN", thresholds);
+    return Math.max(...maxs);
   }
 
-  getMinN(width, height, corridorWidth, minApartmentWidth, maxApartmentWidth) {
-    // TODO: IWIE kommt hier INFTY zurück!
-    console.log(
-      "getminN",
-      width,
-      height,
-      corridorWidth,
-      minApartmentWidth,
-      maxApartmentWidth
-    );
-
-    // TODO: Da kommen iwie threhsolds mit haufen NULL raus
-    let thresholds = this.houseCalc.calculateMinMaxCorridorThresholds(
-      width,
-      height,
-      corridorWidth,
-      minApartmentWidth,
-      maxApartmentWidth
-    );
-
+  /**
+   * Gets the absolute min value out of the thresholds!
+   * @param {*} thresholds
+   * @returns
+   */
+  getMinN(thresholds) {
+    console.log("getMinN threshold input:", thresholds);
     let mins = [];
 
     // Collect all mins
