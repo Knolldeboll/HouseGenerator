@@ -827,6 +827,8 @@ class Tests {
     //...
   }
 
+  testCalcMaxAps(width, height, corr, minAp) {}
+
   unitTests() {
     // Test multiple times with random parameters if those are sufficiently processed.
 

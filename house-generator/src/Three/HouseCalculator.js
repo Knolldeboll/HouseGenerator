@@ -61,21 +61,17 @@ class HouseCalculator {
    */
 
   // Da war was mit geprüfter Eingabe "101", da hat der irgendwie falsch aufgeteilt oder so.
+
   calculateMaxCorridorsOriented(length, corridorWidth, minApartmentWidth) {
-    console.log(
-      ">calculateMaxCorridorsOriented with placmentside length",
-      length,
-      " cw",
-      corridorWidth,
-      "minapWidth",
-      minApartmentWidth
-    );
+    console.log(">calculateMaxCorridorsOriented");
 
     // wenn mit 1 Korridor nicht geht, return 0
     let k = this.calculateK(length, 1, corridorWidth);
-    if (k <= minApartmentWidth) {
+    if (k < minApartmentWidth) {
       console.log(
-        "Max Corridors: 0, because  k is ",
+        "Max Corridors for side ",
+        length,
+        " IS 0, because  k for i=1 is ",
         k,
         " and minapWidth is ",
         minApartmentWidth
@@ -96,9 +92,7 @@ class HouseCalculator {
     }
 
     console.log(
-      "Max Corridors: ",
-      maxI,
-      " for side ",
+      "Max Corridors for side ",
       length,
       " corridorWidth ",
       corridorWidth,
@@ -107,6 +101,7 @@ class HouseCalculator {
       "final k: ",
       this.calculateK(length, maxI, corridorWidth)
     );
+    console.log("=", maxI);
 
     return maxI;
   }
@@ -119,14 +114,7 @@ class HouseCalculator {
   // TODO: Test
   // BRBRBRBRBRBRBRB
   calculateMinCorridorsOriented(length, corridorWidth, maxApartmentWidth) {
-    console.log(
-      ">calculateMinCorridorsOriented with placementside length",
-      length,
-      " cw",
-      corridorWidth,
-      "maxApartmentWidth",
-      maxApartmentWidth
-    );
+    console.log(">calculateMinCorridorsOriented");
 
     // TODO: bei maxCors gibts irgend ne abbruchbedingung am Anfang schonmal.
     //
@@ -153,6 +141,19 @@ class HouseCalculator {
     while (this.calculateK(length, minI, corridorWidth) > maxApartmentWidth) {
       minI++;
     }
+
+    console.log(
+      "Min Corridors for side ",
+      length,
+      " corridorWidth ",
+      corridorWidth,
+      " maxapwidth",
+      maxApartmentWidth,
+      "final k: ",
+      this.calculateK(length, minI, corridorWidth)
+    );
+
+    console.log("=", minI);
     return minI;
   }
 
@@ -301,14 +302,12 @@ class HouseCalculator {
     minApartmentWidth,
     maxApartmentWidth
   ) {
-    // TODO einmal alles bitte
-
     /**
      * Am Ende soll sowas rauskommen wie:
      * (shorter: (min:5) (max:10),longer)
      */
 
-    console.log(">calculateCorridorThresholds");
+    console.log(">calculateMinMaxCorridorThresholds");
 
     // TODO: Kann der das handeln, dass wenn keine kaka kommt da
 
@@ -328,14 +327,13 @@ class HouseCalculator {
     // Wie viele Korridore können minAp-Safe entlang der  längeren Seite platziert werden?
     // Sodass k nicht > minApartmentWidth
 
-    // MaxCorridors passt soweit!
     let maxCorridorsLongerSide = this.calculateMaxCorridorsOriented(
       longerSide,
       corridorWidth,
       minApartmentWidth
     );
 
-    // Wie viele Korridore können minAp-Safe entlang der  längeren Seite platziert werden?
+    // Wie viele Korridore können minAp-Safe entlang der  kürzeren Seite platziert werden?
     let maxCorridorsShorterSide = this.calculateMaxCorridorsOriented(
       shorterSide,
       corridorWidth,
@@ -395,6 +393,7 @@ class HouseCalculator {
 
       // Check if k  would be smaller than minApSize for i and the current side. If so, no
       // Aps possible for i and specified side!
+      console.log("---------- threshold iteration: current i = ", i);
 
       let thresholdSet = {
         i: i,
@@ -405,12 +404,13 @@ class HouseCalculator {
       // Calculate k for corridor placement along shorter side.
 
       const shorterK = this.calculateK(shorterSide, i, corridorWidth);
-      //console.log(" k would be ", shorterK);
+      console.log("shorter k would be ", shorterK);
 
       // Wenn für i und side das k weder zu groß für maxWidth noch zu klein für minWidth ist,
       // berechne die thresholds min und max -apartments. Sonst machts keinen Sinn.
       if (shorterK >= minApartmentWidth && shorterK <= maxApartmentWidth) {
         // Calculate
+        console.log("fits!");
         const currentMaxApsShorter = this.calculateMaxApartmentsCountedOriented(
           corridorWidth,
           minApartmentWidth,
@@ -432,9 +432,9 @@ class HouseCalculator {
       }
 
       const longerK = this.calculateK(longerSide, i, corridorWidth);
-      //console.log(" k would be ", longerK);
+      console.log(" longer k would be ", longerK);
       if (longerK >= minApartmentWidth && longerK <= maxApartmentWidth) {
-        //console.log("so do maxaps");
+        console.log("fits!");
         const currentMaxApsLonger = this.calculateMaxApartmentsCountedOriented(
           corridorWidth,
           minApartmentWidth,
@@ -442,7 +442,7 @@ class HouseCalculator {
           shorterSide
         );
 
-        const currentMinApsShorter = this.calculateMinApartmentsCountedOriented(
+        const currentMinApsLonger = this.calculateMinApartmentsCountedOriented(
           corridorWidth,
           maxApartmentWidth,
           i,
@@ -450,11 +450,12 @@ class HouseCalculator {
         );
 
         thresholdSet.longer = {
-          min: currentMinApsShorter,
+          min: currentMinApsLonger,
           max: currentMaxApsLonger,
         };
       }
 
+      console.log("---------- threshold iteration end ");
       thresholds.push(thresholdSet);
     }
 
@@ -465,7 +466,7 @@ class HouseCalculator {
    * Calculate max Apartments for a given LA rect
    * @param {} laRect The Living Apartment Rect the max Apartment amount should be calculated for
    * @param {} minApartmentWidth The min width for apartments
-   * @param {} splitHorizontally If the LAs should be split horizontally or not
+   * @param {} splitHorizontally If the LAs should be split horizontally or not (so vertically)
    */
 
   // TODO: do specify split orientation instead of always splitting along longer side!
@@ -504,14 +505,14 @@ class HouseCalculator {
   // TODO: Handle 1 corridor
   /**
    * Calculates the max amount of Apartments for the max amount of corridors, which is computed here.
-   *
+   * Also returns the corresponding i and the orientation of the corridor placement
    * To be used in Limit calculation, as only user inputs are needed for this!
    * @param {float} houseWidth
    * @param {float} houseHeight
    * @param {float} corridorWidth
    * @param {float} minApartmentWidth
    */
-  calculateMaxAparmentsAbsolute(
+  calculateMaxAparmentsLayout(
     houseWidth,
     houseHeight,
     corridorWidth,
@@ -537,22 +538,18 @@ class HouseCalculator {
       minApartmentWidth
     );
 
-    // TODO: was,
-    // max aps für beide Höchstanzahlen an Korridoren verwenden
-    // denn wenn maxcorrs1 < maxcorrs2, dann hat maxcorrs2 wahrsch. mehr aps.
-    // aber wenn maxcorrs1 = maxcorrs2, dann kann mans nicht sagen!
+    if (maxCorridorsLonger == 0 && maxCorridorsShorter == 0) {
+      return null;
+    }
 
-    // TODO: Sind die aps bei maxCorridors wirklich immer die besten?
-    // nein, nicht unbedingt!
-    // Noch abändern, um n gescheides Limit anzuzeigen.
-    const maxCorridorsTotal =
-      maxCorridorsLonger > maxCorridorsShorter
-        ? maxCorridorsLonger
-        : maxCorridorsShorter;
-
+    // Die maximalen Apartments bei Korridorplacement entlang der longer side
     let totalMaxApsLonger = 0;
+    let maxApsiLonger = 0;
+    // Die maximalen Apartments bei Korridorplacement entlang der shorter side
     let totalMaxApsShorter = 0;
+    let maxApsiShorter;
 
+    // Gehe alle i's durch und schau, wo jeweils bei den longerside-Layouts meisten Apartments reinpassen!
     for (let i = 1; i <= maxCorridorsLonger; i++) {
       let currentMaxApsLonger = this.calculateMaxApartmentsCountedOriented(
         corridorWidth,
@@ -563,9 +560,11 @@ class HouseCalculator {
 
       if (currentMaxApsLonger > totalMaxApsLonger) {
         totalMaxApsLonger = currentMaxApsLonger;
+        maxApsiLonger = i;
       }
     }
 
+    // Gehe alle i's durch und schau, wo jeweils bei den shorterside-Layouts meisten Apartments reinpassen!
     for (let i = 1; i <= maxCorridorsShorter; i++) {
       let currentMaxApsShorter = this.calculateMaxApartmentsCountedOriented(
         corridorWidth,
@@ -576,18 +575,25 @@ class HouseCalculator {
 
       if (currentMaxApsShorter > totalMaxApsShorter) {
         totalMaxApsShorter = currentMaxApsShorter;
+        maxApsiShorter = i;
       }
     }
     // Iterate over every possible corridor count that keeps k >= minapWidth
     // Save the max threshold encountered
 
-    // Das Problem ist hier, dass der brute force über alle i drübergeht, bis zum maximalen i vom höheren!
-    // Dabei rechnet der aber auch fürs jeweils andere die maxaps mit demselben i aus, was zu einem zu kleinen
-    // k führen kann!
+    // TODO: irgendwie noch k zurückgeben.
 
-    return totalMaxApsLonger > totalMaxApsShorter
-      ? totalMaxApsLonger
-      : totalMaxApsShorter;
+    let maxLayoutK;
+
+    // Returne das Layout, wo die meisten Aps reinpassen - davon placementside, i, k
+    if (totalMaxApsLonger > totalMaxApsShorter) {
+      maxLayoutK = this.calculateK(longerSide, maxApsiLonger, corridorWidth);
+      //console.log("maxLayout K is", maxLayoutK, "rounde");
+      return [true, maxApsiLonger, maxLayoutK];
+    } else {
+      maxLayoutK = this.calculateK(shorterSide, maxApsiShorter, corridorWidth);
+      return [false, maxApsiShorter, maxLayoutK];
+    }
   }
 
   /**

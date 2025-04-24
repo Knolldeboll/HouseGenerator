@@ -130,6 +130,15 @@ const ThreeCanvas = (props) => {
       n
     );
 
+    /*
+    tests.current?.testCalcMaxAps(
+      Number(widthInput),
+      Number(heightInput),
+      Number(corrInput),
+      Number(minApWidthInput)
+    );
+*/
+
     if (randomInput) {
       tests.current?.testMinMaxAdaptiveMultiCorridorLayout(
         Number(widthInput),
@@ -354,8 +363,12 @@ const ThreeCanvas = (props) => {
   // Apartments mehr möglich.
   // 1. Warum?  -> kleineres maxWidth bedeutet: die Apartments können je weniger Breit sein.
   //            -> die LivingAreas müssen in eine mindestanzahl von Splits geteilt werden, die je kleiner als die maxWidth sind
-  //            -> es muss insgesamt so sein, dass es
-  // 2. was ist dieser Wert? und sollte der das eigentliche lower limit von maxWidth sein? -> ja.
+  //            ->
+  //            -> wenn minWidth erhöht wird, sinkt maxN (größere Räume = weniger Räume)
+  //            -> wenn maxWidth erhöht wrid, steigt minN ()
+
+  // 2.1 wie gehen wir damit um?
+  // 2.2 was ist dieser Wert? und sollte der das eigentliche lower limit von maxWidth sein? -> ja.
   useEffect(() => {
     if (
       widthInput === "" ||
@@ -370,21 +383,18 @@ const ThreeCanvas = (props) => {
 
     // TODO: irgendwie kommt hier scheiße rein. der maxApartmentWidthLowerLimit wird tatsächlich zum UPPER LIMIT umgesetzt..
     // aber andersrum irgendwie nix?
-    setMaxApartmentWidthLowerLimit(minApWidthInput);
 
-    console.log(
-      " ONLY FOR DEBUG: WHAT IS MAXWITH LIMITS?  ",
-      maxApartmentWidthLowerLimit,
-      " / ",
-      maxApartmentWidthLimit
+    let lowerMaxWidthLimitTEST = inputChecker.getMaxWidthLowerLimit(
+      widthInput,
+      heightInput,
+      corrInput,
+      minApWidthInput
     );
 
-    console.log(
-      "Sollte aber sein: minWidthInput ",
-      minApWidthInput,
-      " und longerside: ",
-      inputChecker.getMaxApWidthUpperLimit(widthInput, heightInput)
-    );
+    // Das untere Limit für maxWidth ist jetzt angepasst an die Berechnung.
+    // Aber trotz Korrektheit von diesem Limit wird dann bei den Thresholds was verkackt! Why?
+
+    setMaxApartmentWidthLowerLimit(lowerMaxWidthLimitTEST);
 
     //if (maxApWidthInput === "") return;
 
@@ -485,6 +495,7 @@ const ThreeCanvas = (props) => {
 
       // das setzen triggert ein Refresh. Das sorgt fürs schlussendliche Rendern des single apartments.
       // ansonsten, also bei möglicherweise >=1 Korridor Fällen, wird NUR bei Änderung von maxWidth gerendert!
+
       setMaxApartmentWidthInput(
         inputChecker.getMaxApWidthUpperLimit(widthInput, heightInput)
       );

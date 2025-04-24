@@ -1,6 +1,7 @@
 // Immer wenn sich ein fixer Input ändert, soll geprüft werden ob diese überhaupt Sinn ergeben.
 // Dann sollen automatisch immer die Thresholds und die max-Anzahl an Korridoren berechnet und angezeigt werden.
 
+import { min } from "three/tsl";
 import HouseCalculator from "./HouseCalculator";
 
 class InputChecker {
@@ -124,6 +125,130 @@ class InputChecker {
     }
     return false;
   }
+
+  /**
+   * Calculate the lower limit for maxApartmentWidth based on minApWidth
+   * @param {*} width
+   * @param {*} height
+   * @param {*} corridorWidth
+   * @param {*} minApWidth
+   */
+
+  // TODO: Maybe return the limits unrounded!
+  getMaxWidthLowerLimit(width, height, corridorWidth, minApWidth) {
+    // Fürs maximale Korridorlayout (wo k noch > minApWidth ist) berechnen, wie viele
+    // Apartments da jeweils in ein ganzes/halbes LA reinpassen!
+
+    console.log(
+      "> Get the lower max widht limit for non crashing! inputs: ",
+      width,
+      height,
+      corridorWidth,
+      minApWidth
+    );
+
+    let longerSideLength = width > height ? width : height;
+    let shorterSideLength = width > height ? height : width;
+
+    // wir brauchen also: i und side.
+    let maxApsLayout = this.houseCalc.calculateMaxAparmentsLayout(
+      width,
+      height,
+      corridorWidth,
+      minApWidth
+    );
+
+    if (maxApsLayout == null) {
+      console.log("max aps layout resulted in i = 0: no corridor!");
+      return null;
+    }
+
+    let [longersideplacement, i, k] = maxApsLayout;
+
+    console.log(
+      "The absolute max apartment layout is: on longerside placement ",
+      longersideplacement,
+      "i:",
+      i,
+      " k for this layout",
+      k
+    );
+
+    // wenn korridore entlang der longerside platziert wurden, sind die LAs so lang wie die shorterside
+    let laFullLength = longersideplacement
+      ? shorterSideLength
+      : longerSideLength;
+
+    let laHalfLength = (laFullLength - corridorWidth) / 2;
+
+    let maxApsFullLa = Math.floor(laFullLength / minApWidth);
+    let minimalMaxApartmentWidthFull = laFullLength / maxApsFullLa;
+
+    let finalMinimal;
+    if (i == 1) {
+      console.log(
+        "lower limit max ap width for 1 corridor - from Full LA:",
+        minimalMaxApartmentWidthFull,
+        " vs k ",
+        k,
+        "for this layout"
+      );
+
+      finalMinimal = Math.max(minimalMaxApartmentWidthFull, k);
+      if (finalMinimal == k) {
+        console.log(" the final minimal comes from k!");
+      } else {
+        console.log("the final minimal comes from a LA average Ap");
+      }
+
+      return Math.ceil(finalMinimal);
+      // return das durchschnittsdings von ner fulllength
+    } else {
+      let maxApsHalfLa = Math.floor(laHalfLength / minApWidth);
+      let minimalMaxApartmentWidthHalf = laHalfLength / maxApsHalfLa;
+
+      // Return the biggest one
+
+      console.log(
+        "lower limit max ap width for",
+        i,
+        " corridors - from full LA:",
+        minimalMaxApartmentWidthFull,
+
+        "vs from half LA:",
+        minimalMaxApartmentWidthHalf,
+        " vs k ",
+        k,
+        "for this layout"
+      );
+
+      finalMinimal = Math.max(
+        minimalMaxApartmentWidthFull,
+        minimalMaxApartmentWidthHalf,
+        k
+      );
+
+      if (finalMinimal == k) {
+        console.log(" the final minimal comes from k!");
+      } else {
+        console.log("the final minimal comes from a LA average Ap");
+      }
+      console.log(
+        "final minimal value for max Width is",
+        finalMinimal,
+        "rounded up: ",
+        Math.ceil(finalMinimal)
+      );
+      return Math.ceil(finalMinimal);
+    }
+
+    // wenn korridore entlang der longerside platziert wurden, sind die las so lang wie die shorterside
+
+    // Diese Anzahl müsste auch mit den Thresholds übereinstimmen und bei Auswahl von n = maxN auch umgesetzt werden!
+    // Dann die jeweilige Breite (entgegen k) durch die Anzahl teilen
+    // Das ist die durchschnittliche Breite eines Ap in einem voll ausgefüllten LA.
+  }
+
   /**
    * Calculates the absolute max of apartments that fit.
    * @param {} width
@@ -133,16 +258,13 @@ class InputChecker {
    * @returns
    */
   getMaxN(thresholds) {
-    console.log("getMaxN threshold input:", thresholds);
     // TODO: Anpassen, denn hier hat sich was verändert!
-
     // Es soll eigentlich der höchste Wert aus Thresholds kommen.
 
     if (thresholds.length == 1 && thresholds[0].i == 0) {
       // nur ein Element drin, und zwar "i = 0 Korridore"
       return 1;
     }
-
     let maxs = [];
 
     // Collect all mins
@@ -154,9 +276,7 @@ class InputChecker {
         maxs.push(ts.longer.max);
       }
     }
-
     // get the lowest of mins
-    console.log("Trhesholds from getMaxN", thresholds);
     return Math.max(...maxs);
   }
 
@@ -166,8 +286,6 @@ class InputChecker {
    * @returns
    */
   getMinN(thresholds) {
-    console.log("getMinN threshold input:", thresholds);
-
     if (thresholds.length == 1 && thresholds[0].i == 0) {
       // nur ein Element drin, und zwar "i = 0 Korridore"
       return 1;
@@ -186,7 +304,6 @@ class InputChecker {
     }
 
     // get the lowest of mins
-    console.log("Trhesholds from getMinN", thresholds);
     return Math.min(...mins);
     // Return the min of both
   }
