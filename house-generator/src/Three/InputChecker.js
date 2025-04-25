@@ -51,7 +51,8 @@ class InputChecker {
     this.houseHeight = height;
     this.calculateSides(width, height);
 
-    return this.longerSide - 1;
+    // -2, damit k mindestens 1 ist. (1 pro seite = 2)
+    return this.longerSide - 2;
   }
 
   /**
@@ -80,7 +81,13 @@ class InputChecker {
     this.houseWidth = width;
     this.houseHeight = height;
     this.calculateSides(width, height);
-    //console.log("maxmin", width, height, this.longerSide, this.shorterSide);
+    console.log(
+      "min upper limit for w/h -> ls/ss",
+      width,
+      height,
+      this.longerSide,
+      this.shorterSide
+    );
     return this.shorterSide;
     // solange minApWidth > als k ist wird n immer 1 sein.
     // Erst wenn minApWidh = k kann man einen Korridor machen, was mindestens zu n = 2 führt.
@@ -323,8 +330,8 @@ class InputChecker {
   // TODO: Handle every error with exceptions!
 
   calculateSides(width, height) {
-    this.longerSide = width > height ? width : height;
-    this.shorterSide = width < height ? width : height;
+    this.longerSide = Math.max(width, height);
+    this.shorterSide = Math.min(width, height);
   }
   /**
    * Calculates the max amount of Apartments and the thresholds for new corridors for the given configuration

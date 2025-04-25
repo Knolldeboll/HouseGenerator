@@ -470,6 +470,7 @@ const ThreeCanvas = (props) => {
         minApWidthInput
       )
     ) {
+      // Nur Single Apartment möglich
       setMaxN(1);
       setMinN(1);
       console.log(
@@ -502,16 +503,16 @@ const ThreeCanvas = (props) => {
     }
 
     /*
+    
     if (maxN == 1 && minN == 1) {
+      // Wenn insg nur 1:1 geht, dann render das direkt!
       // max Ap width lower limit = longerside
-
       // max ap widht upper limit = longerside (ist eh)
-
- 
 
       refreshCanvas(minN);
       return;
     }
+
 
     // Jedes Mal N auf den Minimalwert für n setzen, damit überhaupt was angezeigt wird!
     if (maxN != -Infinity && minN != -Infinity) {
@@ -569,8 +570,6 @@ const ThreeCanvas = (props) => {
 
     console.log("-> maxApWidth input, maxN:", maxN, " minN ", minN);
 
-    return;
-
     //
 
     // TODO: Sicherstellen, dass nun die richtige anzahl an Corridoren/apartments gerendert wird.
@@ -591,6 +590,8 @@ const ThreeCanvas = (props) => {
 
     if (maxN != -Infinity && minN != -Infinity) {
       console.log("fixedNInput is", minN);
+
+      setNInput(minN);
       refreshCanvas(minN);
       return;
     }
