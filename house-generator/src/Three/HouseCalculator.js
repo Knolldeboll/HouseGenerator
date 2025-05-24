@@ -62,6 +62,9 @@ class HouseCalculator {
 
   // Da war was mit geprüfter Eingabe "101", da hat der irgendwie falsch aufgeteilt oder so.
 
+  // TODO: Der shit basiert aktuell nur auf k!
+  // aber auch ist wichtig, ob in eine spätere LA dann überhaupt ein Apartment rein kann!
+
   calculateMaxCorridorsOriented(length, corridorWidth, minApartmentWidth) {
     console.log(">calculateMaxCorridorsOriented");
 
@@ -327,6 +330,10 @@ class HouseCalculator {
     // Wie viele Korridore können minAp-Safe entlang der  längeren Seite platziert werden?
     // Sodass k nicht > minApartmentWidth
 
+    // TODO: Es können direkt ganze Orientations ausgeschlossen werden, wenn man feststellt dass
+    // die Länge von LAs die Grenzen von minWidth/maxWidth verletzt! Also wenn in min. eine LA
+
+    // max/minCorridors basiert nur auf k!
     let maxCorridorsLongerSide = this.calculateMaxCorridorsOriented(
       longerSide,
       corridorWidth,
@@ -401,7 +408,7 @@ class HouseCalculator {
         longer: null,
       };
 
-      // Calculate k for corridor placement along shorter side.
+      // Calculate k for corridor placement along shorter house side.
 
       const shorterK = this.calculateK(shorterSide, i, corridorWidth);
       console.log("shorter k would be ", shorterK);
@@ -411,12 +418,19 @@ class HouseCalculator {
       if (shorterK >= minApartmentWidth && shorterK <= maxApartmentWidth) {
         // Calculate
         console.log("fits!");
+
+        // TODO: Was, wenn hier 0 rauskommt? Kann ja auch sein, dass
+        // das
         const currentMaxApsShorter = this.calculateMaxApartmentsCountedOriented(
           corridorWidth,
           minApartmentWidth,
           i,
           longerSide
         );
+
+        if (currentMaxApsShorter == null) {
+          // Invalides Korridorlayout, da eine oder mehrere LAs keine Apartments haben können!
+        }
 
         const currentMinApsShorter = this.calculateMinApartmentsCountedOriented(
           corridorWidth,
@@ -687,6 +701,13 @@ class HouseCalculator {
 
     // TODO: Hier nicht die placementSide nehmen, sondern die entlang der Korridore bzw. der LAs
 
+    // TODO: Was, wenn in eine der beiden LA-Arten KEINE Apartments reinpassen?
+    // Dann sind die Splits später ggf. [4,4,0,0,0,0] oder so! Das ist ja bullshit!
+    // Ode wenn hier in die LAs gar keine Apartments reinpassen?
+    // Dann wären die Splits ja [0,0,0,0,0] und nix passt rein.
+
+    // TODO: null zurückgeben, wenn eins von beiden 0 ist!
+
     let maxApartmentsWholeLivingArea = Math.floor(
       parallelSide / minApartmentWidth
     );
@@ -695,6 +716,13 @@ class HouseCalculator {
     let maxApartmentsHalfLivingArea = Math.floor(
       ((parallelSide - corridorWidth) * 0.5) / minApartmentWidth
     );
+
+    if (maxApartmentsWholeLivingArea == 0 || maxApartmentsHalfLivingArea == 0) {
+      console.error(
+        "maxApartments error: one LA cannot be filled with apartments!"
+      );
+      return null;
+    }
 
     // Calculate the amount of half living areas, which is dependent of the
     // Hii hii
