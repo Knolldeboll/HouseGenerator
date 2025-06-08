@@ -1190,8 +1190,14 @@ class House {
       // Einfach von wenig i und kürzerem Korridor (an der longer side platziert)
       // weiter nach short und mehr i arbeiten, bis ein Korridorlayout gefunden wurde das passt!
 
-      // Wenn das einzige i = 0, d
+      // Wenn das einzige i = 0,...
 
+      // Warum nochmal min checken?
+      // ah, wenn weniger gefordert sind als minimum möglich, dann geht nicht!
+      //  -> minimale anzahl dingers ist problematisch wegen maxBreite
+      // wenn mehr gefordert wird als maximum möglich, dann geht nicht!
+
+      //
       if (ts.longer != null && ts.longer.min <= n && ts.longer.max >= n) {
         // longer config is feasible and n fits in its limits!
         isShorter = false;
@@ -1532,6 +1538,7 @@ class House {
     let splitHorizontally = this.mainCorridorRects[0].isHorizontal;
 
     // Calculate the Splits for each living area
+    // Splits sind die Anzahlen von Aps pro LA
     let livingAreaSplits;
     if (maxApWidth) {
       console.log(" split n evenly MINMAX");

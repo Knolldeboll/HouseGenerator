@@ -158,6 +158,8 @@ class InputChecker {
     let shorterSideLength = width > height ? height : width;
 
     // wir brauchen also: i und side.
+
+    // Berechne Layout mit der maximalen Anzahl an Aps... why? egal.
     let maxApsLayout = this.houseCalc.calculateMaxAparmentsLayout(
       width,
       height,
@@ -165,6 +167,15 @@ class InputChecker {
       minApWidth
     );
 
+    // TODO: wenn eins von beiden i=1 hat, dann soll hier auch was kommen!
+    // ansonsten kommt hier fehler, weil der iwie i = 0 verarbeiten will oder so... hehe
+    console.log(
+      "the layout with the max amount of apartments is this:",
+      maxApsLayout
+    );
+
+    // wenn nur i = 0 für beide orientations möglich: return null! Das wird dann gehandelt, indem
+    // einfach eine Nutzeinheit gemacht wird direkt!
     if (maxApsLayout == null) {
       console.log("max aps layout resulted in i = 0: no corridor!");
       return null;

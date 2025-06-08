@@ -69,6 +69,10 @@ class HouseCalculator {
     console.log(">calculateMaxCorridorsOriented");
 
     // wenn mit 1 Korridor nicht geht, return 0
+
+    // 1. Prüfe, ob bei k überhaupt ein
+    // Korridor reinpassen würde.
+
     let k = this.calculateK(length, 1, corridorWidth);
     if (k < minApartmentWidth) {
       console.log(
@@ -79,6 +83,8 @@ class HouseCalculator {
         " and minapWidth is ",
         minApartmentWidth
       );
+
+      // Wenn nein, return 0
       return 0;
     }
 
@@ -358,6 +364,7 @@ class HouseCalculator {
     // Hiermit könnte man direkt die Korridor-Konfigs ausschließen, bei denen k zu groß für max wäre!
     // man berechnet also keine irrelevanten threshold sets
 
+    // >>> k-Validität checken durch mincorridorsOriented.
     let minCorridorsShorterSide = this.calculateMinCorridorsOriented(
       shorterSide,
       corridorWidth,
@@ -415,6 +422,9 @@ class HouseCalculator {
 
       // Wenn für i und side das k weder zu groß für maxWidth noch zu klein für minWidth ist,
       // berechne die thresholds min und max -apartments. Sonst machts keinen Sinn.
+
+      // >>> Sowohl k- Validität für min als auch max prüfen!
+
       if (shorterK >= minApartmentWidth && shorterK <= maxApartmentWidth) {
         // Calculate
         console.log("fits!");
@@ -537,6 +547,7 @@ class HouseCalculator {
     // Because: Sometimes lower i produces better maxAps!
     // not always the last of the thresholds (with highest i) is the most maxAps!
 
+    console.log("> calculateMaxApartments and its layout");
     let longerSide = houseWidth > houseHeight ? houseWidth : houseHeight;
     let shorterSide = houseWidth < houseHeight ? houseWidth : houseHeight;
 
@@ -552,9 +563,24 @@ class HouseCalculator {
       minApartmentWidth
     );
 
+    console.log(
+      "longer side max corrs:",
+      maxCorridorsLonger,
+      "shorter side max corrs:",
+      maxCorridorsShorter
+    );
+
+    // bei i = 0 auf beiden soll null zurückkommen!
+
+    // bei i = 0 bei NUR einem soll trotzdem das eine zurückkommen!
     if (maxCorridorsLonger == 0 && maxCorridorsShorter == 0) {
+      console.log("No corridor could be produced, so no maxApartmentsLayout!");
       return null;
     }
+
+    // TODO: Was, wenn nur eins der beiden Layouts vorhanden ist?
+
+    // Dann wird hier nämlich trotzdem versucht, für beide Layouts die maxAnzahl zu berechnen, was fehlschlägt!
 
     // Die maximalen Apartments bei Korridorplacement entlang der longer side
     let totalMaxApsLonger = 0;
@@ -564,7 +590,20 @@ class HouseCalculator {
     let maxApsiShorter;
 
     // Gehe alle i's durch und schau, wo jeweils bei den longerside-Layouts meisten Apartments reinpassen!
-    for (let i = 1; i <= maxCorridorsLonger; i++) {
+
+    // mach das nur, wenn überhaupt korridore für die orientation vorhanden sind.
+    // weil sonst funktioniert maxApsCountedOriented nicht!!
+
+    // Oder einfach bei 0 starten? kann calculate das?
+    // ja! bei 0 kommt immer 1 zurück.
+    // was aber nicht problematisch ist, da schlussendlich eh das andere layout returnt wird, das sicher immer
+    // über 1 apartment hat! und auch ja i > 0
+
+    // Problem ist hier, dass der trotz zulässigem i = 1 sagt, dass da was nicht aufgeteilt werden kann!
+    // Was soll die wichse?
+
+    console.log("calc max apartments for longer side:");
+    for (let i = 0; i <= maxCorridorsLonger; i++) {
       let currentMaxApsLonger = this.calculateMaxApartmentsCountedOriented(
         corridorWidth,
         minApartmentWidth,
@@ -578,8 +617,9 @@ class HouseCalculator {
       }
     }
 
+    console.log("calc max apartments for shorter side:");
     // Gehe alle i's durch und schau, wo jeweils bei den shorterside-Layouts meisten Apartments reinpassen!
-    for (let i = 1; i <= maxCorridorsShorter; i++) {
+    for (let i = 0; i <= maxCorridorsShorter; i++) {
       let currentMaxApsShorter = this.calculateMaxApartmentsCountedOriented(
         corridorWidth,
         minApartmentWidth,
@@ -708,15 +748,30 @@ class HouseCalculator {
 
     // TODO: null zurückgeben, wenn eins von beiden 0 ist!
 
+    // wenn i = 0, dann gibts nur ein Apartment!
+    if (corridorCount == 0) {
+      return 1;
+    }
+
     let maxApartmentsWholeLivingArea = Math.floor(
       parallelSide / minApartmentWidth
     );
+
+    // Bei i = 1: return nur 2* wholeAreaMaxAps. HalfLAs gibts hier nicht!
+
+    if (corridorCount == 1) {
+      return 2 * maxApartmentsWholeLivingArea;
+    }
     // 2.2 calc max amount of aps per half living area
     // When i = 1, this is 0
     let maxApartmentsHalfLivingArea = Math.floor(
       ((parallelSide - corridorWidth) * 0.5) / minApartmentWidth
     );
 
+    // TODO: was bei i = 1? da wird dann ja immer maxapshalfLA 0 sein!
+
+    // Hier wird geprüft, ob eins der LAs nicht gefüllt werden kann.
+    // da kommt dann ...LA  = 0 raus. das kommt aber auch bei i = 1
     if (maxApartmentsWholeLivingArea == 0 || maxApartmentsHalfLivingArea == 0) {
       console.error(
         "maxApartments error: one LA cannot be filled with apartments!"
@@ -1023,6 +1078,8 @@ class HouseCalculator {
     );
 
     //console.log("totalLAlength:", totalLALength);
+
+    // wieviel Anteilige Größe haben die LAs?
     const LAPercentages = [];
 
     for (const laRect of livingAreaRects) {

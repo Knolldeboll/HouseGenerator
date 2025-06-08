@@ -708,6 +708,11 @@ class Tests {
   ) {
     // TODO: Keep house instance. Only redo .definedHouse if width/height/ changed
     // Only redo generateThresholds when cw, minapw, maxapw changed.
+
+    // Was geht ab? Alle Parameter annehmen!
+    // Dann Grundfläche(width,height) -> Thresholds: wie viele Aps min/max pro Layout (width,height,cw,min,max)
+    // -> adaptiveCorridorlayout (cw, min, max, n) -> Living Areas -> Apartments(n, min, max)
+
     let house = new House()
       .definedHouseShape(houseWidth, houseHeight)
       .generateThresholds(corridorWidth, minApWidth, maxApWidth)
