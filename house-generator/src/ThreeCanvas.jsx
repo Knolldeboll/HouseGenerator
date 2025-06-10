@@ -556,10 +556,7 @@ const ThreeCanvas = (props) => {
       maxApWidthInput
     );
 
-    console.log(
-      "DEBUG: setting maxWidth Input generates following Thresholds: ",
-      thresholds
-    );
+    console.log(">THRESHOLDS after maxWidth Input: ", thresholds);
 
     //Die min/maxWidth beeinflussen direkt das minN/maxN, also update das!
     let maxN = inputChecker.getMaxN(thresholds);
@@ -568,7 +565,12 @@ const ThreeCanvas = (props) => {
     let minN = inputChecker.getMinN(thresholds);
     setMinN(minN);
 
-    console.log("-> maxApWidth input, maxN:", maxN, " minN ", minN);
+    console.log(
+      "-->  on maxApWidth input, set maxN:",
+      maxN,
+      " set minN ",
+      minN
+    );
 
     //
 
@@ -589,6 +591,7 @@ const ThreeCanvas = (props) => {
 */
 
     if (maxN != -Infinity && minN != -Infinity) {
+      console.log("on successful maxWidth INPUT, set nInput to minN ");
       console.log("fixedNInput is", minN);
 
       setNInput(minN);

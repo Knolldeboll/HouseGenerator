@@ -1,4 +1,4 @@
-import { max } from "three/tsl";
+import { fract, max } from "three/tsl";
 
 class HouseCalculator {
   // Private static instance to hold the singleton
@@ -47,6 +47,7 @@ class HouseCalculator {
     // k = (h-b*i)/2i
     // h = length
     // 2i = 2 living areas per corridor
+
     let k = (length - corridorWidth * i) / (2 * i);
 
     return k;
@@ -187,6 +188,7 @@ class HouseCalculator {
   // maxKorridors für Shorter/longer auch minKorridors für Shorter/Longer einbezieht.
   // So muss man nicht immer bei i = 0 starten, wenns keinen Sinn macht!
 
+  // ALT OBSOLETE
   calculateCorridorThresholds(
     houseWidth,
     houseHeight,
@@ -399,6 +401,8 @@ class HouseCalculator {
       maxCorridors
     );
 */
+
+    // TODO: Was bei i = 0 ?
     // nur von minCorridors bis maxCorridors rechnen, da
     // alles darunter ein k erzeugen würde welches zu groß für maxWidth wäre und
     // alles darüber ein k erzeugen würde welches zu klein für minWidth wäre
@@ -415,8 +419,32 @@ class HouseCalculator {
         longer: null,
       };
 
-      // Calculate k for corridor placement along shorter house side.
+      // TODO: i = 0 separat behandeln, da k nicht berechnet werden kann.
+      // 1. validität von i = 0 prüfen
+      // 2. wenn valide, min/max = 1 bei beiden.
 
+      if (i == 0) {
+        // i = 0 geht nur, wenn maxWidth >= longerside ist! da diese auch abgedeckt werden muss!
+        // Analogie: wenn durch zu großes MinWidth auch nur i = 0 geht, wird maxWidth automatisch auf Longerside gesetzt!
+        //
+        if (maxApartmentWidth >= longerSide) {
+          thresholdSet.shorter = {
+            min: 1,
+            max: 1,
+          };
+          thresholdSet.longer = {
+            min: 1,
+            max: 1,
+          };
+        }
+
+        // Entweder mit 1/1 oder null
+        console.log("---------- threshold iteration", i, " end ");
+        thresholds.push(thresholdSet);
+        continue;
+      }
+
+      // prüfe für orientation = shorter
       const shorterK = this.calculateK(shorterSide, i, corridorWidth);
       console.log("shorter k would be ", shorterK);
 
@@ -425,22 +453,19 @@ class HouseCalculator {
 
       // >>> Sowohl k- Validität für min als auch max prüfen!
 
+      // Prüfe k--validität
       if (shorterK >= minApartmentWidth && shorterK <= maxApartmentWidth) {
         // Calculate
         console.log("fits!");
 
-        // TODO: Was, wenn hier 0 rauskommt? Kann ja auch sein, dass
-        // das
+        // TODO: Prüfe die l-Validität! oder wird das schon durch die Limits gesichert?!?
+
         const currentMaxApsShorter = this.calculateMaxApartmentsCountedOriented(
           corridorWidth,
           minApartmentWidth,
           i,
           longerSide
         );
-
-        if (currentMaxApsShorter == null) {
-          // Invalides Korridorlayout, da eine oder mehrere LAs keine Apartments haben können!
-        }
 
         const currentMinApsShorter = this.calculateMinApartmentsCountedOriented(
           corridorWidth,
@@ -449,12 +474,27 @@ class HouseCalculator {
           longerSide
         );
 
-        thresholdSet.shorter = {
-          min: currentMinApsShorter,
-          max: currentMaxApsShorter,
-        };
+        // Check final l-validität!
+        // Die ist aber wahrscheinlich überflüssig, da maxWidth so limitiert wird, dass immer
+        // was erzeugt werden kann!
+
+        // Aber trotzdem:
+        // wenn eine der LAs nicht gefüllt werden kann, dann kommt hier null zurück!
+
+        if (currentMaxApsShorter == null && currentMinApsShorter == null) {
+          console.log(
+            "Invalides Layout bzgl. L, da ein oder mehr LAs nicht gefüllt werden können!"
+          );
+          thresholdSet.shorter = null;
+        } else {
+          thresholdSet.shorter = {
+            min: currentMinApsShorter,
+            max: currentMaxApsShorter,
+          };
+        }
       }
 
+      // prüfe für orientation = longer
       const longerK = this.calculateK(longerSide, i, corridorWidth);
       console.log(" longer k would be ", longerK);
       if (longerK >= minApartmentWidth && longerK <= maxApartmentWidth) {
@@ -479,7 +519,7 @@ class HouseCalculator {
         };
       }
 
-      console.log("---------- threshold iteration end ");
+      console.log("---------- threshold iteration", i, " end ");
       thresholds.push(thresholdSet);
     }
 
@@ -759,9 +799,18 @@ class HouseCalculator {
 
     // Bei i = 1: return nur 2* wholeAreaMaxAps. HalfLAs gibts hier nicht!
 
+    // ACHTUNG: Was, wenn hier max == 0 ist?
     if (corridorCount == 1) {
+      if (maxApartmentsWholeLivingArea == 0) {
+        console.error(
+          "maxApartments error: full LA (at i == 0) cannot be filled with apartments!"
+        );
+        return null;
+      }
+
       return 2 * maxApartmentsWholeLivingArea;
     }
+
     // 2.2 calc max amount of aps per half living area
     // When i = 1, this is 0
     let maxApartmentsHalfLivingArea = Math.floor(
@@ -817,11 +866,28 @@ class HouseCalculator {
     // 2. calculate max amount of apartments that fit in this corridor layout
     // 2.1 calc max amount of aps per whole living area
 
+    // wenn i = 0, dann gibts nur ein Apartment!
+    if (corridorCount == 0) {
+      return 1;
+    }
+
     // TODO: Hier nicht die placementSide nehmen, sondern die entlang der Korridore bzw. der LAs
 
     let minApartmentsWholeLivingArea = Math.ceil(
       parallelSide / maxApartmentWidth
     );
+
+    // Wenn i == 1, dann nur full LAs!
+    if (corridorCount == 1) {
+      if (minApartmentsWholeLivingArea == 0) {
+        console.error(
+          "minApartments error: full LA (at i == 0) cannot be filled with apartments!"
+        );
+        return null;
+      }
+      return 2 * minApartmentsWholeLivingArea;
+    }
+
     // 2.2 calc max amount of aps per half living area
     // When i = 1, this is 0
     let minApartmentsHalfLivingArea = Math.ceil(
@@ -829,9 +895,17 @@ class HouseCalculator {
     );
 
     // Calculate the amount of half living areas, which is dependent of the
-    // Hii hii
     // * 4 ist Korrekt!
     let halfLivingAreaCount = (corridorCount - 1) * 4;
+
+    // Hier wird geprüft, ob eins der LAs nicht gefüllt werden kann.
+    // da kommt dann ...LA  == 0 raus
+    if (minApartmentsWholeLivingArea == 0 || minApartmentsHalfLivingArea == 0) {
+      console.error(
+        "minApartments error: one LA cannot be filled with apartments!"
+      );
+      return null;
+    }
 
     return (
       2 * minApartmentsWholeLivingArea +

@@ -1116,6 +1116,8 @@ class House {
   //  TODO: Irgendwie dumm, hier für jedes neue n neue Thresholds zu berechnen.
   // Die muss man eig nur bei Änderungen von width/height,corrWidth,min/maxWidth neu berechnen!
 
+  // Wird nach eingabe von n aufgerufen.
+
   adaptiveMinMaxMultiCorridorLayout(
     corridorWidth,
     minApartmentWidth,
@@ -1138,6 +1140,7 @@ class House {
     // TODO: Recall saved Thresholds. Can only be done if only n changed and the other stuff is the same!
 
     if (n == 1) {
+      console.log("n is 1, do i=0 layout");
       return this.multiCorridorLayout(corridorWidth, 0);
     }
 
