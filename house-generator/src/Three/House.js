@@ -1231,12 +1231,14 @@ class House {
       }
     }
 
+    // TODO: Prüfen, ob hier nur nicht das Richtige I rauskommt immer! Aber müsste schon passa.
     if (i == null) {
       console.error(
         "ERROR: no house could be produced for this exact value of n"
       );
-      return this;
+      return null;
     }
+
     console.log(
       "adapted to amount of corridors: ",
       i,
@@ -1517,6 +1519,9 @@ class House {
     return this;
   }
 
+  /**
+   * Teile die n aps gleichmäßig auf alle LAs auf und splitte die dann auch gleichnäßig
+   */
   fillLivingAreasWithApartmentsEvenly(n, minApWidth, maxApWidth) {
     // Generate splits  for livingAreaRects
     this.apartmentRects = [];

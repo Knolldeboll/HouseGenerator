@@ -427,7 +427,38 @@ class HouseCalculator {
         // i = 0 geht nur, wenn maxWidth >= longerside ist! da diese auch abgedeckt werden muss!
         // Analogie: wenn durch zu großes MinWidth auch nur i = 0 geht, wird maxWidth automatisch auf Longerside gesetzt!
         //
+
+        console.log(
+          "longerside:",
+          longerSide,
+          "shorterside:",
+          shorterSide,
+          "minwidth",
+          minApartmentWidth,
+          "maxwidth",
+          maxApartmentWidth
+        );
+
+        console.log(
+          "Types: longer ",
+          typeof longerSide,
+          "shorter ",
+          typeof shorterSide,
+          " minw",
+          typeof minApartmentWidth,
+          " maxw",
+          typeof maxApartmentWidth
+        );
+        // Wtf?
         if (maxApartmentWidth >= longerSide) {
+          console.log(
+            "i = 0 / 1,1 fits because of max =",
+            maxApartmentWidth,
+            " and longer = ",
+            longerSide,
+            "and max >= longer",
+            maxApartmentWidth >= longerSide
+          );
           thresholdSet.shorter = {
             min: 1,
             max: 1,
@@ -458,8 +489,9 @@ class HouseCalculator {
         // Calculate
         console.log("fits!");
 
-        // TODO: Prüfe die l-Validität! oder wird das schon durch die Limits gesichert?!?
+        // TODO: Prüfe l_half-Validität bezüglich min! Das wird aber eig im folgenden Schritt gemacht!
 
+        // -> Wenn hier null zurückkommt, ist minApWidth zu groß für l_full oder l_half!
         const currentMaxApsShorter = this.calculateMaxApartmentsCountedOriented(
           corridorWidth,
           minApartmentWidth,
@@ -557,7 +589,7 @@ class HouseCalculator {
     maxApartmentWidth,
     splitHorizontally
   ) {
-    console.log(">calculate min aps for LA ", laRect, maxApartmentWidth);
+    //console.log(">calculate min aps for LA ", laRect, maxApartmentWidth);
 
     if (splitHorizontally) {
       return Math.ceil(laRect.edges.lowerEdge.length / maxApartmentWidth);
@@ -793,6 +825,7 @@ class HouseCalculator {
       return 1;
     }
 
+    // Wie viele Aps passen in ne ganze LA
     let maxApartmentsWholeLivingArea = Math.floor(
       parallelSide / minApartmentWidth
     );
@@ -812,7 +845,7 @@ class HouseCalculator {
     }
 
     // 2.2 calc max amount of aps per half living area
-    // When i = 1, this is 0
+    // Wie viele aps passen in ne Half LA
     let maxApartmentsHalfLivingArea = Math.floor(
       ((parallelSide - corridorWidth) * 0.5) / minApartmentWidth
     );
@@ -1156,10 +1189,14 @@ class HouseCalculator {
     // wieviel Anteilige Größe haben die LAs?
     const LAPercentages = [];
 
+    // TODO: Das ist fehlerhaft, da zb k auch die längere seite sein kann!
+    // Es muss also eig immer die korridorseite genommen werden.
+
     for (const laRect of livingAreaRects) {
       LAPercentages.push(laRect.longerSideLength / totalLALength);
     }
 
+    console.log("LAPERCENTAGES: ", LAPercentages);
     //let testSum = LAPercentages.reduce((acc, perc) => acc + perc, 0);
     //console.log("LApercentages:", LAPercentages, " sum up to ", testSum);
 
@@ -1195,7 +1232,7 @@ class HouseCalculator {
     for (const perc of LAPercentages) {
       // Berechne float Anzahl an Aps pro LA
       const apsWhole = perc * remainingN;
-      // Berechne dasselbe Abgerundet
+      // Berechne dasselbe Abgerundet - Dumm nur, wenn da z.b. 0.9 Rauskommt... Dann kommt straigt 0.9 in den rest!
       const apsRounded = Math.floor(perc * remainingN);
       // Rest berechnen
       rest += apsWhole - apsRounded;

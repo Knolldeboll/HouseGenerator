@@ -721,14 +721,19 @@ class Tests {
         minApWidth,
         maxApWidth,
         n
-      )
-      .generateLivingAreaRects()
-      // evenly!
-      .fillLivingAreasWithApartmentsEvenly(n, minApWidth, maxApWidth);
+      ); //
 
+    if (house == null) {
+      console.log("No House Produced, so no filling etc.!");
+      // TODO: Zeig das irgendwie an oder so!
+      return;
+    }
+
+    house
+      .generateLivingAreaRects()
+      .fillLivingAreasWithApartmentsEvenly(n, minApWidth, maxApWidth);
     console.log("generated test house", house);
     this.rendering.clearScene();
-
     this.rendering.addAllToScene([
       //house.houseRect.generateShapeMesh(),
       ...house.mainCorridorRects.flatMap((mcr) => mcr.generateShapeMesh()),
@@ -760,7 +765,14 @@ class Tests {
 
     let house = new House()
       .definedHouseShape(houseWidth, houseHeight)
-      .adaptiveMultiCorridorLayout(corridorWidth, minApWidth, n)
+      .adaptiveMultiCorridorLayout(corridorWidth, minApWidth, n);
+    if (house == null) {
+      console.log("No House Produced, so no filling etc.!");
+      return;
+      // TODO: Zeig das irgendwie an oder so!
+    }
+
+    house
       .generateLivingAreaRects()
       .fillLivingAreasWithApartmentsEvenly(n, minApWidth);
     //.fillLivingAreasWithApartments(n, minApWidth);

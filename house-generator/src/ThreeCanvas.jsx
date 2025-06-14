@@ -277,15 +277,15 @@ const ThreeCanvas = (props) => {
 
     // set maxApWidth UPPER limit = longerside
     let maxApWidthUpperLimit = inputChecker.getMaxApWidthUpperLimit(
-      widthInput,
-      heightInput
+      Number(widthInput),
+      Number(heightInput)
     );
     setMaxApartmentWidthLimit(maxApWidthUpperLimit);
 
     // set corridorWidth upper limit
     let maxCorrWidth = inputChecker.getMaxCorridorWidth(
-      widthInput,
-      heightInput
+      Number(widthInput),
+      Number(heightInput)
     );
     setMaxCorridorWidth(maxCorrWidth);
 
@@ -334,11 +334,11 @@ const ThreeCanvas = (props) => {
     console.log("INPUT: on corr widht input");
     console.log("calc thresholds");
     let thresholds = houseCalc.calculateMinMaxCorridorThresholds(
-      widthInput,
-      heightInput,
-      corrInput,
-      minApWidthInput,
-      maxApWidthInput
+      Number(widthInput),
+      Number(heightInput),
+      Number(corrInput),
+      Number(minApWidthInput),
+      Number(maxApWidthInput)
     );
 
     // Wenn Korridor sich ändert, ändern sich thresholds, also auch die limits für N
@@ -385,10 +385,10 @@ const ThreeCanvas = (props) => {
     // aber andersrum irgendwie nix?
 
     let lowerMaxWidthLimitTEST = inputChecker.getMaxWidthLowerLimit(
-      widthInput,
-      heightInput,
-      corrInput,
-      minApWidthInput
+      Number(widthInput),
+      Number(heightInput),
+      Number(corrInput),
+      Number(minApWidthInput)
     );
 
     // Das untere Limit für maxWidth ist jetzt angepasst an die Berechnung.
@@ -464,10 +464,10 @@ const ThreeCanvas = (props) => {
 
     if (
       inputChecker.isMinWidthTooBigForCorridor(
-        widthInput,
-        heightInput,
-        corrInput,
-        minApWidthInput
+        Number(widthInput),
+        Number(heightInput),
+        Number(corrInput),
+        Number(minApWidthInput)
       )
     ) {
       // Nur Single Apartment möglich
@@ -477,7 +477,10 @@ const ThreeCanvas = (props) => {
         "     single apartment Case detected! on minApartmentWidth input is too big for even one corridor"
       );
       setMaxApartmentWidthLowerLimit(
-        inputChecker.getMaxApWidthUpperLimit(widthInput, heightInput)
+        inputChecker.getMaxApWidthUpperLimit(
+          Number(widthInput),
+          Number(heightInput)
+        )
       );
 
       // max ap widht input und lowerLimit = longerside!
@@ -498,7 +501,10 @@ const ThreeCanvas = (props) => {
       // ansonsten, also bei möglicherweise >=1 Korridor Fällen, wird NUR bei Änderung von maxWidth gerendert!
 
       setMaxApartmentWidthInput(
-        inputChecker.getMaxApWidthUpperLimit(widthInput, heightInput)
+        inputChecker.getMaxApWidthUpperLimit(
+          Number(widthInput),
+          Number(heightInput)
+        )
       );
     }
 
@@ -549,11 +555,11 @@ const ThreeCanvas = (props) => {
     // Hier MÜSSEN schon alle vorigen inputs gemacht worden sein.
 
     let thresholds = houseCalc.calculateMinMaxCorridorThresholds(
-      widthInput,
-      heightInput,
-      corrInput,
-      minApWidthInput,
-      maxApWidthInput
+      Number(widthInput),
+      Number(heightInput),
+      Number(corrInput),
+      Number(minApWidthInput),
+      Number(maxApWidthInput)
     );
 
     console.log(">THRESHOLDS after maxWidth Input: ", thresholds);
