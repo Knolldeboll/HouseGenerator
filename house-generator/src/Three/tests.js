@@ -657,7 +657,6 @@ class Tests {
     ]);
   }
 
-  // TAHEEHEEE
   testMinMaxAdaptiveMultiCorridorLayout(
     houseWidth,
     houseHeight,
@@ -693,7 +692,7 @@ class Tests {
         ),
         */
       //
-      ...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
+      //...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
       ...house.apartmentRects.flatMap((ar) => ar.generateShapeMesh()),
     ]);
   }
@@ -743,7 +742,7 @@ class Tests {
           ),
           */
       //
-      ...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
+      //...house.livingAreaRects.flatMap((la) => la.generateShapeMesh()),
       ...house.apartmentRects.flatMap((ar) => ar.generateShapeMesh()),
     ]);
   }

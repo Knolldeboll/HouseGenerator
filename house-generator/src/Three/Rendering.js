@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { thickness } from "three/tsl";
+import ThreeCanvas from "../ThreeCanvas";
 
 class Rendering {
   // This class initiates everything that three.js needs to render and containts the animation update loop
@@ -25,6 +26,7 @@ class Rendering {
     this.initHelpers();
     this.initControls();
 
+    //this.scene.clear();
     this.animate();
     window.addEventListener("resize", this.handleWindowResize);
   }
@@ -59,17 +61,19 @@ class Rendering {
 
   initLights() {
     // Lights: Lichteffekte ..
-    const pointLight = new THREE.PointLight(0xffffff);
-    pointLight.position.set(1, 1, 1);
-    const ambientLight = new THREE.AmbientLight();
-    const lighthelper = new THREE.PointLightHelper(pointLight);
-    this.scene.add(pointLight, ambientLight, lighthelper);
+    //const pointLight = new THREE.PointLight(0xffffff);
+    //pointLight.position.set(1, 1, 1);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+    //const lighthelper = new THREE.PointLightHelper(pointLight);
+    this.scene.add(ambientLight);
   }
 
   initHelpers() {
     // General helpers
     const gridhelper = new THREE.GridHelper(200, 50);
-    this.scene.add(gridhelper);
+
+    //this.scene.add(gridhelper);
+    //this.scene.re
   }
 
   initControls() {

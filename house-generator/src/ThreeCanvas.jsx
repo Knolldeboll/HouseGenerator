@@ -6,7 +6,7 @@ import Tests from "./Three/tests.js";
 import { useLimitStore } from "./LimitStore.js";
 import InputChecker from "./Three/InputChecker.js";
 import { useParamStore } from "./ParamStore.js";
-import { cos, max } from "three/tsl";
+import { cos, max, min } from "three/tsl";
 import HouseCalculator from "./Three/HouseCalculator.js";
 
 const ThreeCanvas = (props) => {
@@ -620,7 +620,21 @@ const ThreeCanvas = (props) => {
       maxApWidthInput === "" ||
       nInput === ""
     ) {
-      console.log("but returned!");
+      console.log(
+        "but returned! because width",
+        widthInput,
+        " hei",
+        heightInput,
+        "corr",
+        corrInput,
+        " min",
+        minApWidthInput,
+        " max",
+        maxApWidthInput,
+        " n ",
+        nInput
+      );
+
       return;
     }
 
