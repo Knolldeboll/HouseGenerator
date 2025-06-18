@@ -675,9 +675,13 @@ class Tests {
         minApWidth,
         maxApWidth,
         n
-      )
+      );
+
+    if (house == null) {
+      return;
+    }
+    house
       .generateLivingAreaRects()
-      // unevenly!
       .fillLivingAreasWithApartments(n, minApWidth, maxApWidth);
 
     console.log("generated test house", house);
